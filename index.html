@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeito Miami | Excursiones y experiencias en Miami</title>
+<meta name="description" content="Agencia especializada en Miami: parques, Key West, tour de cocodrilos, city tours, veleros, tour de compras y restaurantes. Atención en español, portugués e inglés.">
+<link rel="canonical" href="https://jeitomiami.com/">
+<link rel="alternate" hreflang="es" href="https://jeitomiami.com/">
+<link rel="alternate" hreflang="pt-BR" href="https://jeitomiami.com/pt.html">
+<link rel="alternate" hreflang="en" href="https://jeitomiami.com/en.html">
+<link rel="alternate" hreflang="x-default" href="https://jeitomiami.com/">
+<link rel="icon" href="favicon.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Jeito Miami | Excursiones y experiencias en Miami">
+<meta property="og:description" content="Agencia especializada en Miami: parques, Key West, tour de cocodrilos, city tours, veleros, tour de compras y restaurantes. Atención en español, portugués e inglés.">
+<meta property="og:url" content="https://jeitomiami.com/">
+<meta property="og:image" content="https://jeitomiami.com/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ink:#101C28;
+  --ink-soft:#3A4B58;
+  --muted:#7A8A95;
+  --paper:#FAFAF8;
+  --paper-2:#FFFFFF;
+  --line:#E4E3DE;
+  --line-2:#CFCEC7;
+  --navy:#0B2440;
+  --teal:#0E8F97;
+  --amber:#BC873C;   /* dorado del logo */
+  --f-display:"Instrument Serif","Iowan Old Style",Georgia,serif;
+  --f-sans:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
+  --maxw:1180px;
+  --gut:clamp(20px,4vw,48px);
+  color-scheme:light;
+}
+html{scroll-behavior:smooth}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit}
+button{font:inherit;color:inherit}
+p{margin:0}
+h1,h2,h3{margin:0;font-family:var(--f-display);font-weight:400;line-height:1.02;letter-spacing:-.015em;text-wrap:balance}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gut)}
+.kicker{font-size:11.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.rule{height:1px;background:var(--line);border:0;margin:0}
+.serif-i{font-style:italic}
+
+/* ---------- entrada animada del logo ---------- */
+.splash{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:22px;
+  animation:splash-out .7s cubic-bezier(.65,0,.35,1) 1.55s forwards}
+.splash img{width:min(46vw,260px);height:auto;opacity:0;transform:scale(.9) translateY(8px);
+  animation:splash-logo 1s cubic-bezier(.22,.61,.36,1) .15s forwards}
+.splash-line{width:0;height:1px;background:var(--amber);animation:splash-line .9s ease .55s forwards}
+@keyframes splash-logo{to{opacity:1;transform:none}}
+@keyframes splash-line{to{width:min(46vw,260px)}}
+@keyframes splash-out{to{transform:translateY(-100%);visibility:hidden}}
+html.no-intro .splash{display:none}
+.brand{perspective:700px}
+.brand img{opacity:0;transform-style:preserve-3d;will-change:transform;
+  filter:drop-shadow(0 1px 0 rgba(0,35,76,.10)) drop-shadow(0 2px 0 rgba(0,35,76,.06)) drop-shadow(0 8px 12px rgba(0,35,76,.12));
+  animation:brand-in .8s cubic-bezier(.22,.61,.36,1) 2.05s forwards, logo-idle 8s ease-in-out 3s infinite;
+  transition:transform .35s ease,filter .35s ease}
+@keyframes logo-idle{0%,100%{transform:rotateY(-7deg) rotateX(3deg)}50%{transform:rotateY(9deg) rotateX(-3deg)}}
+.brand.tilting img{animation:none;opacity:1}
+.brand:hover img{filter:drop-shadow(0 1px 0 rgba(0,35,76,.10)) drop-shadow(0 2px 0 rgba(0,35,76,.06)) drop-shadow(0 12px 16px rgba(0,35,76,.16))}
+html.no-intro .brand img{animation:logo-idle 8s ease-in-out 1s infinite;opacity:1}
+@keyframes brand-in{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.splash{display:none}.brand img{animation:none;opacity:1;transform:none}}
+
+/* ---------- header ---------- */
+header.site{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:20px;max-width:var(--maxw);margin:0 auto;padding:10px var(--gut)}
+.brand{background:none;border:0;padding:0;cursor:pointer;display:flex;align-items:center}
+.brand img{height:82px;width:auto}
+nav.main{display:flex;gap:26px;margin-left:auto;align-items:center;flex-wrap:wrap}
+nav.main button{background:none;border:0;padding:6px 0;cursor:pointer;font-size:12.5px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);position:relative}
+nav.main button::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--ink);transform:scaleX(0);transition:transform .3s ease}
+nav.main button:hover{color:var(--ink)}
+nav.main button[aria-current="page"]{color:var(--ink)}
+nav.main button[aria-current="page"]::after{transform:scaleX(1)}
+.langs{display:flex;gap:10px;align-items:center;padding-left:22px;border-left:1px solid var(--line)}
+.langs button{background:none;border:0;padding:2px 0;cursor:pointer;font-size:11.5px;font-weight:600;letter-spacing:.12em;color:var(--muted)}
+.langs button[aria-pressed="true"]{color:var(--ink);text-decoration:underline;text-underline-offset:5px}
+.langs a{text-decoration:none;color:var(--muted);font-size:11.5px;font-weight:600;letter-spacing:.12em;padding:2px 0}
+.langs a:hover{color:var(--ink)}
+.langs a[aria-current="true"]{color:var(--ink);text-decoration:underline;text-underline-offset:5px}
+.langs-mobile{display:none}
+.menu-toggle{display:none;background:none;border:1px solid var(--line-2);border-radius:2px;padding:7px 11px;cursor:pointer;margin-left:auto}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 30px;border:1px solid transparent;cursor:pointer;
+  font-size:12.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border-radius:2px;
+  transition:background .25s ease,color .25s ease,border-color .25s ease}
+.btn{position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg);transition:left .55s ease}
+.btn:hover::after{left:130%}
+.btn-solid{background:var(--ink);color:var(--paper)}
+.btn-solid:hover{background:var(--teal);color:#fff}
+.btn-line{border-color:var(--line-2);color:var(--ink)}
+.btn-line:hover{border-color:var(--ink)}
+.btn-onphoto{background:rgba(255,255,255,.80);border-color:rgba(255,255,255,.92);color:#101C28;backdrop-filter:blur(6px)}
+.btn-onphoto:hover{background:#fff;color:#101C28;border-color:#fff}
+.btn-white{background:#fff;color:#101C28}
+.btn-white:hover{background:rgba(255,255,255,.86)}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+
+/* ---------- views ---------- */
+main{padding-bottom:0}
+section[id]{scroll-margin-top:112px}
+#sec-home{scroll-margin-top:0}
+.sep{height:1px;background:var(--line);border:0;max-width:var(--maxw);margin:0 auto}
+.to-top{position:fixed;left:20px;bottom:22px;z-index:49;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink);cursor:pointer;
+  display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .3s ease;
+  box-shadow:0 10px 24px -14px rgba(0,0,0,.45)}
+.to-top.show{opacity:1;pointer-events:auto}
+.mobile-bar{display:none}
+.to-top svg{width:18px;height:18px}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .9s cubic-bezier(.22,.61,.36,1),transform .9s cubic-bezier(.22,.61,.36,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+/* ---------- photo slots ---------- */
+.ph{position:relative;overflow:hidden;background:var(--navy);background-size:cover;background-position:center}
+.ph::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 90% at 74% 18%,rgba(255,186,130,.30),transparent 58%),
+             radial-gradient(90% 80% at 12% 88%,rgba(14,143,151,.34),transparent 62%),
+             linear-gradient(160deg,#0B2440,#123049 55%,#0B2440)}
+.ph.has-img::before{display:none}
+.ph .phlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;text-align:center;
+  font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  border:1px solid rgba(255,255,255,.24);padding:9px 16px;border-radius:2px;white-space:nowrap}
+.ph.has-img .phlabel{display:none}
+.ph .lines{position:absolute;inset:0;z-index:1;opacity:.5}
+.ph.has-img .lines{display:none}
+
+/* ---------- cover: destacados rotativos ---------- */
+.cover{position:relative;height:clamp(520px,84vh,780px);margin-bottom:0;overflow:hidden;background:#0B2440}
+/* video de fondo (reemplaza a las 4 fotos; si no carga, vuelven las fotos) */
+.cover-video{position:absolute;inset:0;z-index:0;overflow:hidden;background:#0B2440;display:none}
+.cover-video video{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.cover.has-video .cover-video{display:block}
+.cover.has-video .slide .ph{display:none}
+.cover.has-video .slides{position:relative;z-index:1}
+.slides{display:grid;height:100%}
+.slide{grid-area:1/1;position:relative;opacity:0;visibility:hidden;transition:opacity 1.1s ease,visibility 0s linear 1.1s}
+.slide.is-active{opacity:1;visibility:visible;transition:opacity 1.1s ease,visibility 0s}
+.slide .ph{position:absolute;inset:0;transform:scale(1.02);transition:transform 0s}
+.slide.is-active .ph{animation:kenburns 8s ease-out forwards}
+@keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.10)}}
+.slide .veil{position:absolute;inset:0;z-index:3;
+  background:
+    linear-gradient(95deg,rgba(6,17,28,.50) 0%,rgba(6,17,28,.24) 44%,rgba(6,17,28,0) 76%),
+    linear-gradient(180deg,rgba(6,17,28,.20) 0%,rgba(6,17,28,.02) 32%,rgba(6,17,28,.58) 100%)}
+.slide .content{position:relative;z-index:4;height:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--gut) clamp(74px,9vw,112px);
+  display:flex;flex-direction:column;justify-content:flex-end;gap:22px}
+.slide .kicker{color:rgba(255,255,255,.86);text-shadow:0 1px 10px rgba(6,17,28,.6)}
+.slide h1 em{font-style:italic;color:#F2D3A0}
+.slide h1{color:#fff;font-size:clamp(44px,7.6vw,92px);max-width:15ch;letter-spacing:-.02em;
+  text-shadow:0 2px 26px rgba(6,17,28,.55),0 1px 3px rgba(6,17,28,.35)}
+.slide p{color:#fff;max-width:44ch;font-size:clamp(15.5px,1.5vw,18px);text-shadow:0 1px 14px rgba(6,17,28,.7)}
+.slide .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.slide.is-active .content > *{animation:rise-in .9s cubic-bezier(.22,.61,.36,1) both}
+.slide.is-active .content > *:nth-child(2){animation-delay:.08s}
+.slide.is-active .content > *:nth-child(3){animation-delay:.16s}
+.slide.is-active .content > *:nth-child(4){animation-delay:.24s}
+@keyframes rise-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.cover .phlabel{top:auto;bottom:24px;left:auto;right:24px;transform:none;z-index:5}
+
+/* barras de progreso de los slides */
+.slide-nav{position:absolute;left:0;right:0;bottom:0;z-index:6;max-width:var(--maxw);margin:0 auto;
+  padding:0 var(--gut) 26px;display:flex;gap:8px}
+.slide-nav button{flex:1 1 0;max-width:120px;height:22px;padding:0;border:0;background:none;cursor:pointer;position:relative}
+.slide-nav button::before{content:"";position:absolute;left:0;right:0;top:10px;height:2px;background:rgba(255,255,255,.32);border-radius:2px}
+.slide-nav button::after{content:"";position:absolute;left:0;top:10px;height:2px;width:0;background:#fff;border-radius:2px}
+.slide-nav button[aria-current="true"]::after{animation:fill var(--slide-ms,6000ms) linear forwards}
+.slide-nav button[aria-current="true"].done::after{width:100%;animation:none}
+@keyframes fill{from{width:0}to{width:100%}}
+.cover.paused .slide-nav button[aria-current="true"]::after{animation-play-state:paused}
+.cover.paused .slide.is-active .ph{animation-play-state:paused}
+
+.slide-count,.chips{display:none}
+
+/* ---------- cinta de avisos ---------- */
+.ticker{background:var(--navy);color:#EAF1F5;overflow:hidden;border-top:1px solid rgba(255,255,255,.08);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.ticker-track{display:flex;width:max-content;animation:ticker 48s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker-item{display:inline-flex;align-items:center;gap:18px;padding:15px 22px;white-space:nowrap;
+  font-size:12.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+.ticker-item i{width:5px;height:5px;border-radius:50%;background:var(--amber);display:inline-block}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ---------- generic section ---------- */
+.section{padding-top:clamp(58px,10vw,132px);padding-bottom:clamp(58px,10vw,132px)}
+.section.tight{padding-top:clamp(44px,6vw,80px)}
+.intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(24px,6vw,72px);align-items:end}
+.intro h2{font-size:clamp(34px,5.2vw,60px)}
+.intro p{color:var(--ink-soft);font-size:17.5px;max-width:50ch}
+.intro .kicker{margin-bottom:18px;display:block}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:clamp(36px,5vw,64px);
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats div{padding:26px 22px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.stats div:first-child{border-left:0;padding-left:0}
+.stats strong{font-family:var(--f-display);font-weight:400;font-size:clamp(40px,4.6vw,58px);line-height:1;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.stats span{font-size:13px;letter-spacing:.06em;color:var(--muted)}
+
+/* three columns */
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,54px);margin-top:clamp(40px,6vw,72px)}
+.col h3{font-size:24px;margin-bottom:10px}
+.col p{color:var(--ink-soft);font-size:15.5px}
+.col .num{font-family:var(--f-display);font-size:15px;color:var(--amber);display:block;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+
+/* editorial rows */
+.rows{display:flex;flex-direction:column;gap:clamp(56px,8vw,110px);margin-top:clamp(48px,7vw,86px)}
+.row{display:grid;grid-template-columns:1.08fr .92fr;gap:clamp(24px,5vw,64px);align-items:center}
+.media{display:flex;flex-direction:column;gap:12px}
+.row:nth-child(even) .media{order:2}
+.rowimg{aspect-ratio:4/3}
+.imgwrap{position:relative;overflow:hidden;border-radius:4px}
+.imgwrap .ph.fill{position:absolute;inset:0}
+.ph{transition:transform 1.1s cubic-bezier(.2,.6,.2,1)}
+.row:hover .imgwrap .ph,.tile:hover .ph,.imgwrap:hover .ph{transform:scale(1.05)}
+.rowtxt{display:flex;flex-direction:column;gap:14px}
+.rowtxt .idx{font-family:var(--f-display);font-size:14px;color:var(--amber);letter-spacing:.08em}
+.rowtxt h3{font-size:clamp(28px,3.6vw,42px)}
+.rowtxt p{color:var(--ink-soft);font-size:16.5px;max-width:44ch}
+.rowtxt .go{margin-top:6px;background:none;border:0;padding:0;cursor:pointer;align-self:flex-start;
+  font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+  border-bottom:1px solid var(--line-2);padding-bottom:5px}
+.rowtxt .go:hover{border-color:var(--ink)}
+.rowtxt ul.mini{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;max-width:46ch}
+.rowtxt ul.mini li{display:flex;flex-direction:column;gap:3px;padding:13px 0;border-top:1px solid var(--line)}
+.rowtxt ul.mini strong{font-family:var(--f-display);font-weight:400;font-size:19px;color:var(--ink)}
+.rowtxt ul.mini span{font-size:14.5px;color:var(--ink-soft);line-height:1.5}
+
+
+/* ---------- servicios ---------- */
+#sec-servicios{overflow:hidden}
+.servicios-wrap{overflow:hidden;margin-top:clamp(36px,5vw,60px);width:100vw;margin-left:calc(50% - 50vw);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.servicios{display:flex;width:max-content;animation:sv-marquee 48s linear infinite;will-change:transform;padding:8px 0 14px}
+.servicios-wrap:hover .servicios{animation-play-state:paused}
+.sv-set{display:flex;gap:16px;padding-right:16px}
+.sv{width:272px;flex:0 0 auto}
+@keyframes sv-marquee{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.servicios{animation:none;width:auto;flex-wrap:wrap;gap:16px}.sv-set{flex-wrap:wrap}.servicios-wrap{width:auto;margin-left:0;mask-image:none;-webkit-mask-image:none}}
+.sv{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:24px 22px 26px;display:flex;flex-direction:column;gap:8px;
+  transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease}
+.sv:hover{transform:translateY(-4px);box-shadow:0 22px 40px -28px rgba(11,36,64,.55);border-color:var(--line-2)}
+.sv-ico{width:44px;height:44px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;margin-bottom:8px}
+.sv-ico svg{width:22px;height:22px}
+.sv h3{font-size:20px;line-height:1.12}
+.sv p{color:var(--ink-soft);font-size:14.5px}
+
+/* ---------- tips ---------- */
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:clamp(36px,5vw,60px)}
+.tip{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:0 24px 28px;overflow:hidden;
+  display:flex;flex-direction:column;gap:10px;transition:transform .35s ease,box-shadow .35s ease}
+.tip-foto{position:relative;height:150px;margin:0 -24px 14px;overflow:hidden}
+.tip-foto .ph{position:absolute;inset:0}
+.tip:hover .tip-foto .ph{transform:scale(1.05)}
+.tip-foto .tip-ico{position:absolute;left:20px;bottom:-14px;z-index:3;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.tip:hover{transform:translateY(-4px);box-shadow:0 22px 40px -28px rgba(11,36,64,.55)}
+.tip-ico{width:42px;height:42px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center}
+.tip .kicker{margin-top:8px}
+.tip-ico svg{width:22px;height:22px}
+.tip .kicker{font-size:11px}
+.tip h3{font-size:22px;line-height:1.1}
+.tip p{color:var(--ink-soft);font-size:15px}
+
+/* ---------- testimonios ---------- */
+.testi-band{background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding-top:clamp(58px,9vw,110px);padding-bottom:clamp(58px,9vw,110px)}
+.testi{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:clamp(36px,5vw,60px)}
+.quote{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:28px 26px;display:flex;flex-direction:column;gap:18px}
+.quote blockquote{margin:0;font-family:var(--f-display);font-size:22px;line-height:1.25;color:var(--ink)}
+.quote blockquote::before{content:"\201C";color:var(--amber);font-size:34px;line-height:0;margin-right:4px;vertical-align:-10px}
+.quote figcaption{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.quote figcaption strong{font-weight:600;letter-spacing:.04em}
+.quote figcaption span{color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+
+/* ---------- mapa de cada experiencia ---------- */
+.mapa{position:relative;margin-top:0;height:170px;max-width:none;border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;background:var(--paper-2);display:grid;place-items:center}
+.mapa iframe{width:100%;height:100%;border:0;display:block;filter:saturate(.92)}
+.mapa-carga{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.acciones{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.acciones .go{margin-top:0}
+.ver-mapa{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink-soft);
+  font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  border-bottom:1px solid var(--line-2);padding-bottom:5px}
+.ver-mapa:hover{color:var(--teal);border-color:var(--teal)}
+.ver-mapa svg{width:15px;height:15px;flex:0 0 15px}
+
+/* mosaic */
+.mosaic{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:clamp(40px,6vw,72px)}
+.tile{position:relative;overflow:hidden;perspective:1400px}
+.tile .flip{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(180deg);
+  transition:transform 1.05s cubic-bezier(.3,.7,.25,1)}
+.tile.in .flip{transform:rotateY(0)}
+.tile .face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;overflow:hidden}
+.tile .face.back{transform:rotateY(180deg);background:var(--navy);display:grid;place-items:center;text-align:center;color:#fff;
+  background-image:radial-gradient(circle at 50% 40%,rgba(255,255,255,.08),transparent 60%)}
+.tile .face.back span{font-family:var(--f-display);font-size:clamp(34px,4vw,56px);color:var(--amber);display:block;line-height:1}
+.tile .face.back small{display:block;margin-top:10px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.tile .face.back::after{content:"";position:absolute;inset:14px;border:1px solid rgba(228,180,114,.35);pointer-events:none}
+.tile .ph{position:absolute;inset:0}
+@media (prefers-reduced-motion:reduce){.tile .flip{transform:none;transition:none}}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:22px 24px;color:#fff;
+  background:linear-gradient(0deg,rgba(8,20,32,.94) 0%,rgba(8,20,32,.78) 38%,rgba(8,20,32,.34) 72%,rgba(8,20,32,0) 100%);
+  text-shadow:0 1px 14px rgba(8,20,32,.55)}
+.tile .cap h3{font-size:26px}
+.tile .cap p{font-size:14px;color:rgba(255,255,255,.82);margin-top:4px;max-width:38ch}
+.tile.big{grid-column:span 4;aspect-ratio:16/10}
+.tile.small{grid-column:span 2;aspect-ratio:4/5}
+.tile.half{grid-column:span 3;aspect-ratio:3/2}
+
+/* quote band */
+.band{background:var(--navy);color:#F2F6F8;padding:clamp(64px,9vw,120px) 0;margin-top:0}
+.band blockquote{margin:0;font-family:var(--f-display);font-size:clamp(28px,4.4vw,52px);line-height:1.12;color:#fff;max-width:20ch}
+.band .who{margin-top:22px;font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.band .side{display:flex;flex-direction:column;gap:22px}
+.band .side div{border-top:1px solid rgba(255,255,255,.22);padding-top:16px}
+.band .side h4{margin:0 0 6px;font-size:16px;font-weight:600;letter-spacing:.01em}
+.band .side p{color:rgba(255,255,255,.7);font-size:15px}
+.band .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,6vw,72px);align-items:start}
+
+/* about */
+.about-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,6vw,76px);align-items:start;margin-top:clamp(36px,5vw,64px)}
+.about-grid p+p{margin-top:18px}
+.about-grid p{color:var(--ink-soft);font-size:17px}
+.about-photo{aspect-ratio:3/4}
+.about-grid p.pull{font-family:var(--f-display);font-size:clamp(24px,2.8vw,32px);line-height:1.14;color:var(--ink);
+  margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
+.about-grid p.sign{margin-top:22px;display:flex;flex-direction:column;gap:3px}
+.about-grid p.sign strong{font-family:var(--f-display);font-weight:400;font-size:21px;color:var(--ink)}
+.about-grid p.sign span{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--amber)}
+.checks{list-style:none;margin:34px 0 0;padding:0;display:grid;gap:0}
+.checks li{display:flex;gap:16px;padding:18px 0;border-top:1px solid var(--line);font-size:16px;color:var(--ink)}
+.checks li:last-child{border-bottom:1px solid var(--line)}
+.checks .n{font-family:var(--f-display);color:var(--amber);font-size:14px;flex:0 0 24px}
+
+/* contact */
+.contact-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(32px,6vw,80px);margin-top:clamp(36px,5vw,60px);align-items:start}
+form.contact{display:grid;grid-template-columns:1fr 1fr;gap:28px 26px}
+form.contact .full{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:8px;font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;font-weight:400;letter-spacing:normal;text-transform:none;color:var(--ink);
+  padding:8px 2px;border:0;border-bottom:1px solid var(--line-2);background:transparent;border-radius:0}
+input:focus,select:focus,textarea:focus{outline:0;border-bottom-color:var(--teal)}
+textarea{min-height:96px;resize:vertical}
+select{padding-left:0}
+.sent{border-top:1px solid var(--teal);padding-top:22px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.sent-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+.sent h3{font-size:26px}
+.sent p{color:var(--ink-soft);font-size:15.5px;max-width:46ch}
+.cdata div{padding:20px 0;border-top:1px solid var(--line)}
+.cdata div:last-child{border-bottom:1px solid var(--line)}
+.cdata b{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:6px}
+.cdata span{font-size:17px}
+.socials{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px}
+.socials a{font-size:12px;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;color:var(--muted);border-bottom:1px solid var(--line-2);padding-bottom:4px}
+.socials a:hover{color:var(--ink);border-color:var(--ink)}
+
+/* closing cta */
+.closing{text-align:center;padding-top:clamp(60px,10vw,140px);padding-bottom:clamp(60px,10vw,140px)}
+.closing h2{font-size:clamp(34px,5.6vw,64px);max-width:18ch;margin:0 auto 18px}
+.closing p{color:var(--ink-soft);max-width:46ch;margin:0 auto 30px;font-size:17px}
+
+/* footer */
+footer.site{border-top:1px solid var(--line);padding:44px 0 108px}
+.foot{display:flex;gap:30px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start}
+.foot img{height:112px;filter:drop-shadow(0 1px 0 rgba(0,35,76,.08)) drop-shadow(0 8px 12px rgba(0,35,76,.10))}
+.foot p{color:var(--muted);font-size:14px;max-width:32ch;margin-top:12px}
+.demo-note{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.wa{position:fixed;right:22px;bottom:22px;z-index:50;background:var(--ink);color:var(--paper);padding:14px 20px;border-radius:2px;
+  display:inline-flex;gap:10px;align-items:center;text-decoration:none;font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  box-shadow:0 14px 30px -14px rgba(0,0,0,.6)}
+.wa:hover{background:var(--teal);color:#fff}
+.wa svg{width:17px;height:17px}
+
+/* ============ deslizables (solo celular) ============ */
+.dots{display:none}
+
+@media (max-width:700px){
+  :root{--gut:22px}
+
+  /* ---- portada celular: foto a pantalla, tarjeta superpuesta ---- */
+  header.site{position:fixed;top:0;left:0;right:0;background:transparent;border-color:transparent;backdrop-filter:none;
+    transition:background .35s ease,border-color .35s ease}
+  header.site.solid{background:rgba(250,250,248,.94);border-color:var(--line);backdrop-filter:blur(12px)}
+  header.site:not(.solid) .brand img{background:rgba(255,255,255,.94);border-radius:12px;padding:5px 8px;
+    box-shadow:0 8px 22px -12px rgba(0,0,0,.45)}
+  header.site:not(.solid) .menu-toggle{background:rgba(255,255,255,.94);border-color:transparent;
+    box-shadow:0 8px 22px -12px rgba(0,0,0,.45)}
+  .cover{height:auto;overflow:visible;background:var(--paper)}
+  .cover-video{bottom:auto;height:68vh;min-height:430px;max-height:600px}
+  .cover.has-video .slide .ph{display:block;visibility:hidden}
+  .slides{height:auto}
+  .slide{display:flex;flex-direction:column}
+  .slide .ph{position:relative;inset:auto;height:68vh;min-height:430px;max-height:600px;overflow:hidden;
+    background-position:50% 45%;transform:none!important;animation:none!important}
+  .slide .ph::after{content:"";position:absolute;inset:0;background:inherit;background-size:cover;background-position:inherit;
+    transform:scale(1.02)}
+  .slide.is-active .ph::after{animation:kenburns 9s ease-out forwards}
+  .slide .veil{position:absolute;top:0;left:0;right:0;height:68vh;min-height:430px;max-height:600px;
+    background:linear-gradient(180deg,rgba(6,17,28,.42) 0%,rgba(6,17,28,.08) 30%,rgba(250,250,248,0) 62%,rgba(250,250,248,1) 100%)}
+  .slide .content{position:relative;z-index:4;height:auto;margin:-124px 16px 0;padding:22px 22px 20px;gap:10px;justify-content:flex-start;
+    background:var(--paper-2);border:1px solid var(--line);border-radius:26px;
+    box-shadow:0 26px 54px -30px rgba(11,36,64,.5)}
+  .slide.is-active .content{animation:card-up .8s cubic-bezier(.22,.61,.36,1) both}
+  @keyframes card-up{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  .slide.is-active .content > *{animation:none}
+  .slide .kicker{display:inline-flex;align-self:flex-start;background:var(--navy);color:#fff;text-shadow:none;
+    padding:8px 13px;border-radius:999px;font-size:10.5px;letter-spacing:.18em;margin:-40px 0 6px;
+    box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+  .slide h1{color:var(--ink);text-shadow:none;font-size:clamp(32px,9vw,42px);max-width:none;line-height:1.03}
+  .slide h1 em{font-style:italic;color:var(--amber)}
+  .slide p{color:var(--ink-soft);text-shadow:none;font-size:15.5px;line-height:1.55;max-width:none}
+  .slide .actions{gap:10px;margin-top:8px;flex-direction:column;align-items:stretch}
+  .slide .actions .btn{width:100%;justify-content:center;padding:15px 18px;text-align:center}
+  .slide .actions .btn-white{background:var(--ink);color:var(--paper)}
+  .slide .actions .btn-onphoto{background:transparent;border:1px solid var(--ink);color:var(--ink);backdrop-filter:none}
+
+  /* barras tipo historias, arriba de la foto */
+  .slide-nav{position:absolute;top:calc(var(--hdr,78px) + 10px);bottom:auto;left:0;right:0;z-index:6;padding:0 16px;gap:5px;max-width:none;
+    pointer-events:none}
+  .slide-nav button{max-width:none;height:14px;pointer-events:auto}
+  .slide-nav button::before{background:rgba(255,255,255,.35);top:6px}
+  .slide-nav button::after{background:#fff;top:6px}
+  .slide-count{display:block;position:absolute;z-index:6;right:16px;top:calc(var(--hdr,78px) + 30px);
+    font-family:var(--f-display);font-size:15px;color:#fff;letter-spacing:.08em;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+  .chips{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;position:absolute;z-index:6;left:16px;right:16px;
+    top:calc(min(68vh,600px) - 214px);pointer-events:none}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;
+    background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.45);backdrop-filter:blur(10px);color:#fff;
+    font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.35);
+    animation:chip-float 5s ease-in-out infinite}
+  .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber)}
+  .chip:nth-child(2){animation-delay:-2.4s}
+  @keyframes chip-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .ticker-item{padding:13px 18px;font-size:11px}
+  .ticker-track{animation-duration:36s}
+
+  .section{padding-top:52px;padding-bottom:52px}
+  .intro h2{font-size:clamp(30px,8.4vw,40px)}
+  .intro p{font-size:16.5px}
+
+  /* ---- carrusel genérico ---- */
+  .carousel{display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    align-items:stretch;
+    gap:14px;margin-left:calc(var(--gut)*-1);margin-right:calc(var(--gut)*-1);
+    padding:4px var(--gut) 8px;scrollbar-width:none}
+  .carousel::-webkit-scrollbar{display:none}
+  .carousel > *{flex:0 0 84%;scroll-snap-align:center;min-width:0}
+  .dots{display:flex;justify-content:center;gap:7px;margin-top:16px}
+  .dots button{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:var(--line-2);cursor:pointer;
+    transition:background .25s ease,transform .25s ease}
+  .dots button[aria-current="true"]{background:var(--teal);transform:scale(1.35)}
+
+  .stats{grid-template-columns:1fr 1fr;margin-top:26px;border:0;gap:12px}
+  .stats div{border:1px solid var(--line);border-radius:14px;padding:18px 16px}
+  .stats div:first-child{padding-left:16px}
+  .stats strong{font-size:38px}
+
+  /* ---- 3 razones ---- */
+  .cols{margin-top:28px}
+  .carousel > .col{display:flex;flex-direction:column;background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:24px 22px;
+    box-shadow:0 12px 30px -26px rgba(11,36,64,.7)}
+  .col h3{font-size:22px}
+  .after-cols{margin-top:26px}
+  .after-cols .btn{width:100%;justify-content:center}
+
+  /* ---- experiencias como tarjetas deslizables ---- */
+  .rows{margin-top:30px}
+  .carousel > .row{display:flex;flex-direction:column;align-items:stretch;background:var(--paper-2);
+    border:1px solid var(--line);border-radius:18px;overflow:hidden;
+    box-shadow:0 14px 34px -26px rgba(11,36,64,.75)}
+  .carousel > .row .media{gap:0}
+  .carousel > .row .rowimg{aspect-ratio:auto;height:48vw;max-height:230px;min-height:160px;flex:0 0 auto;border-radius:0}
+  .carousel > .row .rowtxt{padding:20px 20px 24px;gap:10px;flex:1 1 auto}
+  .carousel > .row .go{margin-top:auto;padding-top:14px}
+  .rowtxt .idx{font-size:13px;letter-spacing:.12em}
+  .rowtxt h3{font-size:23px}
+  .rowtxt p{font-size:15px;line-height:1.5}
+  .rowtxt ul.mini{flex-direction:row;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .rowtxt ul.mini li{border:1px solid var(--line);border-radius:999px;padding:6px 12px;display:block;
+    flex:0 0 auto;white-space:nowrap}
+  .rowtxt ul.mini strong{font-size:13.5px}
+  .rowtxt ul.mini span{display:none}
+  .mapa{height:210px;max-width:none;margin:14px 14px 0;border-radius:14px;border:1px solid var(--line);
+    box-shadow:0 10px 24px -20px rgba(11,36,64,.6)}
+  .acciones{gap:14px;margin-top:12px;flex-direction:column;align-items:flex-start}
+  .swipe-hint{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:14px;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .swipe-hint svg{width:16px;height:16px;animation:nudge 1.8s ease-in-out infinite}
+  @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+
+  .servicios-wrap{margin-top:22px}
+  .servicios{animation-duration:40s}
+  .sv-set{gap:10px;padding-right:10px}
+  .sv{width:230px}
+  .sv{padding:18px 16px 20px;border-radius:14px}
+  .sv-ico{width:38px;height:38px;border-radius:10px}
+  .sv h3{font-size:16.5px}
+  .sv p{font-size:13.5px}
+
+  /* ---- tips / testimonios ---- */
+  .tips,.testi{margin-top:26px}
+  .carousel > .tip,.carousel > .quote{display:flex}
+  .tip h3{font-size:21px}
+  .quote blockquote{font-size:20px}
+
+  /* ---- barrios ---- */
+  .mosaic{margin-top:28px}
+  .carousel > .tile{aspect-ratio:auto;height:106vw;max-height:460px;border-radius:16px}
+  .tile.big,.tile.small,.tile.half{grid-column:auto}
+  .tile .cap{padding:18px 20px}
+  .tile .cap h3{font-size:24px}
+
+  .about-photo{aspect-ratio:auto;height:62vw;max-height:320px}
+  .about-grid{gap:24px}
+  .band blockquote{font-size:clamp(26px,7.6vw,34px);max-width:none}
+  .closing h2{font-size:clamp(30px,8.4vw,42px)}
+  .closing .btn{width:100%;justify-content:center}
+  form.contact{gap:22px}
+  .sent-actions .btn{flex:1 1 100%;justify-content:center}
+  footer.site{padding-bottom:108px}
+  .mobile-bar{position:fixed;left:0;right:0;bottom:0;z-index:48;display:flex;gap:10px;padding:10px 14px;
+    padding-bottom:calc(10px + env(safe-area-inset-bottom));
+    background:rgba(250,250,248,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    transform:translateY(110%);transition:transform .35s ease}
+  .mobile-bar.show{transform:none}
+  .mobile-bar .btn{flex:1 1 0;justify-content:center;padding:14px 10px;font-size:12px}
+  .btn-wa{background:#25D366;color:#062d17}
+  .btn-wa svg{width:18px;height:18px}
+  .wa{display:none}
+  .to-top{left:14px;bottom:82px;width:40px;height:40px}
+  footer.site{padding-bottom:120px}
+  .wa{right:16px;bottom:16px;padding:0;width:56px;height:56px;border-radius:50%;justify-content:center;
+      background:#25D366;color:#062d17}
+  .wa span{display:none}
+  .wa svg{width:27px;height:27px}
+  .brand img{height:52px}
+  .menu-toggle{padding:9px 12px;font-size:15px;line-height:1}
+}
+@media (max-width:900px){
+  .intro,.cols,.row,.band .grid2,.about-grid,.contact-grid,form.contact{grid-template-columns:1fr}
+  .row:nth-child(even) .media{order:0}
+  .mosaic{grid-template-columns:1fr}
+  .tile.big,.tile.small,.tile.half{grid-column:span 1;aspect-ratio:3/2}
+  nav.main{display:none;width:100%;order:9;margin-left:0;gap:14px;flex-direction:column;align-items:flex-start;padding-bottom:14px}
+  nav.main.open{display:flex}
+  nav.main .langs{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px;width:100%}
+  .menu-toggle{display:block;margin-left:0}
+  nav.main .langs{display:none}
+  .langs-mobile{display:flex;width:auto;flex:0 0 auto;gap:2px;margin-left:auto;margin-right:4px;padding:3px 5px;border:0;border-radius:999px;
+    background:rgba(255,255,255,.94);box-shadow:0 8px 22px -12px rgba(0,0,0,.45)}
+  .langs-mobile button,.langs-mobile a{padding:6px 8px;border-radius:999px;font-size:11px}
+  .langs-mobile button[aria-pressed="true"],.langs-mobile a[aria-current="true"]{background:var(--navy);color:#fff;text-decoration:none}
+  header.site.solid .langs-mobile{background:transparent;box-shadow:none}
+  .bar{flex-wrap:wrap;gap:10px}
+  .cols{gap:34px}
+}
+</style>
+
+<div class="splash" id="intro" aria-hidden="true">
+  <img src="logo-completo.webp" alt="">
+  <span class="splash-line"></span>
+</div>
+
+</head>
+<body>
+<header class="site">
+  <div class="bar">
+    <button class="brand" data-go="home" aria-label="Jeito Miami"><img src="logo.webp" alt="Jeito Miami"></button>
+    <span class="langs langs-mobile" role="group" aria-label="Idioma"><a href="index.html" aria-current="true">ES</a><a href="pt.html">PT</a><a href="en.html">EN</a></span>
+    <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-label="Menu">☰</button>
+    <nav class="main" id="nav">
+      <button data-go="home" data-i18n="nav.home">Inicio</button>
+      <button data-go="servicios" data-i18n="nav.sv">Servicios</button>
+      <button data-go="exp" data-i18n="nav.exp">Experiencias</button>
+      <button data-go="about" data-i18n="nav.about">Nosotros</button>
+      <button data-go="contact" data-i18n="nav.contact">Contacto</button>
+      <span class="langs" role="group" aria-label="Idioma"><a href="index.html" aria-current="true">ES</a><a href="pt.html">PT</a><a href="en.html">EN</a></span>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HOME ================= -->
+  <section id="sec-home">
+    <div class="cover" id="cover">
+      <div class="cover-video" aria-hidden="true"><video id="coverVideo" muted loop playsinline autoplay preload="auto"></video></div>
+      <div class="slides" id="slides">
+        <article class="slide is-active" data-i="0">
+          <div class="ph" data-slot="cover"></div>
+          <div class="veil"></div>
+          <div class="content">
+            <span class="kicker" data-i18n="home.kicker">Agencia especializada en Miami</span>
+            <h1 data-i18n="home.title">El viaje que ya te estabas imaginando</h1>
+            <p data-i18n="home.sub">Diseñamos cada día de tu estadía: parques, navegación privada, mesas reservadas y los rincones que no salen en las guías.</p>
+            <div class="actions">
+              <button class="btn btn-white" data-go="exp" data-i18n="home.cta1">Ver experiencias</button>
+              <button class="btn btn-onphoto" data-go="contact" data-i18n="home.cta2">Hablar con un asesor</button>
+            </div>
+          </div>
+        </article>
+        <article class="slide" data-i="1">
+          <div class="ph" data-slot="exp9"></div>
+          <div class="veil"></div>
+          <div class="content">
+            <span class="kicker" data-i18n="s2.kicker">Full day</span>
+            <h1 data-i18n="s2.title">Un día entero en Key West</h1>
+            <p data-i18n="s2.sub">Cruzamos los puentes de la Overseas Highway hasta el punto más al sur de Estados Unidos. Salida temprano, vuelta de noche.</p>
+            <div class="actions">
+              <button class="btn btn-white" data-go="exp" data-i18n="s2.cta">Ver la experiencia</button>
+              <button class="btn btn-onphoto" data-go="contact" data-i18n="home.cta2">Hablar con un asesor</button>
+            </div>
+          </div>
+        </article>
+        <article class="slide" data-i="2">
+          <div class="ph" data-slot="exp7"></div>
+          <div class="veil"></div>
+          <div class="content">
+            <span class="kicker" data-i18n="s3.kicker">Tour de compras</span>
+            <h1 data-i18n="s3.title">Vos elegís las bolsas, nosotros el resto</h1>
+            <p data-i18n="s3.sub">Sawgrass Mills, Dolphin Mall, Aventura: con chofer, ayuda con los talles y tiempo para recorrer sin apuro.</p>
+            <div class="actions">
+              <button class="btn btn-white" data-go="exp" data-i18n="s2.cta">Ver la experiencia</button>
+              <button class="btn btn-onphoto" data-go="contact" data-i18n="home.cta2">Hablar con un asesor</button>
+            </div>
+          </div>
+        </article>
+        <article class="slide" data-i="3">
+          <div class="ph" data-slot="exp5"></div>
+          <div class="veil"></div>
+          <div class="content">
+            <span class="kicker" data-i18n="s4.kicker">Navegación privada</span>
+            <h1 data-i18n="s4.title">El atardecer, desde el agua</h1>
+            <p data-i18n="s4.sub">Velero o yate con capitán, para dos o para un grupo chico. La ciudad iluminándose mientras volvés a puerto.</p>
+            <div class="actions">
+              <button class="btn btn-white" data-go="exp" data-i18n="s2.cta">Ver la experiencia</button>
+              <button class="btn btn-onphoto" data-go="contact" data-i18n="home.cta2">Hablar con un asesor</button>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="slide-nav" id="slideNav" aria-label="Destacados"></div>
+      <div class="slide-count" id="slideCount" aria-hidden="true">01 / 04</div>
+    </div>
+
+  </section>
+
+  <!-- ================= SERVICIOS ================= -->
+  <section id="sec-servicios" class="wrap section">
+      <div class="intro reveal">
+        <div>
+          <span class="kicker" data-i18n="sv.kicker">Servicios</span>
+          <h2><span data-i18n="sv.title">Todo lo que resolvemos </span><span class="serif-i" data-i18n="sv.titleEm">por vos</span></h2>
+        </div>
+        <p data-i18n="sv.sub">Las experiencias son la parte linda. Esto es lo que hace que salgan bien.</p>
+      </div>
+      <div class="servicios-wrap reveal"><div class="servicios" id="serviciosGrid"></div></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ================= QUIENES SOMOS ================= -->
+  <section id="sec-quienes" class="wrap section">
+      <div class="intro reveal">
+        <div>
+          <span class="kicker" data-i18n="home.whoKicker">Quiénes somos</span>
+          <h2><span data-i18n="home.whoTitle">Un solo destino, </span><span class="serif-i" data-i18n="home.whoTitleEm">conocido a fondo</span></h2>
+        </div>
+        <p data-i18n="home.whoSub">No vendemos el mundo entero. Trabajamos Miami todo el año, y esa es la razón por la que sabemos qué reservar con tres meses de anticipación, qué se puede resolver el mismo día y qué no vale lo que cuesta.</p>
+      </div>
+      <div class="stats reveal" id="stats">
+        <div><strong data-count="10">0</strong><span data-i18n="st.1">experiencias armadas</span></div>
+        <div><strong data-count="3">0</strong><span data-i18n="st.2">idiomas de atención</span></div>
+        <div><strong data-count="1">0</strong><span data-i18n="st.3">destino, conocido a fondo</span></div>
+        <div><strong data-count="24" data-suffix="h">0</strong><span data-i18n="st.4">o menos para responderte</span></div>
+      </div>
+      <div class="cols carousel" id="homeCols">
+        <div class="col reveal"><span class="num">I</span><h3 data-i18n="home.p1t">Un asesor, no un formulario</h3><p data-i18n="home.p1p">La misma persona te acompaña desde la primera consulta hasta que volvés.</p></div>
+        <div class="col reveal"><span class="num">II</span><h3 data-i18n="home.p2t">Todo coordinado</h3><p data-i18n="home.p2p">Entradas, reservas, chofer y guía encajan entre sí. Vos no perseguís a nadie.</p></div>
+        <div class="col reveal"><span class="num">III</span><h3 data-i18n="home.p3t">Tres idiomas</h3><p data-i18n="home.p3p">Te atendemos y te acompañamos en español, portugués o inglés.</p></div>
+      </div>
+      <div class="dots" data-carousel="homeCols"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ================= EXPERIENCIAS ================= -->
+  <section id="sec-exp" class="wrap section">
+      <div class="intro reveal">
+        <div>
+          <span class="kicker" data-i18n="exp.kicker">Experiencias</span>
+          <h2><span data-i18n="exp.title">Qué podemos armarte </span><span class="serif-i" data-i18n="exp.titleEm">en Miami</span></h2>
+        </div>
+        <p data-i18n="exp.sub">Cada experiencia se cotiza según la fecha, la cantidad de personas y lo que quieran combinar. Todas incluyen coordinación y asistencia en tu idioma.</p>
+      </div>
+      <div class="rows carousel" id="expRows"></div>
+      <div class="dots" data-carousel="expRows"></div>
+  </section>
+
+  <!-- ================= MIAMI ================= -->
+  <section id="sec-miami" class="wrap section tight">
+      <div class="intro reveal">
+        <div>
+          <span class="kicker" data-i18n="mi.kicker">El destino</span>
+          <h2><span data-i18n="mi.title">Miami no es </span><span class="serif-i" data-i18n="mi.titleEm">un solo lugar</span></h2>
+        </div>
+        <p data-i18n="mi.sub">Entre la playa, el pantano y el centro financiero hay media hora de auto. Estos son los lugares por los que te vamos a preguntar cuando armemos tu viaje.</p>
+      </div>
+      <div class="mosaic carousel" id="mosaic"></div>
+      <div class="dots" data-carousel="mosaic"></div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ================= TIPS ================= -->
+  <section id="sec-tips" class="wrap section">
+      <div class="intro reveal">
+        <div>
+          <span class="kicker" data-i18n="tips.kicker">Antes de viajar</span>
+          <h2><span data-i18n="tips.title">Tips que te ahorran </span><span class="serif-i" data-i18n="tips.titleEm">un dolor de cabeza</span></h2>
+        </div>
+        <p data-i18n="tips.sub">Lo que le contamos a cada cliente antes de que saque el pasaje. Cortito y al pie.</p>
+      </div>
+      <div class="tips carousel" id="tipsGrid"></div>
+      <div class="dots" data-carousel="tipsGrid"></div>
+  </section>
+
+  <!-- ================= TESTIMONIOS ================= -->
+  <section id="sec-testi" class="testi-band" hidden>
+    <div class="wrap">
+      <div class="intro reveal">
+        <div>
+          <span class="kicker" data-i18n="testi.kicker">Viajaron con nosotros</span>
+          <h2><span data-i18n="testi.title">Lo que cuentan </span><span class="serif-i" data-i18n="testi.titleEm">al volver</span></h2>
+        </div>
+      </div>
+      <div class="testi carousel" id="testiGrid"></div>
+      <div class="dots" data-carousel="testiGrid"></div>
+    </div>
+  </section>
+
+    <div class="band">
+      <div class="wrap grid2">
+        <blockquote data-i18n="home.quote">Un buen viaje no se improvisa: se arma con tiempo y con alguien que ya estuvo ahí.</blockquote>
+        <div class="side">
+          <div><h4 data-i18n="home.q1t">Propuesta por escrito</h4><p data-i18n="home.q1p">Con todo lo que incluye y lo que no, antes de que pagues nada.</p></div>
+          <div><h4 data-i18n="home.q2t">Acompañamiento en destino</h4><p data-i18n="home.q2p">Estamos disponibles por WhatsApp durante todo el viaje.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap closing">
+      <h2 class="reveal" data-i18n="home.closeTitle">¿Empezamos por las fechas?</h2>
+      <p class="reveal" data-i18n="home.closeSub">Contanos cuántos son y qué les gustaría hacer. Te devolvemos una propuesta armada.</p>
+      <button class="btn btn-solid reveal" data-go="contact" data-i18n="home.closeCta">Pedir una propuesta</button>
+    </div>
+
+  <hr class="sep">
+
+  <!-- ================= NOSOTROS ================= -->
+  <section id="sec-about" class="wrap section">
+      <div class="intro">
+        <div>
+          <span class="kicker" data-i18n="ab.kicker">Nosotros</span>
+          <h2><span data-i18n="ab.title">Detrás de </span><span class="serif-i" data-i18n="ab.titleEm">cada viaje</span></h2>
+        </div>
+        <p data-i18n="ab.sub">Creemos que un viaje empieza mucho antes de llegar a destino.</p>
+      </div>
+      <div class="about-grid">
+        <div class="ph about-photo" data-slot="about"><span class="phlabel" data-i18n="ph.team">Foto del equipo</span></div>
+        <div>
+          <p data-i18n="ab.p1">Empieza con una conversación, con una idea, con esas ganas de conocer un lugar y vivirlo de una manera especial. En Jeito Miami estamos detrás de cada detalle para transformar esa ilusión en una experiencia que realmente disfrutes.</p>
+          <p data-i18n="ab.p2">Seleccionamos cada experiencia, coordinamos cada servicio y acompañamos a nuestros viajeros durante todo el recorrido, buscando que todo sea simple, seguro y memorable.</p>
+          <p data-i18n="ab.p3">Porque para nosotros, viajar no es solamente conocer un destino. Es descubrir, disfrutar, conectar y crear recuerdos que quedan para siempre.</p>
+          <p class="pull" data-i18n="ab.p4">Vos disfrutás del viaje. Nosotros nos ocupamos de hacerlo posible.</p>
+          <p class="sign"><strong>Jeito Miami</strong><span data-i18n="ab.sign">Tu viaje. Nuestra dedicación. Cada detalle importa.</span></p>
+          <ul class="checks" id="checkList"></ul>
+        </div>
+      </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- ================= CONTACTO ================= -->
+  <section id="sec-contact" class="wrap section">
+      <div class="intro">
+        <div>
+          <span class="kicker" data-i18n="ct.kicker">Contacto</span>
+          <h2><span data-i18n="ct.title">Contanos qué </span><span class="serif-i" data-i18n="ct.titleEm">te gustaría hacer</span></h2>
+        </div>
+        <p data-i18n="ct.sub">Respondemos por el canal que prefieras, siempre dentro del día. Si es urgente, WhatsApp es el más rápido.</p>
+      </div>
+      <div class="contact-grid">
+        <div>
+          <form class="contact" id="quoteForm" novalidate>
+            <label class="full"><span data-i18n="ct.f1">Nombre y apellido</span><input required name="name" autocomplete="name"></label>
+            <label><span data-i18n="ct.f2">Email</span><input required type="email" name="email" autocomplete="email"></label>
+            <label><span data-i18n="ct.f3">Teléfono / WhatsApp</span><input name="phone" inputmode="tel"></label>
+            <label><span data-i18n="ct.f4">Qué te interesa</span><select name="service" id="serviceSel"></select></label>
+            <label><span data-i18n="ct.f5">Cuántas personas</span><input name="pax" inputmode="numeric"></label>
+            <label class="full"><span data-i18n="ct.f6">Contanos un poco más</span><textarea name="msg" data-i18n-ph="ct.f6ph" placeholder="Fechas aproximadas, si viajan con chicos, qué les gustaría hacer…"></textarea></label>
+            <div class="full"><button class="btn btn-solid" type="submit" data-i18n="ct.send">Enviar consulta</button></div>
+          </form>
+          <div id="sent" class="sent" hidden>
+            <h3 data-i18n="ct.okTitle">Tu consulta está lista</h3>
+            <p data-i18n="ct.okBody">Te abrimos WhatsApp con todos los datos ya escritos: solo tenés que tocar enviar. Si no se abrió solo, usá los botones de acá abajo.</p>
+            <div class="sent-actions">
+              <a class="btn btn-solid" id="waFromForm" href="#" target="_blank" rel="noopener" data-i18n="ct.okCta">Abrir WhatsApp</a>
+              <a class="btn btn-line" id="mailFromForm" href="#" data-i18n="ct.okCta2">Enviarla por email</a>
+            </div>
+          </div>
+        </div>
+        <div class="cdata">
+          <div><b data-i18n="ct.wa">WhatsApp</b><span>+55 21 97207-2811</span></div>
+          <div><b data-i18n="ct.mail">Email</b><span>pontotour@gmail.com</span></div>
+          <div><b data-i18n="ct.hours">Atención</b><span data-i18n="ct.hoursVal">Lunes a sábado, 9 a 19 h</span></div>
+          <div class="socials" style="border:0;padding-top:0">
+            <a href="#" data-i18n="ct.ig">Instagram</a>
+          </div>
+        </div>
+      </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <img src="logo-completo.webp" alt="Jeito Miami">
+        <p data-i18n="ft.tag">Miami, a tu manera. Agencia especializada en Miami, con atención en español, portugués e inglés.</p>
+      </div>
+      <div class="socials" style="margin-top:6px">
+        <a href="#" data-i18n="ct.ig">Instagram</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="mobile-bar" id="mobileBar">
+  <button class="btn btn-solid" data-go="contact" data-i18n="ui.mbConsult">Consultar</button>
+  <a class="btn btn-wa" id="waBar" href="https://wa.me/5521972072811" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.94 1.34-.5.04-.98.22-3.3-.69-2.78-1.1-4.54-3.94-4.68-4.12-.13-.18-1.1-1.47-1.1-2.8 0-1.33.7-1.98.95-2.25.24-.27.53-.34.7-.34.18 0 .35 0 .5.01.16.01.38-.06.59.45.24.55.8 1.9.87 2.04.07.14.11.3.02.48-.09.18-.13.29-.26.45-.13.16-.28.35-.4.47-.13.13-.27.28-.12.55.15.27.67 1.1 1.44 1.79.99.88 1.82 1.15 2.09 1.28.27.14.42.11.58-.07.16-.18.67-.78.85-1.05.18-.27.35-.22.59-.13.24.09 1.53.72 1.79.85.27.13.44.2.5.31.07.11.07.64-.17 1.32Z"/></svg>
+    <span>WhatsApp</span>
+  </a>
+</div>
+
+<button class="to-top" id="toTop" aria-label="Volver arriba">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<a class="wa" href="https://wa.me/5521972072811" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm5.8 14.06c-.24.68-1.4 1.3-1.94 1.34-.5.04-.98.22-3.3-.69-2.78-1.1-4.54-3.94-4.68-4.12-.13-.18-1.1-1.47-1.1-2.8 0-1.33.7-1.98.95-2.25.24-.27.53-.34.7-.34.18 0 .35 0 .5.01.16.01.38-.06.59.45.24.55.8 1.9.87 2.04.07.14.11.3.02.48-.09.18-.13.29-.26.45-.13.16-.28.35-.4.47-.13.13-.27.28-.12.55.15.27.67 1.1 1.44 1.79.99.88 1.82 1.15 2.09 1.28.27.14.42.11.58-.07.16-.18.67-.78.85-1.05.18-.27.35-.22.59-.13.24.09 1.53.72 1.79.85.27.13.44.2.5.31.07.11.07.64-.17 1.32Z"/></svg>
+  <span data-i18n="wa.label">WhatsApp</span>
+</a>
+
+<script>
+/* entrada del logo: se muestra una vez por visita (no en cada cambio de idioma o recarga) */
+(function(){
+  let seen=false;
+  try{ seen = sessionStorage.getItem("pt_intro")==="1"; sessionStorage.setItem("pt_intro","1"); }catch(e){}
+  if(seen) document.documentElement.classList.add("no-intro");
+  window.addEventListener("load",()=>{
+    const i=document.getElementById("intro"); if(!i) return;
+    setTimeout(()=>i.remove(), 2600);
+  });
+})();
+/* ============================================================
+   FOTOS — pegá acá la ruta o el data URI de cada imagen.
+   Ej.:  cover:"fotos/portada.jpg",  exp1:"fotos/parques.jpg"
+   Mientras estén vacías se ve el recuadro gris con el nombre.
+   ============================================================ */
+const PHOTOS = {
+  cover:"portada.jpg",
+  about:"miami-skyline.jpg",
+  exp1:"parques.jpg",
+  exp2:"everglades.jpg",
+  exp3:"miami-skyline.jpg",
+  exp4:"brickell.jpg",
+  exp5:"yates.jpg",
+  exp6:"restaurantes.jpg",
+  exp7:"compras.jpg",
+  exp8:"brickell-city.jpg",
+  exp9:"key-west.jpg",
+  exp10:"islamorada.jpg",
+  mi1:"south-beach.jpg",
+  mi2:"wynwood.jpg",
+  mi3:"brickell.jpg",
+  mi4:"everglades.jpg",
+  mi5:"key-biscayne.jpg",
+  mi6:"little-havana.jpg",
+};
+
+
+/* ============================================================
+   UBICACIONES DE CADA EXPERIENCIA
+   lat / lng: coordenadas del punto que se muestra en el mapa
+   z: nivel de zoom (mas alto = mas cerca)
+   ruta: si esta, el boton abre el recorrido desde Miami
+   Podes ajustar cualquier punto buscandolo en Google Maps,
+   clic derecho sobre el lugar, y copiando los dos numeros.
+   ============================================================ */
+const LUGARES = {
+  exp1:  {lat:28.3852, lng:-81.5639, z:11, ruta:"Orlando, FL"},
+  exp2:  {lat:25.7580, lng:-80.5540, z:11},
+  exp9:  {lat:24.5551, lng:-81.7800, z:9,  ruta:"Key West, FL"},
+  exp10: {lat:24.9243, lng:-80.6279, z:11, ruta:"Islamorada, FL"},
+  exp3:  {lat:25.7823, lng:-80.1301, z:13},
+  exp4:  {lat:25.7745, lng:-80.1533, z:13},
+  exp5:  {lat:25.7787, lng:-80.1857, z:13},
+  exp6:  {lat:25.7818, lng:-80.1300, z:14},
+  exp7:  {lat:26.1503, lng:-80.3231, z:11},
+  exp8:  {lat:25.7663, lng:-80.1936, z:14}
+};
+const ORIGEN = "Miami, FL";   // desde donde salen los recorridos
+
+
+/* ============================================================
+   TESTIMONIOS — pegá acá las frases reales de tus clientes.
+   Mientras la lista esté vacía, la sección no se muestra.
+   Ejemplo:
+   { nombre:"Mariana R.", ciudad:"Rio de Janeiro", texto:"Foi tudo perfeito..." },
+   ============================================================ */
+const TESTIMONIOS = [
+];
+
+
+const SERVICIOS = [
+  {icon:"car",
+   es:{t:"Traslados",d:"Aeropuerto, hotel y entre cada paseo, con un chofer que te espera con tu nombre."},
+   pt:{t:"Traslados",d:"Aeroporto, hotel e entre cada passeio, com um motorista esperando com o seu nome."},
+   en:{t:"Transfers",d:"Airport, hotel and between every outing, with a driver waiting with your name."}},
+  {icon:"star",
+   es:{t:"Reservas en lugares exclusivos",d:"Restaurantes, rooftops, beach clubs y eventos donde no se consigue mesa."},
+   pt:{t:"Reservas em lugares exclusivos",d:"Restaurantes, rooftops, beach clubs e eventos onde não se consegue mesa."},
+   en:{t:"Bookings at exclusive places",d:"Restaurants, rooftops, beach clubs and events where a table is hard to get."}},
+  {icon:"briefcase",
+   es:{t:"Viajes corporativos",d:"Grupos de empresa, incentivos y convenciones, con la logística resuelta."},
+   pt:{t:"Viagens corporativas",d:"Grupos de empresa, incentivos e convenções, com a logística resolvida."},
+   en:{t:"Corporate travel",d:"Company groups, incentives and conventions, with the logistics handled."}},
+  {icon:"route",
+   es:{t:"Coordinación total del viaje",d:"Armamos el itinerario completo, día por día, y lo seguimos mientras viajás."},
+   pt:{t:"Coordenação total da viagem",d:"Montamos o roteiro completo, dia a dia, e acompanhamos enquanto você viaja."},
+   en:{t:"Full trip coordination",d:"We build the whole itinerary, day by day, and follow it while you travel."}},
+  {icon:"compass",
+   es:{t:"Guía y tips",d:"Acompañamiento en tu idioma y recomendaciones de quien conoce el destino."},
+   pt:{t:"Guia e dicas",d:"Acompanhamento no seu idioma e recomendações de quem conhece o destino."},
+   en:{t:"Guidance and tips",d:"Support in your language and recommendations from people who know the destination."}},
+  {icon:"chat",
+   es:{t:"Asistencia durante el viaje",d:"Un WhatsApp que responde a cualquier hora mientras estás en Miami."},
+   pt:{t:"Assistência durante a viagem",d:"Um WhatsApp que responde a qualquer hora enquanto você está em Miami."},
+   en:{t:"Support during the trip",d:"A WhatsApp that answers at any hour while you're in Miami."}},
+  {icon:"ticket",
+   es:{t:"Entradas y accesos",d:"Parques, shows, partidos y atracciones, con las entradas resueltas de antemano."},
+   pt:{t:"Ingressos e acessos",d:"Parques, shows, jogos e atrações, com os ingressos resolvidos de antemão."},
+   en:{t:"Tickets and access",d:"Parks, shows, games and attractions, with tickets sorted in advance."}},
+  {icon:"gift",
+   es:{t:"Celebraciones especiales",d:"Cumpleaños, luna de miel, propuestas: lo especial también se organiza."},
+   pt:{t:"Celebrações especiais",d:"Aniversários, lua de mel, pedidos de casamento: o especial também se organiza."},
+   en:{t:"Special celebrations",d:"Birthdays, honeymoons, proposals: the special moments get planned too."}}
+];
+
+const TIPS = [
+  {icon:"sun", foto:"mi1",
+   es:{k:"Cuándo ir",t:"Noviembre a abril es la temporada linda",d:"Días secos, 22 a 28 grados y mar tranquilo. De junio a octubre hace más calor, llueve un rato a la tarde y los precios bajan."},
+   pt:{k:"Quando ir",t:"Novembro a abril é a temporada boa",d:"Dias secos, 22 a 28 graus e mar calmo. De junho a outubro faz mais calor, chove um pouco à tarde e os preços caem."},
+   en:{k:"When to go",t:"November to April is the sweet spot",d:"Dry days, 22 to 28°C and calm sea. June to October is hotter, with a short afternoon shower and lower prices."}},
+  {icon:"passport", foto:"about",
+   es:{k:"Documentos",t:"Empezá la visa apenas tengas fechas",d:"Argentinos y brasileños necesitan pasaporte vigente y visa de turista. El turno para la entrevista puede demorar meses: no lo dejes para el final."},
+   pt:{k:"Documentos",t:"Comece o visto assim que tiver datas",d:"Brasileiros e argentinos precisam de passaporte válido e visto de turista. A entrevista pode demorar meses: não deixe para o fim."},
+   en:{k:"Documents",t:"Start your visa as soon as you have dates",d:"Argentine and Brazilian travellers need a valid passport and a tourist visa. The interview slot can take months, so don't leave it for last."}},
+  {icon:"car", foto:"exp8",
+   es:{k:"Moverse",t:"Miami es grande y el colectivo no ayuda",d:"Para los paseos te llevamos nosotros. Para el resto, Uber funciona muy bien y sale barato entre South Beach, Brickell y Wynwood."},
+   pt:{k:"Como se locomover",t:"Miami é grande e o ônibus não ajuda",d:"Para os passeios, nós levamos você. Para o resto, o Uber funciona muito bem e é barato entre South Beach, Brickell e Wynwood."},
+   en:{k:"Getting around",t:"Miami is big and buses won't help",d:"We drive you to every tour. For the rest, Uber works great and is cheap between South Beach, Brickell and Wynwood."}},
+  {icon:"bag", foto:"exp2",
+   es:{k:"Qué llevar",t:"Repelente, gorra y una campera liviana",d:"En los Everglades el hidrodeslizador va rápido y corre viento. Para los Cayos, malla debajo de la ropa: el agua invita."},
+   pt:{k:"O que levar",t:"Repelente, boné e um casaco leve",d:"Nos Everglades o aerobarco é rápido e venta. Para os Keys, roupa de banho por baixo: a água convida."},
+   en:{k:"What to pack",t:"Repellent, a cap and a light jacket",d:"The Everglades airboat is fast and windy. Down in the Keys, wear your swimsuit underneath: the water is hard to resist."}},
+  {icon:"clock", foto:"exp9",
+   es:{k:"Planificar",t:"Key West no va el día del vuelo",d:"Son tres a cuatro horas de ida. Salimos temprano y volvemos de noche: dejalo para un día entero, sin nada después."},
+   pt:{k:"Planejar",t:"Key West não combina com dia de voo",d:"São três a quatro horas de ida. Saímos cedo e voltamos à noite: reserve um dia inteiro, sem nada depois."},
+   en:{k:"Planning",t:"Don't put Key West on your flight day",d:"It's a three-to-four-hour drive each way. We leave early and return at night: give it a full day with nothing after."}},
+  {icon:"card", foto:"exp7",
+   es:{k:"Plata",t:"Tarjeta en todos lados, poco efectivo",d:"En restaurantes se deja entre 18 y 20 por ciento de propina. Los outlets abren de 10 a 21: andá temprano y entre semana."},
+   pt:{k:"Dinheiro",t:"Cartão em todo lugar, pouco dinheiro vivo",d:"Nos restaurantes deixa-se de 18 a 20 por cento de gorjeta. Os outlets abrem das 10 às 21: vá cedo e durante a semana."},
+   en:{k:"Money",t:"Cards everywhere, little cash",d:"Restaurants expect an 18 to 20 percent tip. Outlets open 10am to 9pm: go early and on a weekday."}}
+];
+
+const EXP = [
+  {slot:"exp1", es:{t:"Parques y atracciones",d:"Entradas a los grandes parques y a las atracciones de la ciudad, con la fila y el orden del día resueltos antes de que llegues."},
+   pt:{t:"Parques e atrações",d:"Ingressos para os grandes parques e as atrações da cidade, com a fila e a ordem do dia resolvidas antes de você chegar."},
+   en:{t:"Theme parks and attractions",d:"Tickets to the big parks and the city's attractions, with the queues and the order of the day sorted before you arrive."}},
+  {slot:"exp2", es:{t:"Tour de cocodrilos",d:"Salida a los Everglades en hidrodeslizador, con avistaje de cocodrilos y un guía que sabe dónde mirar."},
+   pt:{t:"Tour dos jacarés",d:"Saída para os Everglades de aerobarco, com avistamento de jacarés e um guia que sabe onde olhar."},
+   en:{t:"Everglades gator tour",d:"An airboat run through the Everglades, spotting alligators with a guide who knows where to look."}},
+  {slot:"exp9",
+   es:{t:"Full day a Key West",d:"Cruzamos los puentes de la Overseas Highway hasta el punto más al sur de Estados Unidos. Tiempo libre en Duval Street, paseo por Mallory Square y snorkel en el arrecife como opcional."},
+   pt:{t:"Full day em Key West",d:"Atravessamos as pontes da Overseas Highway até o ponto mais ao sul dos Estados Unidos. Tempo livre na Duval Street, passeio pela Mallory Square e snorkel no recife como opcional."},
+   en:{t:"Key West full day",d:"We cross the Overseas Highway bridges to the southernmost point of the United States. Free time on Duval Street, a walk around Mallory Square and an optional reef snorkel."}},
+  {slot:"exp10",
+   es:{t:"Islamorada y sus arrecifes",d:"Navegación por los Cayos hasta el arrecife de Alligator Reef, con su faro en medio del mar. Snorkel o buceo en agua turquesa, con buenas chances de ver tiburones, rayas y tortugas. Hay salida para principiantes y para buzos con brevet."},
+   pt:{t:"Islamorada e seus recifes",d:"Navegação pelos Cayos até o recife de Alligator Reef, com seu farol em pleno mar. Snorkel ou mergulho em água turquesa, com boas chances de ver tubarões, raias e tartarugas. Há saída para iniciantes e para mergulhadores credenciados."},
+   en:{t:"Islamorada and its reefs",d:"A boat run through the Keys to Alligator Reef and its lighthouse standing out at sea. Snorkelling or diving in turquoise water, with a good chance of seeing sharks, rays and turtles. There are trips for beginners and for certified divers."}},
+  {slot:"exp3", es:{t:"City tours",d:"South Beach, Wynwood, Little Havana y el Distrito Art Déco, a pie o en vehículo privado con guía propio."},
+   pt:{t:"City tours",d:"South Beach, Wynwood, Little Havana e o Distrito Art Déco, a pé ou em veículo privativo com guia próprio."},
+   en:{t:"City tours",d:"South Beach, Wynwood, Little Havana and the Art Deco District, on foot or by private car with your own guide."}},
+  {slot:"exp4", es:{t:"Casas de los famosos",d:"Navegación por las islas de Biscayne Bay, frente a las casas de músicos, actores y deportistas."},
+   pt:{t:"Casas dos famosos",d:"Navegação pelas ilhas da Biscayne Bay, em frente às casas de músicos, atores e atletas."},
+   en:{t:"Celebrity homes cruise",d:"A cruise around the Biscayne Bay islands, past the homes of musicians, actors and athletes."}},
+  {slot:"exp5", es:{t:"Veleros y yates privados",d:"Salidas privadas al atardecer, con capitán a bordo, para grupos chicos o para festejar algo."},
+   pt:{t:"Veleiros e iates privativos",d:"Saídas privativas ao pôr do sol, com capitão a bordo, para grupos pequenos ou para comemorar."},
+   en:{t:"Private sailboats and yachts",d:"Private sunset outings with a captain on board, for small groups or a celebration."}},
+  {slot:"exp6", es:{t:"Restaurantes VIP",d:"Reservamos las mesas difíciles: rooftops, cocina latina de autor y los clásicos frente a la playa."},
+   pt:{t:"Restaurantes VIP",d:"Reservamos as mesas difíceis: rooftops, cozinha latina autoral e os clássicos de frente para a praia."},
+   en:{t:"VIP restaurant tables",d:"We book the hard tables: rooftops, chef-led Latin kitchens and the classics facing the beach."}},
+  {slot:"exp7",
+   es:{t:"Tour de compras",d:"Te llevamos a los outlets y centros comerciales con chofer, ayuda con los talles americanos y tiempo suficiente para recorrerlos sin apuro.",
+       list:[["Sawgrass Mills","El outlet más grande de Estados Unidos, a una hora al norte de Miami: más de 350 tiendas, de Nike y Tommy Hilfiger a las marcas de lujo."],
+             ["Dolphin Mall","Más cerca de la ciudad y del aeropuerto, con más de 240 tiendas y descuentos como Ross y Burlington."],
+             ["Bayside Marketplace","Centro comercial al aire libre en el puerto de Miami, ideal para combinar compras con paseo."],
+             ["Aventura Mall","Uno de los más grandes de Florida, con marcas variadas y grandes tiendas departamentales."]]},
+   pt:{t:"Tour de compras",d:"Levamos você aos outlets e shoppings com motorista, ajuda com os tamanhos americanos e tempo suficiente para percorrer sem pressa.",
+       list:[["Sawgrass Mills","O maior outlet dos Estados Unidos, a uma hora ao norte de Miami: mais de 350 lojas, de Nike e Tommy Hilfiger às marcas de luxo."],
+             ["Dolphin Mall","Mais perto da cidade e do aeroporto, com mais de 240 lojas e descontos como Ross e Burlington."],
+             ["Bayside Marketplace","Shopping a céu aberto no porto de Miami, ideal para juntar compras e passeio."],
+             ["Aventura Mall","Um dos maiores da Flórida, com marcas variadas e grandes lojas de departamento."]]},
+   en:{t:"Shopping tour",d:"We take you to the outlets and malls with a driver, help with US sizing and enough time to do it without rushing.",
+       list:[["Sawgrass Mills","The largest outlet in the United States, an hour north of Miami: over 350 stores, from Nike and Tommy Hilfiger to luxury labels."],
+             ["Dolphin Mall","Closer to the city and the airport, with over 240 stores and discount chains such as Ross and Burlington."],
+             ["Bayside Marketplace","An open-air mall at Miami's port, perfect for combining shopping with a stroll."],
+             ["Aventura Mall","One of the biggest in Florida, with a wide mix of brands and large department stores."]]}},
+  {slot:"exp8",
+   es:{t:"Brickell",d:"El distrito financiero de Miami: torres de vidrio, el Brickell City Centre, rooftops y una de las mejores zonas para comer y salir de noche. Lo recorremos a pie o en vehículo privado."},
+   pt:{t:"Brickell",d:"O distrito financeiro de Miami: torres de vidro, o Brickell City Centre, rooftops e uma das melhores áreas para comer e sair à noite. Percorremos a pé ou em veículo privativo."},
+   en:{t:"Brickell",d:"Miami's financial district: glass towers, Brickell City Centre, rooftops and one of the best areas to eat and go out at night. On foot or by private car."}}
+];
+
+const PLACES = [
+  {slot:"mi1", size:"big", es:{t:"South Beach",d:"Arena blanca, hoteles art déco y una vida que empieza cuando baja el sol."},
+   pt:{t:"South Beach",d:"Areia branca, hotéis art déco e uma vida que começa quando o sol cai."},
+   en:{t:"South Beach",d:"White sand, art deco hotels and a night that starts as the sun goes down."}},
+  {slot:"mi2", size:"small", es:{t:"Wynwood",d:"Murales de piso a techo y galerías abiertas hasta tarde."},
+   pt:{t:"Wynwood",d:"Murais do chão ao teto e galerias abertas até tarde."},
+   en:{t:"Wynwood",d:"Floor-to-ceiling murals and galleries open late."}},
+  {slot:"mi3", size:"small", es:{t:"Brickell",d:"Torres de vidrio, rooftops y el punto de partida de casi todos los paseos en barco."},
+   pt:{t:"Brickell",d:"Torres de vidro, rooftops e o ponto de partida de quase todos os passeios de barco."},
+   en:{t:"Brickell",d:"Glass towers, rooftops and the departure point for nearly every boat trip."}},
+  {slot:"mi4", size:"big", es:{t:"Everglades",d:"Una hora hacia el oeste y el paisaje cambia entero: pastizal, agua quieta y cocodrilos."},
+   pt:{t:"Everglades",d:"Uma hora a oeste e a paisagem muda por completo: campo alagado, água parada e jacarés."},
+   en:{t:"The Everglades",d:"An hour west and the landscape changes completely: sawgrass, still water and alligators."}},
+  {slot:"mi5", size:"half", es:{t:"Key Biscayne",d:"Faro, playas tranquilas y el mejor lugar para escaparle al ruido."},
+   pt:{t:"Key Biscayne",d:"Farol, praias tranquilas e o melhor lugar para fugir do barulho."},
+   en:{t:"Key Biscayne",d:"A lighthouse, quiet beaches and the best place to escape the noise."}},
+  {slot:"mi6", size:"half", es:{t:"Little Havana",d:"Cafecito en la ventanilla, dominó en el parque y música cubana toda la tarde."},
+   pt:{t:"Little Havana",d:"Cafezinho na janelinha, dominó na praça e música cubana a tarde inteira."},
+   en:{t:"Little Havana",d:"Cafecito at the window, dominoes in the park and Cuban music all afternoon."}}
+];
+
+const CHECKS = {
+  es:["Propuesta por escrito, con lo que incluye y lo que no.","Respuesta dentro del día, de lunes a sábado.","Acompañamiento por WhatsApp durante todo el viaje.","Trabajamos solo con operadores que ya probamos."],
+  pt:["Proposta por escrito, com o que inclui e o que não inclui.","Resposta no mesmo dia, de segunda a sábado.","Acompanhamento por WhatsApp durante toda a viagem.","Trabalhamos apenas com operadores que já testamos."],
+  en:["A written proposal stating what is and isn't included.","A reply the same day, Monday to Saturday.","WhatsApp support for the whole trip.","We only work with operators we have used ourselves."]
+};
+
+const T = {
+  es:{
+    "doc.title":"Jeito Miami | Excursiones y experiencias en Miami",
+    "nav.home":"Inicio","nav.exp":"Experiencias","nav.miami":"Miami","nav.about":"Nosotros","nav.contact":"Contacto",
+    "ph.cover":"Foto de portada","ph.team":"Foto del equipo","ph.exp":"Foto","ph.place":"Foto",
+    "home.kicker":"Agencia especializada en Miami",
+    "home.title":"El viaje que ya te estabas imaginando",
+    "home.sub":"Diseñamos cada día de tu estadía: parques, navegación privada, mesas reservadas y los rincones que no salen en las guías.",
+    "home.cta1":"Ver experiencias","home.cta2":"Hablar con un asesor",
+    "home.whoKicker":"Quiénes somos","home.whoTitle":"Un solo destino, ","home.whoTitleEm":"conocido a fondo",
+    "home.whoSub":"No vendemos el mundo entero. Trabajamos Miami todo el año, y esa es la razón por la que sabemos qué reservar con tres meses de anticipación, qué se puede resolver el mismo día y qué no vale lo que cuesta.",
+    "home.p1t":"Un asesor, no un formulario","home.p1p":"La misma persona te acompaña desde la primera consulta hasta que volvés.",
+    "home.p2t":"Todo coordinado","home.p2p":"Entradas, reservas, chofer y guía encajan entre sí. Vos no perseguís a nadie.",
+    "home.p3t":"Tres idiomas","home.p3p":"Te atendemos y te acompañamos en español, portugués o inglés.",
+    "home.expKicker":"Experiencias","home.expTitle":"Lo que más nos piden",
+    "home.expSub":"Se toman sueltas o se combinan en un solo programa, con los traslados resueltos entre una y otra.",
+    "home.quote":"Un buen viaje no se improvisa: se arma con tiempo y con alguien que ya estuvo ahí.",
+    "home.q1t":"Propuesta por escrito","home.q1p":"Con todo lo que incluye y lo que no, antes de que pagues nada.",
+    "home.q2t":"Acompañamiento en destino","home.q2p":"Estamos disponibles por WhatsApp durante todo el viaje.",
+    "home.closeTitle":"¿Empezamos por las fechas?","home.closeSub":"Contanos cuántos son y qué les gustaría hacer. Te devolvemos una propuesta armada.","home.closeCta":"Pedir una propuesta",
+    "exp.kicker":"Experiencias","exp.title":"Qué podemos armarte ","exp.titleEm":"en Miami",
+    "exp.sub":"Cada experiencia se cotiza según la fecha, la cantidad de personas y lo que quieran combinar. Todas incluyen coordinación y asistencia en tu idioma.",
+    "exp.closeTitle":"También las combinamos","exp.closeSub":"Un día de parque, una cena reservada y un atardecer navegando pueden entrar en el mismo programa.","exp.closeCta":"Consultar",
+    "mi.kicker":"El destino","mi.title":"Miami no es ","mi.titleEm":"un solo lugar",
+    "mi.sub":"Entre la playa, el pantano y el centro financiero hay media hora de auto. Estos son los lugares por los que te vamos a preguntar cuando armemos tu viaje.",
+    "ab.kicker":"Nosotros","ab.title":"Detrás de ","ab.titleEm":"cada viaje",
+    "ab.sub":"Creemos que un viaje empieza mucho antes de llegar a destino.",
+    "ab.p1":"Empieza con una conversación, con una idea, con esas ganas de conocer un lugar y vivirlo de una manera especial. En Jeito Miami estamos detrás de cada detalle para transformar esa ilusión en una experiencia que realmente disfrutes.",
+    "ab.p2":"Seleccionamos cada experiencia, coordinamos cada servicio y acompañamos a nuestros viajeros durante todo el recorrido, buscando que todo sea simple, seguro y memorable.",
+    "ct.kicker":"Contacto","ct.title":"Contanos qué ","ct.titleEm":"te gustaría hacer",
+    "ct.sub":"Respondemos por el canal que prefieras, siempre dentro del día. Si es urgente, WhatsApp es el más rápido.",
+    "ct.f1":"Nombre y apellido","ct.f2":"Email","ct.f3":"Teléfono / WhatsApp","ct.f4":"Qué te interesa","ct.f5":"Cuántas personas","ct.f6":"Contanos un poco más",
+    "ct.f6ph":"Fechas aproximadas, si viajan con chicos, qué les gustaría hacer…",
+    "ct.send":"Enviar consulta","ct.okTitle":"Tu consulta está lista",
+    "ct.okBody":"Te abrimos WhatsApp con todos los datos ya escritos: solo tenés que tocar enviar. Si no se abrió solo, usá los botones de acá abajo.",
+    "ct.okCta":"Abrir WhatsApp",
+    "ct.wa":"WhatsApp","ct.mail":"Email","ct.hours":"Atención","ct.hoursVal":"Lunes a sábado, 9 a 19 h",
+    "ct.ig":"Instagram","ct.fb":"Facebook","ct.tk":"TikTok","ct.optOther":"Otra consulta",
+    "ft.tag":"Miami, a tu manera. Agencia especializada en Miami, con atención en español, portugués e inglés.",
+    "ft.demo":"Sitio de demostración — textos, imágenes y datos de contacto son de ejemplo",
+    "wa.label":"WhatsApp","ui.more":"Consultar","ui.required":"Completá tu nombre y un email válido.",
+    "ab.p3":"Porque para nosotros, viajar no es solamente conocer un destino. Es descubrir, disfrutar, conectar y crear recuerdos que quedan para siempre.",
+    "ab.p4":"Vos disfrutás del viaje. Nosotros nos ocupamos de hacerlo posible.",
+    "ab.sign":"Tu viaje. Nuestra dedicación. Cada detalle importa.",
+    "ct.okCta2":"Enviarla por email",
+    "ct.mailSubject":"Consulta desde la web",
+    "ui.swipe":"Deslizá",
+    "ui.mapLoading":"Cargando mapa",
+    "ui.openMap":"Ver en el mapa",
+    "ui.route":"Ver el recorrido",
+    "wa.msg":"¡Hola! 👋 Vengo desde la web de Jeito Miami y quería consultar por los paseos en Miami 🌴☀️\n\nMi nombre es ",
+    "s2.kicker":"Full day",
+    "s2.title":"Un día entero en Key West",
+    "s2.sub":"Cruzamos los puentes de la Overseas Highway hasta el punto más al sur de Estados Unidos. Salida temprano, vuelta de noche.",
+    "s2.cta":"Ver la experiencia",
+    "s3.kicker":"Tour de compras",
+    "s3.title":"Vos elegís las bolsas, nosotros el resto",
+    "s3.sub":"Sawgrass Mills, Dolphin Mall, Aventura: con chofer, ayuda con los talles y tiempo para recorrer sin apuro.",
+    "s4.kicker":"Navegación privada",
+    "s4.title":"El atardecer, desde el agua",
+    "s4.sub":"Velero o yate con capitán, para dos o para un grupo chico. La ciudad iluminándose mientras volvés a puerto.",
+    "ticker":["Salidas a Key West todos los días", "Tour de compras con chofer", "Snorkel con tiburones en Islamorada", "Atención en español, portugués e inglés", "Hidrodeslizador por los Everglades", "Mesas reservadas en los restaurantes difíciles", "Propuesta por escrito en el día", "Atardecer en velero por Biscayne Bay"],
+    "tips.kicker":"Antes de viajar",
+    "tips.title":"Tips que te ahorran ",
+    "tips.titleEm":"un dolor de cabeza",
+    "tips.sub":"Lo que le contamos a cada cliente antes de que saque el pasaje. Cortito y al pie.",
+    "testi.kicker":"Viajaron con nosotros",
+    "testi.title":"Lo que cuentan ",
+    "testi.titleEm":"al volver",
+    "st.1":"experiencias armadas",
+    "st.2":"idiomas de atención",
+    "st.3":"destino, conocido a fondo",
+    "st.4":"o menos para responderte",
+    "ui.mbConsult":"Consultar",
+    "chip.1":"10 experiencias",
+    "chip.2":"ES · PT · EN",
+    "nav.sv":"Servicios",
+    "sv.kicker":"Servicios",
+    "sv.title":"Todo lo que resolvemos ",
+    "sv.titleEm":"por vos",
+    "sv.sub":"Las experiencias son la parte linda. Esto es lo que hace que salgan bien.",
+  },
+  pt:{
+    "doc.title":"Jeito Miami | Passeios e experiências em Miami",
+    "nav.home":"Início","nav.exp":"Experiências","nav.miami":"Miami","nav.about":"Sobre nós","nav.contact":"Contato",
+    "ph.cover":"Foto de capa","ph.team":"Foto da equipe","ph.exp":"Foto","ph.place":"Foto",
+    "home.kicker":"Agência especializada em Miami",
+    "home.title":"A viagem que você já estava imaginando",
+    "home.sub":"Desenhamos cada dia da sua estadia: parques, navegação privativa, mesas reservadas e os cantos que não aparecem nos guias.",
+    "home.cta1":"Ver experiências","home.cta2":"Falar com um consultor",
+    "home.whoKicker":"Quem somos","home.whoTitle":"Um só destino, ","home.whoTitleEm":"conhecido a fundo",
+    "home.whoSub":"Não vendemos o mundo inteiro. Trabalhamos Miami o ano todo, e é por isso que sabemos o que reservar com três meses de antecedência, o que dá para resolver no mesmo dia e o que não vale o que custa.",
+    "home.p1t":"Um consultor, não um formulário","home.p1p":"A mesma pessoa acompanha você da primeira consulta até a volta.",
+    "home.p2t":"Tudo coordenado","home.p2p":"Ingressos, reservas, motorista e guia se encaixam entre si. Você não corre atrás de ninguém.",
+    "home.p3t":"Três idiomas","home.p3p":"Atendemos e acompanhamos em português, espanhol ou inglês.",
+    "home.expKicker":"Experiências","home.expTitle":"O que mais nos pedem",
+    "home.expSub":"Podem ser feitas soltas ou combinadas em um só programa, com os traslados resolvidos entre uma e outra.",
+    "home.quote":"Uma boa viagem não se improvisa: se monta com tempo e com alguém que já esteve lá.",
+    "home.q1t":"Proposta por escrito","home.q1p":"Com tudo o que inclui e o que não inclui, antes de você pagar qualquer coisa.",
+    "home.q2t":"Acompanhamento no destino","home.q2p":"Ficamos disponíveis por WhatsApp durante toda a viagem.",
+    "home.closeTitle":"Começamos pelas datas?","home.closeSub":"Conte quantas pessoas são e o que gostariam de fazer. Devolvemos uma proposta montada.","home.closeCta":"Pedir uma proposta",
+    "exp.kicker":"Experiências","exp.title":"O que podemos montar ","exp.titleEm":"em Miami",
+    "exp.sub":"Cada experiência é orçada conforme a data, o número de pessoas e o que quiserem combinar. Todas incluem coordenação e assistência no seu idioma.",
+    "exp.closeTitle":"Também combinamos tudo","exp.closeSub":"Um dia de parque, um jantar reservado e um pôr do sol navegando podem entrar no mesmo programa.","exp.closeCta":"Consultar",
+    "mi.kicker":"O destino","mi.title":"Miami não é ","mi.titleEm":"um lugar só",
+    "mi.sub":"Entre a praia, o pântano e o centro financeiro há meia hora de carro. Estes são os lugares sobre os quais vamos perguntar quando montarmos a sua viagem.",
+    "ab.kicker":"Sobre nós","ab.title":"Por trás de ","ab.titleEm":"cada viagem",
+    "ab.sub":"Acreditamos que uma viagem começa muito antes de chegar ao destino.",
+    "ab.p1":"Começa com uma conversa, com uma ideia, com aquela vontade de conhecer um lugar e vivê-lo de um jeito especial. Na Jeito Miami estamos por trás de cada detalhe para transformar essa vontade em uma experiência que você realmente aproveite.",
+    "ab.p2":"Selecionamos cada experiência, coordenamos cada serviço e acompanhamos nossos viajantes durante todo o percurso, buscando que tudo seja simples, seguro e memorável.",
+    "ct.kicker":"Contato","ct.title":"Conte o que ","ct.titleEm":"você gostaria de fazer",
+    "ct.sub":"Respondemos pelo canal que você preferir, sempre no mesmo dia. Se for urgente, o WhatsApp é o mais rápido.",
+    "ct.f1":"Nome completo","ct.f2":"E-mail","ct.f3":"Telefone / WhatsApp","ct.f4":"O que te interessa","ct.f5":"Quantas pessoas","ct.f6":"Conte um pouco mais",
+    "ct.f6ph":"Datas aproximadas, se viajam com crianças, o que gostariam de fazer…",
+    "ct.send":"Enviar consulta","ct.okTitle":"Sua consulta está pronta",
+    "ct.okBody":"Abrimos o WhatsApp com todos os dados já escritos: é só tocar em enviar. Se não abriu sozinho, use os botões abaixo.",
+    "ct.okCta":"Abrir o WhatsApp",
+    "ct.wa":"WhatsApp","ct.mail":"E-mail","ct.hours":"Atendimento","ct.hoursVal":"Segunda a sábado, das 9h às 19h",
+    "ct.ig":"Instagram","ct.fb":"Facebook","ct.tk":"TikTok","ct.optOther":"Outra consulta",
+    "ft.tag":"Miami, do seu jeito. Agência especializada em Miami, com atendimento em português, espanhol e inglês.",
+    "ft.demo":"Site de demonstração — textos, imagens e dados de contato são exemplos",
+    "wa.label":"WhatsApp","ui.more":"Consultar","ui.required":"Preencha seu nome e um e-mail válido.",
+    "ab.p3":"Porque para nós viajar não é somente conhecer um destino. É descobrir, aproveitar, se conectar e criar lembranças que ficam para sempre.",
+    "ab.p4":"Você aproveita a viagem. Nós cuidamos de torná-la possível.",
+    "ab.sign":"Sua viagem. Nossa dedicação. Cada detalhe importa.",
+    "ct.okCta2":"Enviar por e-mail",
+    "ct.mailSubject":"Consulta pelo site",
+    "ui.swipe":"Deslize",
+    "ui.mapLoading":"Carregando mapa",
+    "ui.openMap":"Ver no mapa",
+    "ui.route":"Ver o trajeto",
+    "wa.msg":"Olá! 👋 Vim pelo site da Jeito Miami e gostaria de saber mais sobre os passeios em Miami 🌴☀️\n\nMeu nome é ",
+    "s2.kicker":"Full day",
+    "s2.title":"Um dia inteiro em Key West",
+    "s2.sub":"Atravessamos as pontes da Overseas Highway até o ponto mais ao sul dos Estados Unidos. Saída cedo, volta à noite.",
+    "s2.cta":"Ver a experiência",
+    "s3.kicker":"Tour de compras",
+    "s3.title":"Você escolhe as sacolas, nós cuidamos do resto",
+    "s3.sub":"Sawgrass Mills, Dolphin Mall, Aventura: com motorista, ajuda com os tamanhos e tempo para percorrer sem pressa.",
+    "s4.kicker":"Navegação privativa",
+    "s4.title":"O pôr do sol, visto da água",
+    "s4.sub":"Veleiro ou iate com capitão, para dois ou para um grupo pequeno. A cidade se acendendo enquanto você volta ao porto.",
+    "ticker":["Saídas para Key West todos os dias", "Tour de compras com motorista", "Snorkel com tubarões em Islamorada", "Atendimento em português, espanhol e inglês", "Aerobarco pelos Everglades", "Mesas reservadas nos restaurantes disputados", "Proposta por escrito no mesmo dia", "Pôr do sol de veleiro pela Biscayne Bay"],
+    "tips.kicker":"Antes de viajar",
+    "tips.title":"Dicas que evitam ",
+    "tips.titleEm":"dor de cabeça",
+    "tips.sub":"O que contamos a cada cliente antes de comprar a passagem. Curto e direto.",
+    "testi.kicker":"Viajaram com a gente",
+    "testi.title":"O que contam ",
+    "testi.titleEm":"na volta",
+    "st.1":"experiências montadas",
+    "st.2":"idiomas de atendimento",
+    "st.3":"destino, conhecido a fundo",
+    "st.4":"ou menos para responder",
+    "ui.mbConsult":"Consultar",
+    "chip.1":"10 experiências",
+    "chip.2":"ES · PT · EN",
+    "nav.sv":"Serviços",
+    "sv.kicker":"Serviços",
+    "sv.title":"Tudo o que resolvemos ",
+    "sv.titleEm":"por você",
+    "sv.sub":"As experiências são a parte bonita. Isto é o que faz com que saiam bem.",
+  },
+  en:{
+    "doc.title":"Jeito Miami | Miami tours and experiences",
+    "nav.home":"Home","nav.exp":"Experiences","nav.miami":"Miami","nav.about":"About","nav.contact":"Contact",
+    "ph.cover":"Cover photo","ph.team":"Team photo","ph.exp":"Photo","ph.place":"Photo",
+    "home.kicker":"A travel agency devoted to Miami",
+    "home.title":"The trip you were already picturing",
+    "home.sub":"We shape every day of your stay: parks, private sailings, reserved tables and the corners the guidebooks leave out.",
+    "home.cta1":"See experiences","home.cta2":"Talk to an advisor",
+    "home.whoKicker":"Who we are","home.whoTitle":"One destination, ","home.whoTitleEm":"known properly",
+    "home.whoSub":"We don't sell the whole world. We work Miami all year, which is why we know what to book three months ahead, what can be arranged the same day and what isn't worth the money.",
+    "home.p1t":"An advisor, not a form","home.p1p":"The same person stays with you from the first enquiry until you're home.",
+    "home.p2t":"Everything coordinated","home.p2p":"Tickets, bookings, driver and guide all fit together. You chase nobody.",
+    "home.p3t":"Three languages","home.p3p":"We answer and accompany you in Spanish, Portuguese or English.",
+    "home.expKicker":"Experiences","home.expTitle":"What people ask us for",
+    "home.expSub":"Take them on their own or combine them into one programme, with the transfers handled in between.",
+    "home.quote":"A good trip isn't improvised: it's built with time, by someone who has already been there.",
+    "home.q1t":"A written proposal","home.q1p":"Stating what's included and what isn't, before you pay anything.",
+    "home.q2t":"Support on the ground","home.q2p":"We stay reachable on WhatsApp for the whole trip.",
+    "home.closeTitle":"Shall we start with the dates?","home.closeSub":"Tell us how many of you there are and what you'd like to do. We'll come back with a proposal.","home.closeCta":"Request a proposal",
+    "exp.kicker":"Experiences","exp.title":"What we can arrange ","exp.titleEm":"in Miami",
+    "exp.sub":"Each experience is quoted by date, group size and what you want to combine. All of them include coordination and support in your language.",
+    "exp.closeTitle":"We combine them too","exp.closeSub":"A park day, a reserved dinner and a sunset on the water can all sit in one programme.","exp.closeCta":"Ask us",
+    "mi.kicker":"The destination","mi.title":"Miami isn't ","mi.titleEm":"one single place",
+    "mi.sub":"Half an hour of driving separates the beach, the wetlands and the financial district. These are the places we'll ask you about while planning your trip.",
+    "ab.kicker":"About us","ab.title":"Behind ","ab.titleEm":"every trip",
+    "ab.sub":"We believe a trip begins long before you reach your destination.",
+    "ab.p1":"It begins with a conversation, an idea, the urge to see a place and live it in a particular way. At Jeito Miami we stand behind every detail, turning that idea into an experience you genuinely enjoy.",
+    "ab.p2":"We choose each experience, coordinate each service and stay with our travellers throughout the journey, so that everything is simple, safe and memorable.",
+    "ct.kicker":"Contact","ct.title":"Tell us what ","ct.titleEm":"you'd like to do",
+    "ct.sub":"We reply on whichever channel you prefer, always the same day. If it's urgent, WhatsApp is fastest.",
+    "ct.f1":"Full name","ct.f2":"Email","ct.f3":"Phone / WhatsApp","ct.f4":"What interests you","ct.f5":"How many people","ct.f6":"Tell us a bit more",
+    "ct.f6ph":"Rough dates, whether you're travelling with kids, what you'd like to do…",
+    "ct.send":"Send enquiry","ct.okTitle":"Your enquiry is ready",
+    "ct.okBody":"We've opened WhatsApp with all your details already written — just hit send. If it didn't open, use the buttons below.",
+    "ct.okCta":"Open WhatsApp",
+    "ct.wa":"WhatsApp","ct.mail":"Email","ct.hours":"Hours","ct.hoursVal":"Monday to Saturday, 9am–7pm",
+    "ct.ig":"Instagram","ct.fb":"Facebook","ct.tk":"TikTok","ct.optOther":"Something else",
+    "ft.tag":"Miami, your way. A travel agency devoted to Miami, with support in Spanish, Portuguese and English.",
+    "ft.demo":"Demo site — copy, images and contact details are placeholders",
+    "wa.label":"WhatsApp","ui.more":"Ask about it","ui.required":"Please add your name and a valid email.",
+    "ab.p3":"Because for us travelling isn't only about seeing a destination. It's about discovering, enjoying, connecting and creating memories that last.",
+    "ab.p4":"You enjoy the trip. We take care of making it happen.",
+    "ab.sign":"Your trip. Our dedication. Every detail matters.",
+    "ct.okCta2":"Send it by email",
+    "ct.mailSubject":"Website enquiry",
+    "ui.swipe":"Swipe",
+    "ui.mapLoading":"Loading map",
+    "ui.openMap":"See it on the map",
+    "ui.route":"See the route",
+    "wa.msg":"Hi! 👋 I came from the Jeito Miami website and I'd like to know more about the tours in Miami 🌴☀️\n\nMy name is ",
+    "s2.kicker":"Full day",
+    "s2.title":"A whole day in Key West",
+    "s2.sub":"We cross the Overseas Highway bridges to the southernmost point of the United States. Early start, back by night.",
+    "s2.cta":"See the experience",
+    "s3.kicker":"Shopping tour",
+    "s3.title":"You pick the bags, we handle the rest",
+    "s3.sub":"Sawgrass Mills, Dolphin Mall, Aventura: with a driver, help with sizing and time to browse without rushing.",
+    "s4.kicker":"Private sailing",
+    "s4.title":"Sunset, seen from the water",
+    "s4.sub":"Sailboat or yacht with a captain, for two or a small group. The city lighting up as you head back to port.",
+    "ticker":["Key West departures every day", "Shopping tour with a driver", "Snorkel with sharks in Islamorada", "Support in Spanish, Portuguese and English", "Airboat through the Everglades", "Tables booked at the hard-to-get restaurants", "Written proposal the same day", "Sunset sail across Biscayne Bay"],
+    "tips.kicker":"Before you travel",
+    "tips.title":"Tips that save you ",
+    "tips.titleEm":"a headache",
+    "tips.sub":"What we tell every client before they book a flight. Short and to the point.",
+    "testi.kicker":"They travelled with us",
+    "testi.title":"What they say ",
+    "testi.titleEm":"when they're back",
+    "st.1":"experiences ready to book",
+    "st.2":"languages we speak",
+    "st.3":"destination, known properly",
+    "st.4":"or less to get back to you",
+    "ui.mbConsult":"Ask us",
+    "chip.1":"10 experiences",
+    "chip.2":"ES · PT · EN",
+    "nav.sv":"Services",
+    "sv.kicker":"Services",
+    "sv.title":"Everything we take care of ",
+    "sv.titleEm":"for you",
+    "sv.sub":"The experiences are the pretty part. This is what makes them go smoothly.",
+  }
+};
+
+let lang="es";
+/* ============================================================
+   CONFIGURACIÓN — cambiá estos tres valores antes de publicar
+   ============================================================ */
+const WA_NUMBER = "5521972072811";                   // WhatsApp, solo números, con código de país y sin el +
+const IG_URL    = "https://instagram.com/";         // link de tu Instagram
+const EMAIL     = "pontotour@gmail.com";            // mail donde querés recibir las consultas
+/* ========================================================== */
+const ROMAN=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function phBox(slot,label,cls){
+  return `<div class="ph ${cls||""}" data-slot="${slot}"><span class="phlabel">${esc(label)}</span></div>`;
+}
+
+
+const HL={es:"es",pt:"pt-BR",en:"en"};
+const PIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+
+function mapaHTML(slot){
+  const p=LUGARES[slot]; if(!p) return "";
+  return `<div class="mapa" data-slot="${slot}"><span class="mapa-carga">${esc(T[lang]["ui.mapLoading"])}</span></div>`;
+}
+
+function urlEmbed(p){
+  return `https://www.google.com/maps?q=${p.lat},${p.lng}&z=${p.z}&hl=${HL[lang]||"es"}&output=embed`;
+}
+
+function linkMapa(slot){
+  const p=LUGARES[slot]; if(!p) return "";
+  const href = p.ruta
+    ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(ORIGEN)}&destination=${encodeURIComponent(p.ruta)}`
+    : `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`;
+  const txt = p.ruta ? T[lang]["ui.route"] : T[lang]["ui.openMap"];
+  return `<a class="ver-mapa" href="${href}" target="_blank" rel="noopener">${PIN}<span>${esc(txt)}</span></a>`;
+}
+
+/* los mapas se cargan solo cuando entran en pantalla */
+let mapObserver=null;
+function cargarMapas(){
+  const cajas=$$(".mapa:not(.lista)");
+  const cargar=el=>{
+    const p=LUGARES[el.dataset.slot]; if(!p) return;
+    el.classList.add("lista");
+    const f=document.createElement("iframe");
+    f.src=urlEmbed(p); f.loading="lazy"; f.title="Mapa";
+    f.setAttribute("referrerpolicy","no-referrer-when-downgrade");
+    f.setAttribute("allowfullscreen","");
+    el.innerHTML=""; el.appendChild(f);
+  };
+  if(!("IntersectionObserver" in window)){ cajas.forEach(cargar); return; }
+  if(mapObserver) mapObserver.disconnect();
+  mapObserver=new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ cargar(e.target); mapObserver.unobserve(e.target); } });
+  },{rootMargin:"300px"});
+  cajas.forEach(el=>mapObserver.observe(el));
+}
+
+function expRow(x,i,compact){
+  const c=x[lang];
+  return `<article class="row reveal">
+    <div class="media">
+      <div class="rowimg imgwrap">${phBox(x.slot, T[lang]["ph.exp"]+" · "+c.t, "fill")}</div>
+      ${mapaHTML(x.slot)}
+    </div>
+    <div class="rowtxt">
+      <span class="idx">${ROMAN[i]||i+1}</span>
+      <h3>${esc(c.t)}</h3>
+      <p>${esc(c.d)}</p>
+      ${(c.list && !compact) ? `<ul class="mini">${c.list.map(([n,d])=>`<li><strong>${esc(n)}</strong><span>${esc(d)}</span></li>`).join("")}</ul>` : ""}
+      <div class="acciones">
+        <button class="go" data-go="contact">${esc(T[lang]["ui.more"])}</button>
+        ${linkMapa(x.slot)}
+      </div>
+    </div>
+  </article>`;
+}
+
+function applyPhotos(){
+  $$(".ph").forEach(el=>{
+    const src = PHOTOS[el.dataset.slot];
+    if(src){ el.style.backgroundImage = `url("${src}")`; el.classList.add("has-img"); }
+    else { el.style.backgroundImage = ""; el.classList.remove("has-img"); }
+  });
+}
+
+const isMobile = () => window.matchMedia("(max-width:700px)").matches;
+const HINT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+
+
+/* ============ portada rotativa ============ */
+const SLIDE_MS = 6000;
+let slideIdx = 0, slideTimer = null, slidePaused = false;
+function slideGo(n, user){
+  const slides = $$("#slides .slide");
+  if(!slides.length) return;
+  slideIdx = (n + slides.length) % slides.length;
+  slides.forEach((el,i)=>el.classList.toggle("is-active", i===slideIdx));
+  const c=$("#slideCount"); if(c) c.textContent=String(slideIdx+1).padStart(2,"0")+" / "+String(slides.length).padStart(2,"0");
+  $$("#slideNav button").forEach((b,i)=>{
+    b.setAttribute("aria-current", String(i===slideIdx));
+    b.classList.toggle("done", i<slideIdx);
+  });
+  if(user) slideRestart();
+}
+function slideRestart(){
+  clearInterval(slideTimer);
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  slideTimer = setInterval(()=>{ if(!slidePaused) slideGo(slideIdx+1); }, SLIDE_MS);
+}
+const VIDEO = { desk:"portada.mp4", mob:"portada-movil.mp4", poster:"portada-poster.jpg" };
+function setupVideo(){
+  const v=$("#coverVideo"), cov=$("#cover"); if(!v||!cov) return;
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches) return;   // se quedan las fotos
+  v.poster = VIDEO.poster;
+  v.src = matchMedia("(max-width:700px)").matches ? VIDEO.mob : VIDEO.desk;
+  cov.classList.add("has-video");
+  v.addEventListener("error", ()=>cov.classList.remove("has-video"));
+  const p=v.play(); if(p && p.catch) p.catch(()=>{});
+}
+function setupSlider(){
+  const slides = $$("#slides .slide"), nav = $("#slideNav"), cover = $("#cover");
+  if(!slides.length || !nav) return;
+  document.documentElement.style.setProperty("--slide-ms", SLIDE_MS+"ms");
+  nav.innerHTML = slides.map((_,i)=>`<button type="button" aria-label="${i+1}"></button>`).join("");
+  nav.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>slideGo(i,true)));
+  cover.addEventListener("mouseenter",()=>{ slidePaused=true; cover.classList.add("paused"); });
+  cover.addEventListener("mouseleave",()=>{ slidePaused=false; cover.classList.remove("paused"); });
+  let x0=null;
+  cover.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; },{passive:true});
+  cover.addEventListener("touchend",e=>{
+    if(x0===null) return; const dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)>45) slideGo(slideIdx+(dx<0?1:-1), true);
+  },{passive:true});
+  document.addEventListener("visibilitychange",()=>{ slidePaused=document.hidden; });
+  slideGo(0); slideRestart();
+}
+
+/* ============ cinta de avisos ============ */
+
+const TIP_ICONS={
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  passport:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8.5 17h7"/></svg>',
+  car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5L21 13v5H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/><path d="M3 13h18"/></svg>',
+  bag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.2 12H5.2z"/><path d="M8.5 8V6.5a3.5 3.5 0 0 1 7 0V8"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  card:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M2.5 10h19M6.5 14.5h4"/></svg>'
+};
+
+/* numeros que cuentan al aparecer */
+function contarNumeros(){
+  const box=$("#stats"); if(!box||box.dataset.done) return;
+  const run=()=>{
+    box.dataset.done="1";
+    box.querySelectorAll("[data-count]").forEach(el=>{
+      const end=+el.dataset.count, suf=el.dataset.suffix||"", t0=performance.now(), dur=1400;
+      const tick=now=>{
+        const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3);
+        el.textContent=Math.round(end*e)+suf;
+        if(k<1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  };
+  if(!("IntersectionObserver" in window)){ run(); return; }
+  const io=new IntersectionObserver(es=>{ if(es.some(e=>e.isIntersecting)){ run(); io.disconnect(); } },{threshold:.4});
+  io.observe(box);
+}
+
+
+const SV_ICONS={
+  car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l2-5.5A2 2 0 0 1 6.9 6h10.2a2 2 0 0 1 1.9 1.5L21 13v5H3z"/><circle cx="7.5" cy="16" r="1.5"/><circle cx="16.5" cy="16" r="1.5"/><path d="M3 13h18"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+  briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18"/></svg>',
+  route:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H14a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.5"/></svg>',
+  compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/></svg>',
+  ticket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 1 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 1 0 0-4z"/><path d="M13 6v12" stroke-dasharray="2 2"/></svg>',
+  gift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="4"/><path d="M5 13v7h14v-7M12 9v11M12 9c-2-4-7-4-6-1s5 1 6 1zm0 0c2-4 7-4 6-1s-5 1-6 1z"/></svg>'
+};
+function renderServicios(){
+  const g=$("#serviciosGrid"); if(!g) return;
+  const cards = SERVICIOS.map(x=>{const c=x[lang]; return `<article class="sv">
+    <div class="sv-ico">${SV_ICONS[x.icon]||""}</div>
+    <h3>${esc(c.t)}</h3>
+    <p>${esc(c.d)}</p>
+  </article>`;}).join("");
+  // dos copias iguales: cuando termina la primera arranca la segunda y la cinta no se corta
+  g.innerHTML = `<div class="sv-set">${cards}</div><div class="sv-set" aria-hidden="true">${cards}</div>`;
+}
+
+function renderTips(){
+  const g=$("#tipsGrid"); if(!g) return;
+  g.innerHTML = TIPS.map(t=>{const c=t[lang]; return `<article class="tip reveal">
+    <div class="tip-foto">${phBox(t.foto, c.k)}<div class="tip-ico">${TIP_ICONS[t.icon]||""}</div></div>
+    <span class="kicker">${esc(c.k)}</span>
+    <h3>${esc(c.t)}</h3>
+    <p>${esc(c.d)}</p>
+  </article>`;}).join("");
+}
+function renderTestimonios(){
+  const sec=$("#sec-testi"), g=$("#testiGrid"); if(!sec||!g) return;
+  if(!TESTIMONIOS.length){ sec.hidden=true; return; }
+  sec.hidden=false;
+  g.innerHTML = TESTIMONIOS.map(t=>`<figure class="quote reveal">
+    <blockquote>${esc(t.texto)}</blockquote>
+    <figcaption><strong>${esc(t.nombre)}</strong>${t.ciudad?`<span>${esc(t.ciudad)}</span>`:""}</figcaption>
+  </figure>`).join("");
+}
+
+function renderTicker(){
+  const track=$("#tickerTrack"); if(!track) return;
+  const items=T[lang]["ticker"]||[];
+  const html=items.map(t=>`<span class="ticker-item"><i></i>${esc(t)}</span>`).join("");
+  track.innerHTML = html + html;   // duplicado para que el loop sea continuo
+}
+
+function setupCarousels(){
+  $$(".dots").forEach(dots=>{
+    const track = document.getElementById(dots.dataset.carousel);
+    if(!track) return;
+    const items = [...track.children];
+    if(dots.childElementCount !== items.length){
+      dots.innerHTML = items.map((_,i)=>`<button type="button" aria-label="${i+1}"></button>`).join("");
+      dots.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>{
+        items[i].scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+      }));
+    }
+    const mark=()=>{
+      const mid = track.scrollLeft + track.clientWidth/2;
+      let best=0,bd=Infinity;
+      items.forEach((el,i)=>{
+        const c = el.offsetLeft + el.offsetWidth/2;
+        const d = Math.abs(c-mid);
+        if(d<bd){bd=d;best=i;}
+      });
+      dots.querySelectorAll("button").forEach((b,i)=>
+        b.setAttribute("aria-current", String(i===best)));
+    };
+    if(!track.dataset.wired){
+      track.addEventListener("scroll",()=>{ clearTimeout(track._t); track._t=setTimeout(mark,60); },{passive:true});
+      track.dataset.wired="1";
+    }
+    mark();
+  });
+  // pista de "deslizá" bajo las experiencias
+  if(isMobile()){
+    ["expRows","mosaic","tipsGrid"].forEach(id=>{
+      const track=document.getElementById(id); if(!track) return;
+      if(track.parentNode.querySelector(".swipe-hint")) return;
+      const h=document.createElement("p"); h.className="swipe-hint";
+      h.innerHTML = `<span>${esc(T[lang]["ui.swipe"])}</span>${HINT_SVG}`;
+      const dots=track.parentNode.querySelector(`.dots[data-carousel="${id}"]`);
+      track.parentNode.insertBefore(h, dots? dots.nextSibling : track.nextSibling);
+    });
+  }
+}
+
+function observeReveals(){
+  const els=$$(".reveal:not(.in)");
+  if(!("IntersectionObserver" in window)){ els.forEach(e=>e.classList.add("in")); return; }
+  const io=new IntersectionObserver((ents)=>{
+    ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+  },{rootMargin:"0px 0px -8% 0px",threshold:.08});
+  els.forEach(e=>io.observe(e));
+}
+
+function renderData(){
+  $("#expRows").innerHTML = EXP.map((x,i)=>expRow(x,i)).join("");
+  $("#mosaic").innerHTML = PLACES.map((p,i)=>`<div class="tile ${p.size} reveal">
+      <div class="flip" style="transition-delay:${i*140}ms">
+        <div class="face back"><div><span>${ROMAN[i]}</span><small>${esc(p[lang].t)}</small></div></div>
+        <div class="face front">
+          ${phBox(p.slot, T[lang]["ph.place"]+" · "+p[lang].t)}
+          <div class="cap"><h3>${esc(p[lang].t)}</h3><p>${esc(p[lang].d)}</p></div>
+        </div>
+      </div>
+    </div>`).join("");
+  $("#checkList").innerHTML = CHECKS[lang].map((c,i)=>`<li><span class="n">${ROMAN[i]}</span><span>${esc(c)}</span></li>`).join("");
+  const sel=$("#serviceSel"), keep=sel.selectedIndex;
+  sel.innerHTML = EXP.map((x,i)=>`<option value="${i}">${esc(x[lang].t)}</option>`).join("")
+    + `<option value="other">${esc(T[lang]["ct.optOther"])}</option>`;
+  if(keep>=0) sel.selectedIndex=keep;
+  // primero se dibuja TODO, recién después se activan animaciones, carruseles y mapas
+  renderTips();
+  renderServicios();
+  renderTestimonios();
+  renderTicker();
+  applyPhotos();
+  observeReveals();
+  setupCarousels();
+  cargarMapas();
+}
+
+function setLang(l){
+  lang = T[l] ? l : "es";
+
+
+  $$("[data-i18n]").forEach(el=>{const v=T[lang][el.dataset.i18n]; if(v!==undefined) el.textContent=v;});
+  $$("[data-i18n-ph]").forEach(el=>{const v=T[lang][el.dataset.i18nPh]; if(v!==undefined) el.placeholder=v;});
+  
+  $$(".slide h1").forEach(h=>{ const w=h.textContent.trim().split(" "); if(w.length>1){ const last=w.pop(); h.innerHTML=esc(w.join(" "))+" <em>"+esc(last)+"</em>"; } });
+  renderData();
+  const waHref = "https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(T[lang]["wa.msg"]);
+  $$(".wa, #waBar").forEach(a=>a.href=waHref);
+  try{ localStorage.setItem("pt_lang", lang); }catch(e){}
+}
+
+const SECTIONS={home:"sec-home",servicios:"sec-servicios",exp:"sec-exp",miami:"sec-miami",about:"sec-about",contact:"sec-contact"};
+
+function markNav(view){
+  $$("nav.main button[data-go]").forEach(b=>{
+    if(b.dataset.go===view) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+  });
+}
+
+function go(view){
+  const el=document.getElementById(SECTIONS[view]||"sec-home");
+  if(!el) return;
+  $("#nav").classList.remove("open");
+  $("#menuToggle").setAttribute("aria-expanded","false");
+  if(view==="home") window.scrollTo({top:0,behavior:"smooth"});
+  else el.scrollIntoView({behavior:"smooth",block:"start"});
+  history.replaceState(null,"","#"+view);
+  markNav(view);
+}
+
+/* resalta en el menu la seccion que se esta viendo */
+function watchSections(){
+  const map=[["sec-home","home"],["sec-quienes","home"],["sec-servicios","servicios"],["sec-exp","exp"],["sec-miami","exp"],["sec-tips","exp"],["sec-testi","exp"],
+             ["sec-about","about"],["sec-contact","contact"]];
+  const els=map.map(([id,v])=>[document.getElementById(id),v]).filter(x=>x[0]);
+  let ticking=false;
+  const check=()=>{
+    const line=window.scrollY+150;
+    let cur="home";
+    els.forEach(([el,v])=>{ if(!el.hidden && el.offsetParent!==null && el.offsetTop<=line) cur=v; });
+    if(window.innerHeight+window.scrollY>=document.body.scrollHeight-90) cur="contact";
+    markNav(cur);
+    const t=$("#toTop"); if(t) t.classList.toggle("show", window.scrollY>700);
+    const mb=$("#mobileBar"); if(mb) mb.classList.toggle("show", window.scrollY>window.innerHeight*0.9);
+    const hd=$("header.site"); if(hd) hd.classList.toggle("solid", window.scrollY>24 || $("#nav").classList.contains("open"));
+  };
+  window.addEventListener("scroll",()=>{
+    if(ticking) return; ticking=true;
+    requestAnimationFrame(()=>{ check(); ticking=false; });
+  },{passive:true});
+  check();
+}
+
+window.addEventListener("resize",()=>{ clearTimeout(window._rz); window._rz=setTimeout(setupCarousels,180); });
+window.addEventListener("hashchange",()=>{
+  const v=location.hash.slice(1);
+  if(SECTIONS[v]) go(v);
+});
+
+document.addEventListener("click", e=>{
+  const g=e.target.closest("[data-go]"); if(g){ go(g.dataset.go); return; }
+  
+});
+$("#toTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+$("#menuToggle").addEventListener("click",()=>{
+  const nav=$("#nav"), open=nav.classList.toggle("open");
+  $("#menuToggle").setAttribute("aria-expanded", String(open));
+  $("header.site").classList.toggle("solid", open || window.scrollY>24);
+});
+
+$("#quoteForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const f=e.currentTarget, d=new FormData(f);
+  const name=(d.get("name")||"").toString().trim();
+  const email=(d.get("email")||"").toString().trim();
+  if(!name || !/^\S+@\S+\.\S+$/.test(email)){ showErr(T[lang]["ui.required"]); return; }
+  const sv=d.get("service");
+  const svc = sv==="other" ? T[lang]["ct.optOther"] : ((EXP[Number(sv)]||{})[lang]||{}).t || "";
+  const L=T[lang];
+  const line=(k,v)=> v ? `${L[k]}: ${v}\n` : "";
+  const body =
+    line("ct.f1",name) + line("ct.f2",email) +
+    line("ct.f3",(d.get("phone")||"").toString()) +
+    line("ct.f5",(d.get("pax")||"").toString()) +
+    line("ct.f4",svc) +
+    line("ct.f6",(d.get("msg")||"").toString());
+  const subject = `${L["ct.mailSubject"]} — ${svc}`;
+
+  $("#waFromForm").href  = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(subject+"\n\n"+body)}`;
+  $("#mailFromForm").href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  f.hidden = true; $("#sent").hidden = false;
+  window.open($("#waFromForm").href, "_blank", "noopener");
+});
+function showErr(msg){
+  let n=$("#formErr");
+  if(!n){ n=document.createElement("p"); n.id="formErr"; n.style.gridColumn="1/-1"; n.style.color="var(--amber)"; n.style.fontSize="14px"; $("#quoteForm").appendChild(n); }
+  n.textContent=msg;
+}
+
+let sl=lang;
+
+
+/* el logo se inclina siguiendo el mouse (solo escritorio) */
+(function(){
+  const b=document.querySelector(".brand"), img=b&&b.querySelector("img");
+  if(!b||!img||window.matchMedia("(hover: none)").matches) return;
+  b.addEventListener("mousemove",e=>{
+    const r=b.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+    b.classList.add("tilting");
+    img.style.transform=`rotateY(${x*22}deg) rotateX(${-y*16}deg) translateZ(6px) scale(1.04)`;
+  });
+  b.addEventListener("mouseleave",()=>{ img.style.transform=""; b.classList.remove("tilting"); });
+})();
+
+setLang(sl);
+setupSlider();
+setupVideo();
+watchSections();
+contarNumeros();
+const setHdr=()=>document.documentElement.style.setProperty("--hdr", $("header.site").offsetHeight+"px");
+setHdr(); window.addEventListener("resize",setHdr);
+const startHash=location.hash.slice(1);
+if(SECTIONS[startHash]) setTimeout(()=>go(startHash),140);
+</script>
+
+</body>
+</html>

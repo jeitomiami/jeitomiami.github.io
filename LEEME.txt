@@ -1,0 +1,163 @@
+JEITO MIAMI — SITIO WEB
+=======================
+
+CONTENIDO DE LA CARPETA (todo en un solo nivel, sin subcarpetas)
+------------------------------------------------------------------
+index.html            Pagina en espanol (la principal)
+pt.html               Pagina en portugues
+en.html               Pagina en ingles
+*.jpg / logo.webp     Todas las fotos y el logo (logo-completo.webp es la copia
+                      que usan la animacion de entrada y el pie)
+favicon.png           Icono de la pestana del navegador
+apple-touch-icon.png  Icono para celulares
+robots.txt            Permiso para que Google indexe el sitio
+sitemap.xml           Mapa del sitio para Google
+
+
+ANTES DE PUBLICAR — 1 DATO PARA CAMBIAR
+---------------------------------------
+Abri los TRES archivos: index.html, pt.html y en.html
+con el Bloc de notas y busca el bloque que dice "CONFIGURACION".
+Se ve asi:
+
+    const WA_NUMBER = "5521972072811";
+    const IG_URL    = "https://instagram.com/";
+    const EMAIL     = "pontotour@gmail.com";
+
+1) WA_NUMBER — YA ESTA PUESTO: +55 21 97207-2811
+   Si alguna vez cambia, se escribe solo con numeros, con codigo de pais
+   y sin el signo +.
+
+2) IG_URL — FALTA. Poné el link de tu Instagram.
+   Ejemplo: https://instagram.com/jeitomiami
+
+3) EMAIL — sigue puesto pontotour@gmail.com porque es la casilla que existe.
+   Cuando crees la nueva (por ejemplo jeitomiami@gmail.com), cambiala
+   aca Y en el texto de la seccion Contacto (busca "pontotour@gmail.com",
+   aparece 2 veces en cada archivo).
+
+Guarda los tres archivos. Listo, no hay que crear ninguna cuenta.
+
+
+EL BOTON VERDE DE WHATSAPP
+--------------------------
+El boton flotante abre el chat con un mensaje ya escrito, en el idioma
+en que la persona esta navegando:
+
+  Espanol    ¡Hola! Vengo desde la web de Jeito Miami y queria consultar
+             por los paseos en Miami. Mi nombre es ...
+
+  Portugues  Ola! Vim pelo site da Jeito Miami e gostaria de saber mais
+             sobre os passeios em Miami. Meu nome e ...
+
+  Ingles     Hi! I came from the Jeito Miami website and I'd like to know
+             more about the tours in Miami. My name is ...
+
+La persona solo completa su nombre y toca enviar.
+
+Para cambiar el texto: en cada archivo .html busca "wa.msg". Hay una linea
+por idioma. Los emojis se pueden copiar y pegar ahi mismo.
+
+
+COMO FUNCIONA EL FORMULARIO
+---------------------------
+No usa ningun servicio de terceros: los datos no pasan por ningun
+servidor ajeno.
+
+Cuando alguien completa el formulario y aprieta "Enviar consulta":
+  - Se le abre WhatsApp con el mensaje ya escrito (nombre, mail,
+    telefono, cantidad de personas, que le interesa y su comentario).
+    Solo tiene que tocar enviar y la consulta llega a +55 21 97207-2811.
+  - Si el navegador le bloqueo la ventana, ve dos botones: uno para
+    abrir WhatsApp y otro para mandarlo por email.
+
+
+TESTIMONIOS DE CLIENTES
+-----------------------
+La seccion "Lo que cuentan al volver" esta lista pero OCULTA hasta que
+le cargues frases reales. En index.html, pt.html y en.html busca "TESTIMONIOS" y
+pega una linea por cliente, asi:
+
+    { nombre:"Mariana R.", ciudad:"Rio de Janeiro", texto:"Foi tudo perfeito..." },
+
+Con la primera que pegues, la seccion aparece sola. Las frases se
+muestran tal cual las escribas, en el idioma en que te las dieron.
+
+
+LA PORTADA CON VIDEO
+--------------------
+De fondo de la portada corre un video sin sonido, en loop:
+  portada.mp4         version para computadora (1920x1080)
+  portada-movil.mp4   version liviana para celular (1280x720)
+  portada-poster.jpg  imagen que se ve mientras carga
+Para cambiar el video, reemplaza esos archivos con el mismo nombre
+(idealmente sin audio, de 15 a 30 segundos, de menos de 8 MB).
+Si el video no carga, aparecen solas las fotos de antes.
+
+Encima del video pasan 4 textos destacados cada 6 segundos.
+Para cambiarlos: busca "s2.title", "s3.title", "s4.title".
+
+
+LOS MAPAS DE LAS EXPERIENCIAS
+-----------------------------
+Cada experiencia muestra un mapa de Google con su ubicacion, y un boton
+que abre el punto (o el recorrido desde Miami) en la app de mapas.
+
+Los mapas se cargan solo cuando el visitante llega a ellos, para que la
+pagina abra rapido.
+
+Para corregir la ubicacion de una experiencia: en los tres archivos .html
+busca el bloque "UBICACIONES DE CADA EXPERIENCIA". Hay una linea por
+experiencia con dos numeros (lat y lng). Para sacar los numeros reales:
+entra a Google Maps, busca el lugar, hace clic derecho encima y copia
+los dos numeros que aparecen arriba de todo.
+
+
+SUBIRLO A GITHUB PAGES (gratis, sin limites)
+--------------------------------------------
+El sitio vive en el repositorio github.com/jeitomiami/jeitomiami.github.io
+(cuenta de GitHub "jeitomiami", separada de Sineus). El sistema interno
+esta en la carpeta admin/ del mismo repositorio: al subir la pagina NO
+toques esa carpeta.
+
+Para actualizar:
+1. Entra al repositorio -> boton "Add file" -> "Upload files".
+2. Abri la carpeta "sitio" en tu compu, selecciona TODO lo de adentro
+   (Ctrl+A) y arrastralo a la ventana. Como no hay subcarpetas, no se
+   puede romper nada. El archivo CNAME tiene que quedar: es el que
+   conecta el dominio.
+3. Toca el boton verde "Commit changes". En un minuto esta online.
+
+Las tres versiones:
+   https://jeitomiami.com/           espanol
+   https://jeitomiami.com/pt.html    portugues
+   https://jeitomiami.com/en.html    ingles
+   (mientras el dominio no este conectado: https://jeitomiami.github.io/)
+
+
+SUBIRLO A TU HOSTING Y DOMINIO PROPIO
+-------------------------------------
+1. Entra al panel de tu hosting (cPanel, Plesk o similar) o usa FileZilla.
+2. Busca la carpeta publica. Suele llamarse public_html, htdocs o www.
+3. Subi TODO el contenido de la carpeta "sitio" adentro de esa carpeta.
+   Importante: el contenido, no la carpeta "sitio" en si.
+   Te tiene que quedar asi:
+       public_html/index.html
+       public_html/pt.html
+       public_html/en.html
+       public_html/portada.jpg  (y el resto de las fotos)
+4. Entra a tu dominio y ya deberia verse.
+
+
+EL DOMINIO
+----------
+El sitio esta configurado para https://jeitomiami.com (canonical, sitemap,
+imagen al compartir). El archivo CNAME de la carpeta le dice a GitHub Pages
+que use ese dominio: NO lo borres al subir actualizaciones.
+
+CAMBIAR UNA FOTO MAS ADELANTE
+-----------------------------
+Las fotos estan en la misma carpeta, con nombres claros. Para cambiar
+alguna, subi la nueva con EXACTAMENTE el mismo nombre de archivo y se
+reemplaza sola. Recomendado: fotos horizontales, de 1200 pixeles de
+ancho aproximadamente, en formato .jpg.
