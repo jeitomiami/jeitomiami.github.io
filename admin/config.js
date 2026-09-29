@@ -6,7 +6,7 @@
 // ============================================================================
 window.JEITO_CONFIG = {
   // Dirección del proyecto. Ejemplo: "https://abcdefghijklmnop.supabase.co"
-  SUPABASE_URL: "https://rseymbjronfjvhcgnjwf.supabase.co/rest/v1/",
+  SUPABASE_URL: "https://rseymbjronfjvhcgnjwf.supabase.co",
 
   // Clave pública "anon" (es larga, empieza con "eyJ..."). Es seguro que esté
   // acá: con ella nadie ve nada si no tiene usuario y contraseña.
