@@ -216,6 +216,40 @@
     .perm{font-size:11px}
   }
   .lang{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border-radius:4px;background:#E4B47233;color:#001E48;vertical-align:1px}
+  /* ---- proveedores ---- */
+  .subtabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .subtabs button{border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:8px 14px;font-weight:600;cursor:pointer}
+  .subtabs button span{font-size:11px;background:var(--bg);border-radius:999px;padding:1px 7px;margin-left:4px;color:var(--muted)}
+  .subtabs button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .subtabs button.on span{background:rgba(255,255,255,.18);color:#fff}
+  .pv-month{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .pv-month input{border:1px solid var(--line-2);border-radius:10px;padding:7px 10px;background:#fff}
+  .pv{display:grid;grid-template-columns:320px 1fr;gap:16px;align-items:start}
+  .pv>*{min-width:0} .pv .card{max-width:100%}
+  .pv-list{position:sticky;top:70px;max-height:calc(100vh - 160px);display:flex;flex-direction:column}
+  .pv-list .list{overflow:auto}
+  .pv-search{display:flex;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+  .pv-search input{flex:1;min-width:0;border:1px solid var(--line-2);border-radius:9px;padding:8px 10px}
+  .list.sel li{cursor:pointer;border-left:3px solid transparent}
+  .list.sel li:hover{background:#F7F9FB}
+  .list.sel li.on{background:#FFF8EC;border-left-color:var(--gold)}
+  .list li small{display:block}
+  form.pad{padding:16px}
+  .meta{font-size:12px;color:var(--muted);margin:-4px 0 12px}
+  form.pad .acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  table.money th.c{text-align:center}
+  table.money .r,table.money th.r{text-align:right}
+  table.money td{white-space:nowrap}
+  table.money tr.off td{opacity:.5}
+  table.money .pos{color:var(--ok)} table.money .neg{color:var(--bad)}
+  td .sub.warn{color:var(--warn)} td .sub.ok{color:var(--ok)}
+  .modal .box.wide{width:min(720px,100%);max-height:92vh;overflow:auto}
+  table.prices td{padding:5px 6px} table.prices th{padding:7px 6px}
+  table.prices input{width:100%;min-width:64px;border:1px solid var(--line-2);border-radius:8px;padding:7px 8px;text-align:right}
+  table.prices input.warnbox{border-color:var(--warn);background:#FFF8EC}
+  .row-y{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  @media (max-width:600px){ table.prices input{min-width:50px;padding:6px 5px} table.prices td{padding:4px 3px} table.prices th{padding:6px 3px} }
+  @media (max-width:900px){ .pv{grid-template-columns:1fr} .pv-list{position:static;max-height:none} .pv-month{margin-left:0} }
 </style>
 </head>
 <body>
@@ -225,8 +259,8 @@
 <!-- Librería de Supabase (conexión a la base). Se carga antes que la app. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Dirección y clave pública del proyecto Supabase (editar UNA vez). -->
-<script src="config.js?v=1.1.1"></script>
+<script src="config.js?v=1.2.0"></script>
 <!-- Toda la lógica del sistema. -->
-<script src="app.js?v=1.1.1"></script>
+<script src="app.js?v=1.2.0"></script>
 </body>
 </html>
