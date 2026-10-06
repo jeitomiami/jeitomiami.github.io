@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.0.1";
+  const APP_VERSION = "1.1.0";
 
   const ROLES = {
     direccion:           "Dirección",
@@ -43,6 +43,21 @@
   };
   const NO_CLOSE_REASONS = ["Precio", "Cambió de destino", "Sin respuesta", "Fechas", "Otro"];
   const SOURCES = ["Instagram", "WhatsApp directo", "Indicación", "Web", "TikTok", "Agencia asociada", "Otro"];
+
+  // País de origen → idioma del itinerario (se puede cambiar a mano en la ficha).
+  const LANGS = { pt: "Português", es: "Español", en: "English" };
+  const LANG_PT = ["BR", "PT", "AO", "MZ", "CV", "GW", "ST", "TL"];
+  const LANG_ES = ["AR", "BO", "CL", "CO", "CR", "CU", "DO", "EC", "SV", "GQ", "GT", "HN", "MX", "NI", "PA", "PY", "PE", "PR", "ES", "UY", "VE"];
+  const COUNTRIES_TOP = ["BR", "AR", "UY", "CL", "PY", "CO", "PE", "MX", "ES", "PT", "US"];
+  const COUNTRIES_ALL = ("AF AL DE AD AO AG SA DZ AR AM AU AT AZ BS BD BB BH BE BZ BJ BY BO BA BW BR BN BG BF BI BT CV KH CM CA QA TD CL CN CY CO KM CG CD KP KR CI CR HR CU DK DM EC EG SV AE ER SK SI ES US EE SZ ET PH FI FJ FR GA GM GE GH GD GR GT GN GQ GW GY HT HN HK HU IN ID IQ IR IE IS IL IT JM JP JO KZ KE KG KI KW LA LS LV LB LR LY LI LT LU MO MK MG MY MW MV ML MT MA MH MU MR MX FM MD MC MN ME MZ MM NA NR NP NI NE NG NO NZ OM NL PK PW PS PA PG PY PE PL PT PR GB CF CZ DO RW RO RU WS KN SM VC LC ST SN RS SC SL SG SY SO LK ZA SD SS SE CH SR TH TW TZ TJ TL TG TO TT TN TM TR TV UA UG UY UZ VU VA VE VN YE DJ ZM ZW").split(" ");
+  const _regionNames = (() => { try { return new Intl.DisplayNames(["es"], { type: "region" }); } catch (e) { return null; } })();
+  function countryName(code) { if (!code) return ""; try { return (_regionNames && _regionNames.of(code)) || code; } catch (e) { return code; } }
+  function langForCountry(code) { return LANG_PT.includes(code) ? "pt" : LANG_ES.includes(code) ? "es" : "en"; }
+  function countryOptions() {
+    const byName = (a, b) => countryName(a).localeCompare(countryName(b), "es");
+    const rest = COUNTRIES_ALL.filter(c => !COUNTRIES_TOP.includes(c)).sort(byName);
+    return { top: COUNTRIES_TOP.map(c => ({ v: c, l: countryName(c) })), rest: rest.map(c => ({ v: c, l: countryName(c) })) };
+  }
 
   const state = {
     supabase: null,
@@ -426,7 +441,7 @@
       if (f.period && periodOf(c.created_at) !== f.period) return false;
       if (f.seller && c.seller_id !== f.seller) return false;
       if (f.status && c.lead_status !== f.status) return false;
-      if (q && !(fullName(c).toLowerCase().includes(q) || String(c.number).includes(q) || (c.origin_city || "").toLowerCase().includes(q))) return false;
+      if (q && !(fullName(c).toLowerCase().includes(q) || String(c.number).includes(q) || countryName(c.origin_country).toLowerCase().includes(q))) return false;
       return true;
     });
   }
@@ -460,7 +475,7 @@
         <div class="kpi"><small>Mejor vendedor</small><b>${k.best ? esc(userName(k.best.k)) : "—"}</b><span>${k.best ? k.best.v.closed + " cierres · " + Math.round(k.best.v.closed * 100 / k.best.v.n) + "%" : "sin cierres"}</span></div>
       </div>
       <div class="toolbar">
-        <input class="grow" id="fQ" placeholder="Buscar por nombre, número o ciudad…" value="${esc(f.q)}">
+        <input class="grow" id="fQ" placeholder="Buscar por nombre, número o país…" value="${esc(f.q)}">
         <select id="fPeriod"><option value="">Todo</option>${periodsAvailable().map(p => `<option value="${p}" ${p === f.period ? "selected" : ""}>${esc(periodLabel(p))}</option>`).join("")}</select>
         <select id="fSeller"><option value="">Todos los vendedores</option>${sellers.map(u => `<option value="${u.id}" ${u.id === f.seller ? "selected" : ""}>${esc(u.display_name)}</option>`).join("")}</select>
         <div class="chips" id="fStatus"><span class="chip ${!f.status ? "on" : ""}" data-s="">Todos</span>${Object.entries(LEAD_STATUS).map(([k, v]) => `<span class="chip ${f.status === k ? "on" : ""}" data-s="${k}">${v}</span>`).join("")}</div>
@@ -469,15 +484,10 @@
       </div>
       <div class="card">
         <div class="tablewrap"><table>
-          <thead><tr><th>Nº</th><th>Ingreso</th><th>Cliente</th><th>Pax</th><th>Viaje</th><th>Origen · medio</th><th>Vendedor</th><th>Estado</th></tr></thead>
+          <thead><tr><th>Nº</th><th>Ingreso</th><th>Cliente</th><th>Pax</th><th>Viaje</th><th>País · medio</th><th>Vendedor</th><th>Estado</th></tr></thead>
           <tbody>${rows.length ? rows.map(rowHTML).join("") : `<tr><td colspan="8" class="empty">No hay clientes con estos filtros.</td></tr>`}</tbody>
         </table></div>
         <div class="tfoot">Mostrando ${rows.length} de ${state.clients.filter(c => f.showDeleted || !c.deleted_at).length} · ordenado por ingreso <button class="btn sm" id="btnExport">Exportar a Excel</button></div>
-      </div>
-      <div class="card" style="margin-top:16px">
-        <h3 class="t">Por vendedor · ${esc(periodLabel(f.period))}</h3>
-        <div class="tablewrap"><table><thead><tr><th>Vendedor</th><th>Ingresados</th><th>Cerrados</th><th>% cierre</th><th>Pax vendidos</th></tr></thead>
-        <tbody>${Object.entries(k.bySeller).sort((a, b) => b[1].closed - a[1].closed).map(([id, v]) => `<tr><td>${id === "sin" ? "<i class='muted'>Sin vendedor</i>" : esc(userName(id))}</td><td>${v.n}</td><td>${v.closed}</td><td>${v.n ? Math.round(v.closed * 100 / v.n) : 0}%</td><td>${v.pax}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Sin datos en este período.</td></tr>`}</tbody></table></div>
       </div>`;
     // eventos
     $("#fQ").addEventListener("input", e => { f.q = e.target.value; refreshTable(); });
@@ -501,15 +511,15 @@
       <td class="num">${c.number}</td><td class="num">${fmtDateTime(c.created_at)}</td>
       <td><span class="name">${esc(fullName(c))}</span>${c.interests ? `<span class="sub">${esc(c.interests)}</span>` : ""}</td>
       <td>${pax}</td><td class="num">${viaje}</td>
-      <td>${esc(c.origin_city || "—")}<span class="sub">${esc(c.source || "")}</span></td>
+      <td>${esc(countryName(c.origin_country) || "—")}${c.lang ? ` <span class="lang">${c.lang.toUpperCase()}</span>` : ""}<span class="sub">${esc(c.source || "")}</span></td>
       <td>${esc(userName(c.seller_id))}</td>
       <td><span class="st ${c.lead_status}">${LEAD_STATUS[c.lead_status] || c.lead_status}</span>${c.lead_status === "no_cerrado" && c.no_close_reason ? `<span class="sub">${esc(c.no_close_reason)}</span>` : ""}</td>
     </tr>`;
   }
   function exportCSV() {
     const rows = visibleClients();
-    const head = ["Nº", "Ingreso", "Nombre", "Apellido", "Adultos", "Menores", "Edades menores", "Llegada", "Salida", "Hotel/zona", "Origen", "Medio", "Qué le interesa", "Vendedor", "Estado", "Motivo no cierre", "Cerrado el", "Observaciones"];
-    const lines = [head].concat(rows.map(c => [c.number, fmtDateLong(c.created_at), c.first_name, c.last_name, c.adults, c.minors, c.minors_ages, c.arrival, c.departure, c.hotel_zone, c.origin_city, c.source, c.interests, userName(c.seller_id), LEAD_STATUS[c.lead_status], c.no_close_reason, c.closed_at ? fmtDateLong(c.closed_at) : "", c.observations]));
+    const head = ["Nº", "Ingreso", "Nombre", "Apellido", "Adultos", "Menores", "Edades menores", "Llegada", "Salida", "País", "Idioma", "Medio", "Qué le interesa", "Vendedor", "Estado", "Motivo no cierre", "Cerrado el", "Observaciones"];
+    const lines = [head].concat(rows.map(c => [c.number, fmtDateLong(c.created_at), c.first_name, c.last_name, c.adults, c.minors, c.minors_ages, c.arrival, c.departure, countryName(c.origin_country), LANGS[c.lang] || "", c.source, c.interests, userName(c.seller_id), LEAD_STATUS[c.lead_status], c.no_close_reason, c.closed_at ? fmtDateLong(c.closed_at) : "", c.observations]));
     const csv = "﻿" + lines.map(r => r.map(v => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`).join(";")).join("\r\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "clientes-" + (state.filters.period || "todo") + ".csv"; a.click();
   }
@@ -553,13 +563,15 @@
     if (d.tab === "datos") {
       const sellers = state.users.filter(u => u.active && ["direccion", "ventas", "operaciones"].includes(u.role));
       const sel = (name, opts, val, extra) => `<select name="${name}" ${extra || ""} ${editable ? "" : "disabled"}>${opts.map(o => `<option value="${esc(o.v)}" ${o.v === (val || "") ? "selected" : ""}>${esc(o.l)}</option>`).join("")}</select>`;
+      const co = countryOptions();
       const inp = (name, val, type, extra) => `<input name="${name}" type="${type || "text"}" value="${esc(val == null ? "" : val)}" ${extra || ""} ${editable ? "" : "disabled"}>`;
       body.innerHTML = `<form id="cForm">
         <div class="sect">Cliente</div>
         <div class="grid2">
           <div class="field"><label>Nombre *</label>${inp("first_name", c.first_name, "text", "required")}</div>
           <div class="field"><label>Apellido</label>${inp("last_name", c.last_name)}</div>
-          <div class="field"><label>Ciudad de origen</label>${inp("origin_city", c.origin_city, "text", 'placeholder="Rio de Janeiro"')}</div>
+          <div class="field"><label>País de origen</label><select name="origin_country" id="fCountry" ${editable ? "" : "disabled"}><option value="">—</option><optgroup label="Más frecuentes">${co.top.map(o => `<option value="${o.v}" ${o.v === c.origin_country ? "selected" : ""}>${esc(o.l)}</option>`).join("")}</optgroup><optgroup label="Todos">${co.rest.map(o => `<option value="${o.v}" ${o.v === c.origin_country ? "selected" : ""}>${esc(o.l)}</option>`).join("")}</optgroup></select>${c.origin_city ? `<span class="help">Ciudad cargada antes: ${esc(c.origin_city)}</span>` : ""}</div>
+          <div class="field"><label>Idioma del itinerario</label>${sel("lang", Object.entries(LANGS).map(([v, l]) => ({ v, l })), c.lang || "pt", 'id="fLang"')}<span class="help">Se elige solo según el país; se puede cambiar.</span></div>
           <div class="field"><label>¿Cómo llegó?</label>${sel("source", [{ v: "", l: "—" }].concat(SOURCES.map(s => ({ v: s, l: s }))), c.source)}</div>
         </div>
         <div class="sect">Viaje</div>
@@ -569,7 +581,6 @@
           <div class="field"><label>Edades menores</label>${inp("minors_ages", c.minors_ages, "text", 'placeholder="7, 12"')}</div>
           <div class="field"><label>Llegada</label>${inp("arrival", c.arrival, "date")}</div>
           <div class="field"><label>Salida</label>${inp("departure", c.departure, "date")}</div>
-          <div class="field"><label>Hotel / zona</label>${inp("hotel_zone", c.hotel_zone, "text", 'list="zonesList"')}<datalist id="zonesList">${state.zones.filter(z => z.active).map(z => `<option value="${esc(z.name)}">`).join("")}</datalist></div>
         </div>
         <div class="field"><label>Qué le interesa</label>${inp("interests", c.interests, "text", 'placeholder="Parques, compras, Key West…"')}</div>
         <div class="sect">Comercial</div>
@@ -583,6 +594,7 @@
       </form>`;
       const syncReason = () => { const s = $("#fStatusSel"), r = $("#fReason"); if (s && r) { r.disabled = !editable || s.value !== "no_cerrado"; if (s.value !== "no_cerrado") r.value = ""; } };
       syncReason();
+      if ($("#fCountry")) $("#fCountry").addEventListener("change", e => { if (e.target.value) $("#fLang").value = langForCountry(e.target.value); });
       $("#cForm").addEventListener("change", () => { d.dirty = true; syncReason(); });
       $("#cForm").addEventListener("input", () => { d.dirty = true; });
       $("#cForm").addEventListener("submit", e => { e.preventDefault(); saveClient(); });
@@ -604,7 +616,7 @@
       foot.innerHTML = `<div class="rightside"><button class="btn" id="btnCancel">Cerrar</button></div>`; $("#btnCancel").addEventListener("click", () => closeDrawer());
     }
   }
-  const FIELD_LABELS = { first_name: "nombre", last_name: "apellido", origin_city: "ciudad", source: "medio", adults: "adultos", minors: "menores", minors_ages: "edades", arrival: "llegada", departure: "salida", hotel_zone: "hotel/zona", interests: "intereses", seller_id: "vendedor", lead_status: "estado", no_close_reason: "motivo", observations: "observaciones", deleted_at: "borrado" };
+  const FIELD_LABELS = { first_name: "nombre", last_name: "apellido", origin_city: "ciudad", origin_country: "país", lang: "idioma", source: "medio", adults: "adultos", minors: "menores", minors_ages: "edades", arrival: "llegada", departure: "salida", hotel_zone: "hotel/zona", interests: "intereses", seller_id: "vendedor", lead_status: "estado", no_close_reason: "motivo", observations: "observaciones", deleted_at: "borrado" };
   function eventHTML(e) {
     const who = esc(userName(e.by_user));
     let txt;
@@ -613,7 +625,7 @@
     else if (e.action === "restaurado") txt = `<b>${who}</b> la restauró`;
     else {
       const parts = Object.entries(e.detail || {}).filter(([k]) => k !== "restore_backup").map(([k, v]) => {
-        const fmt = x => { if (x == null || x === "") return "—"; if (k === "lead_status") return LEAD_STATUS[x] || x; if (k === "seller_id") return userName(x); return String(x); };
+        const fmt = x => { if (x == null || x === "") return "—"; if (k === "lead_status") return LEAD_STATUS[x] || x; if (k === "seller_id") return userName(x); if (k === "origin_country") return countryName(x); if (k === "lang") return LANGS[x] || x; return String(x); };
         return `${FIELD_LABELS[k] || k}: ${esc(fmt(v.de))} → <b>${esc(fmt(v.a))}</b>`;
       });
       if (e.detail && e.detail.restore_backup) parts.push("restaurado desde el backup " + e.detail.restore_backup);
@@ -626,7 +638,7 @@
     for (const [k, v] of fd.entries()) o[k] = typeof v === "string" ? v.trim() : v;
     o.adults = Math.max(0, parseInt(o.adults || "0", 10) || 0);
     o.minors = Math.max(0, parseInt(o.minors || "0", 10) || 0);
-    ["origin_city", "source", "minors_ages", "arrival", "departure", "hotel_zone", "interests", "seller_id", "no_close_reason", "observations", "last_name"].forEach(k => { if (o[k] === "") o[k] = k === "last_name" ? "" : null; });
+    ["origin_country", "source", "minors_ages", "arrival", "departure", "interests", "seller_id", "no_close_reason", "observations", "last_name"].forEach(k => { if (o[k] === "") o[k] = k === "last_name" ? "" : null; });
     if (o.lead_status !== "no_cerrado") o.no_close_reason = null;
     return o;
   }
