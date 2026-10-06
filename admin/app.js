@@ -17,7 +17,13 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.2.0";
+  const APP_VERSION = "1.2.1";
+
+  // Seguridad de la sesión
+  const PASSWORD_MIN = 8;                       // largo mínimo de contraseña
+  const IDLE_MS = 8 * 60 * 60 * 1000;           // se cierra sola tras 8 h sin uso
+  const IDLE_WARN_MS = 5 * 60 * 1000;           // aviso 5 min antes
+  const IDLE_KEY = "jm_last_activity";          // compartido entre pestañas
 
   const ROLES = {
     direccion:           "Dirección",
@@ -78,6 +84,8 @@
     codeStale: false,    // hay una versión más nueva publicada
     remoteVersion: null,
     sync: { status: "ok", text: "" },
+    loginNote: "",       // aviso en la pantalla de login (ej. sesión cerrada por inactividad)
+    weakPassword: false, // entró con una contraseña de menos de PASSWORD_MIN
     versionTimer: null
   };
 
@@ -134,7 +142,7 @@
     if (/Invalid login credentials/i.test(m)) return "Usuario o contraseña incorrectos.";
     if (/duplicate key.*username/i.test(m)) return "Ya existe un usuario con ese nombre.";
     if (/already registered/i.test(m)) return "Ya existe un usuario con ese nombre.";
-    if (/Password should be/i.test(m)) return "La contraseña tiene que tener al menos 6 caracteres.";
+    if (/Password should be|at least \d+ characters/i.test(m)) return "La contraseña tiene que tener al menos " + PASSWORD_MIN + " caracteres.";
     if (/departure/i.test(m)) return "La fecha de salida no puede ser anterior a la de llegada.";
     return m;
   }
@@ -160,7 +168,9 @@
     const { error } = await state.supabase.auth.signInWithPassword({ email: emailFor(username), password });
     if (error) throw error;
   }
-  async function logout() {
+  async function logout(note) {
+    state.loginNote = typeof note === "string" ? note : "";
+    state.weakPassword = false; hideIdleWarn();
     await state.supabase.auth.signOut();
     state.session = null; state.me = null; state.clients = []; state.cat = null;
     render();
@@ -269,6 +279,7 @@
     // registrarlo, así la sesión de dirección no se toca. El usuario nace
     // inactivo (lo decide la base) y acá mismo se activa.
     async createUser({ username, display_name, role, password }) {
+      if (String(password || "").length < PASSWORD_MIN) throw new Error("La contraseña tiene que tener al menos " + PASSWORD_MIN + " caracteres.");
       await assertCanSave();
       const c = window.JEITO_CONFIG;
       const tmp = window.supabase.createClient(cleanUrl(c.SUPABASE_URL), c.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
@@ -343,7 +354,7 @@
       <div class="logo">${logoSVG(150)}</div>
       <h1>Ingresar al sistema</h1>
       <p class="sub">Usuario y contraseña de Jeito Miami</p>
-      <div id="loginErr"></div>
+      <div id="loginErr">${state.loginNote ? `<div class="infomsg">${esc(state.loginNote)}</div>` : ""}</div>
       <div class="field"><label>Usuario</label><input name="u" autocomplete="username" autofocus placeholder="tu.usuario" required></div>
       <div class="field"><label>Contraseña</label><input name="p" type="password" autocomplete="current-password" required></div>
       <button class="btn primary block" type="submit">Entrar</button>
@@ -355,6 +366,9 @@
       e.preventDefault();
       const f = e.target; const btn = $("button", f); btn.disabled = true; $("#loginErr").innerHTML = "";
       try {
+        state.weakPassword = f.p.value.length < PASSWORD_MIN;
+        state.loginNote = "";
+        touchActivity(true);
         await login(f.u.value, f.p.value);
       } catch (err) {
         $("#loginErr").innerHTML = `<div class="err">${esc(explainError(err))}</div>`;
@@ -365,7 +379,7 @@
   function noAccessHTML() {
     return `<div class="splash"><div class="box"><h3>Tu usuario todavía no está habilitado</h3><p>Existe, pero dirección tiene que activarlo y darle un rol. Avisale y volvé a entrar.</p><button class="btn" id="btnOut">Salir</button></div></div>`;
   }
-  function wireNoAccess() { $("#btnOut").addEventListener("click", logout); }
+  function wireNoAccess() { $("#btnOut").addEventListener("click", () => logout()); }
 
   /* ---------- esqueleto ---------- */
   const NAV = [
@@ -412,7 +426,7 @@
       const a = e.target.closest("[data-view]");
       if (a) { e.preventDefault(); goView(a.dataset.view); }
     });
-    $("#btnLogout").addEventListener("click", logout);
+    $("#btnLogout").addEventListener("click", () => logout());
     renderBanner();
   }
   function goView(v) {
@@ -423,6 +437,10 @@
   }
   function renderBanner() {
     const el = $("#banner"); if (!el) return;
+    if (!state.codeStale && state.weakPassword) {
+      el.innerHTML = `<div class="banner">🔒 Tu contraseña tiene menos de ${PASSWORD_MIN} caracteres. Por seguridad, cambiala por una más larga. <button class="btn sm primary" data-view="perfil">Cambiarla ahora</button></div>`;
+      return;
+    }
     if (state.codeStale) {
       el.innerHTML = `<div class="banner">⚠️ Hay una versión más nueva del sistema (${esc(state.remoteVersion)}). Esta pestaña tiene la ${APP_VERSION} y <b>&nbsp;no va a poder guardar&nbsp;</b> hasta que actualices. <button class="btn sm primary" onclick="location.reload(true)">Actualizar ahora</button></div>`;
     } else el.innerHTML = "";
@@ -1129,7 +1147,7 @@
           <div class="field"><label>Usuario (para entrar)</label><input name="username" value="${esc(u ? u.username : "")}" ${isNew ? 'required pattern="[a-zA-Z0-9._\\-]{3,}" placeholder="carla"' : "disabled"}><span class="help">Letras, números, punto o guion. Sin espacios.</span></div>
           <div class="field"><label>Nombre que se muestra</label><input name="display_name" value="${esc(u ? u.display_name : "")}" required placeholder="Carla"></div>
           <div class="field"><label>Rol</label><select name="role">${Object.entries(ROLES).filter(([k]) => k !== "chofer").map(([k, v]) => `<option value="${k}" ${u && u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></div>
-          ${isNew ? `<div class="field"><label>Contraseña inicial</label><input name="password" type="text" required minlength="6" placeholder="mínimo 6 caracteres"></div>` : ""}
+          ${isNew ? `<div class="field"><label>Contraseña inicial</label><input name="password" type="text" required minlength="${PASSWORD_MIN}" placeholder="mínimo ${PASSWORD_MIN} caracteres"><span class="help">Pasásela a la persona por un canal privado; la puede cambiar desde "mi usuario".</span></div>` : ""}
         </div>
         <div class="acts"><button type="button" class="btn" id="mCancel">Cancelar</button><button type="submit" class="btn primary">${isNew ? "Crear usuario" : "Guardar"}</button></div>
       </form>`);
@@ -1234,17 +1252,52 @@
   function renderPerfil() {
     $("#content").innerHTML = `<div class="card" style="max-width:520px"><h3 class="t">Mi usuario</h3>
       <ul class="list"><li><div class="grow">Usuario</div><b>${esc(state.me.username)}</b></li><li><div class="grow">Nombre</div><b>${esc(state.me.display_name)}</b></li><li><div class="grow">Rol</div><span class="role ${state.me.role}">${esc(ROLES[state.me.role])}</span></li></ul>
-      <form class="inline-form" id="pwForm" style="flex-direction:column;align-items:stretch"><label class="muted" style="font-size:12px">Cambiar mi contraseña</label><input name="p1" type="password" minlength="6" required placeholder="Nueva contraseña (mínimo 6)"><input name="p2" type="password" minlength="6" required placeholder="Repetir"><button class="btn primary" type="submit">Cambiar</button></form></div>`;
+      <form class="inline-form" id="pwForm" style="flex-direction:column;align-items:stretch"><label class="muted" style="font-size:12px">Cambiar mi contraseña</label><input name="p1" type="password" minlength="${PASSWORD_MIN}" required autocomplete="new-password" placeholder="Nueva contraseña (mínimo ${PASSWORD_MIN})"><input name="p2" type="password" minlength="${PASSWORD_MIN}" required autocomplete="new-password" placeholder="Repetir"><span class="help" style="font-size:11.5px;color:var(--muted)">Consejo: una frase corta es fácil de recordar y difícil de adivinar (ej. "mate con medialunas 7").</span><button class="btn primary" type="submit">Cambiar</button></form></div>`;
     $("#pwForm").addEventListener("submit", async e => {
       e.preventDefault(); const f = e.target;
+      if (f.p1.value.length < PASSWORD_MIN) return toast("La contraseña tiene que tener al menos " + PASSWORD_MIN + " caracteres.", "bad");
       if (f.p1.value !== f.p2.value) return toast("Las contraseñas no coinciden.", "bad");
-      try { await db.changeMyPassword(f.p1.value); toast("Contraseña cambiada.", "ok"); f.reset(); } catch (err) { toast(explainError(err), "bad"); }
+      try { await db.changeMyPassword(f.p1.value); toast("Contraseña cambiada.", "ok"); f.reset(); state.weakPassword = false; renderBanner(); } catch (err) { toast(explainError(err), "bad"); }
     });
   }
 
   /* ---------- modal ---------- */
   function openModal(html) { closeModal(); const m = document.createElement("div"); m.className = "modal"; m.id = "modal"; m.innerHTML = `<div class="box">${html}</div>`; document.body.appendChild(m); }
   function closeModal() { const m = $("#modal"); if (m) m.remove(); }
+
+  /* ---------- cierre de sesión por inactividad ---------- */
+  let _lastWrite = 0;
+  function readActivity() { try { return +localStorage.getItem(IDLE_KEY) || 0; } catch (e) { return state._lastActivity || 0; } }
+  function touchActivity(force) {
+    const now = Date.now();
+    state._lastActivity = now;
+    if (!force && now - _lastWrite < 30000) return;   // no escribir en cada movimiento
+    _lastWrite = now;
+    try { localStorage.setItem(IDLE_KEY, String(now)); } catch (e) { }
+    hideIdleWarn();
+  }
+  function hideIdleWarn() { const w = $("#idleWarn"); if (w) w.remove(); }
+  function showIdleWarn(msLeft) {
+    let w = $("#idleWarn");
+    if (!w) { w = document.createElement("div"); w.id = "idleWarn"; w.className = "idle-warn"; document.body.appendChild(w); }
+    const min = Math.max(1, Math.ceil(msLeft / 60000));
+    w.innerHTML = `<span>🔒 Por seguridad, la sesión se cierra en <b>${min} min</b> porque no se está usando.</span> <button class="btn sm gold" type="button">Seguir conectado</button>`;
+    w.querySelector("button").onclick = () => touchActivity(true);
+  }
+  function idleCheck() {
+    if (!state.session) return;
+    const last = Math.max(readActivity(), state._lastActivity || 0);
+    if (!last) { touchActivity(true); return; }
+    const idle = Date.now() - last;
+    if (idle >= IDLE_MS) { clearInterval(state.idleTimer); logout("Por seguridad, la sesión se cerró porque no se usó por " + Math.round(IDLE_MS / 3600000) + " horas. Volvé a entrar."); return; }
+    if (idle >= IDLE_MS - IDLE_WARN_MS) showIdleWarn(IDLE_MS - idle); else hideIdleWarn();
+  }
+  function startIdleWatch() {
+    if (state.idleWired) return; state.idleWired = true;
+    ["pointerdown", "keydown", "touchstart", "wheel"].forEach(ev => document.addEventListener(ev, () => { if (state.session) touchActivity(); }, { passive: true, capture: true }));
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) idleCheck(); });
+    clearInterval(state.idleTimer); state.idleTimer = setInterval(idleCheck, 30000);
+  }
 
   /* ==========================================================================
      7. ARRANQUE
@@ -1263,10 +1316,12 @@
       state.versionTimer = setInterval(checkVersion, 60000);
     } catch (err) {
       $("#app").innerHTML = `<div class="splash"><div class="box"><h3>No se pudo cargar el sistema</h3><p>${esc(explainError(err))}</p><p class="muted" style="font-size:12px">Si es la primera vez: ¿corriste 01-modifica.sql en Supabase?</p><button class="btn" id="btnRetry">Reintentar</button> <button class="btn ghost" id="btnOut2">Salir</button></div></div>`;
-      $("#btnRetry").addEventListener("click", afterLogin); $("#btnOut2").addEventListener("click", logout);
+      $("#btnRetry").addEventListener("click", afterLogin); $("#btnOut2").addEventListener("click", () => logout());
     }
   }
   async function boot() {
+    // siempre por conexión segura (el candadito): si alguien entra por http, se pasa a https
+    if (location.protocol === "http:" && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) { location.replace("https://" + location.host + location.pathname + location.search + location.hash); return; }
     if (!configOk() || !window.supabase) { render(); return; }
     const c = window.JEITO_CONFIG;
     state.supabase = window.supabase.createClient(cleanUrl(c.SUPABASE_URL), c.SUPABASE_ANON_KEY);
@@ -1277,9 +1332,17 @@
       if (event === "SIGNED_IN" && !had) afterLogin();
       if (event === "SIGNED_OUT") { state.me = null; render(); }
     });
-    if (state.session) afterLogin(); else render();
+    if (state.session) {
+      const last = readActivity();
+      if (last && Date.now() - last >= IDLE_MS) {           // quedó abierta y sin uso: se cierra
+        state.loginNote = "Por seguridad, la sesión se cerró porque no se usó por " + Math.round(IDLE_MS / 3600000) + " horas. Volvé a entrar.";
+        await state.supabase.auth.signOut(); state.session = null; render(); startIdleWatch(); return;
+      }
+      touchActivity(true); afterLogin();
+    } else render();
+    startIdleWatch();
   }
   // para pruebas y depuración desde la consola del navegador
-  window.JEITO = { state, db, APP_VERSION, checkVersion };
+  window.JEITO = { state, db, APP_VERSION, checkVersion, idleCheck };
   boot();
 })();

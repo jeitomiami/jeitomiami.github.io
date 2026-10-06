@@ -250,6 +250,9 @@
   .row-y{display:flex;align-items:center;gap:12px;margin-bottom:8px}
   @media (max-width:600px){ table.prices input{min-width:50px;padding:6px 5px} table.prices td{padding:4px 3px} table.prices th{padding:6px 3px} }
   @media (max-width:900px){ .pv{grid-template-columns:1fr} .pv-list{position:static;max-height:none} .pv-month{margin-left:0} }
+  .infomsg{background:#EEF3FB;color:#0B2D5E;border:1px solid #CFDDF3;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px}
+  .idle-warn{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;background:var(--navy);color:#fff;border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 14px 34px -12px rgba(0,0,0,.55);font-size:13px;max-width:calc(100% - 24px)}
+  @media (max-width:600px){ .idle-warn{width:calc(100% - 24px);justify-content:space-between} }
 </style>
 </head>
 <body>
@@ -259,8 +262,8 @@
 <!-- Librería de Supabase (conexión a la base). Se carga antes que la app. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Dirección y clave pública del proyecto Supabase (editar UNA vez). -->
-<script src="config.js?v=1.2.0"></script>
+<script src="config.js?v=1.2.1"></script>
 <!-- Toda la lógica del sistema. -->
-<script src="app.js?v=1.2.0"></script>
+<script src="app.js?v=1.2.1"></script>
 </body>
 </html>
