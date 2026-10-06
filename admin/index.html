@@ -253,6 +253,30 @@
   .infomsg{background:#EEF3FB;color:#0B2D5E;border:1px solid #CFDDF3;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:12px}
   .idle-warn{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;background:var(--navy);color:#fff;border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 14px 34px -12px rgba(0,0,0,.55);font-size:13px;max-width:calc(100% - 24px)}
   @media (max-width:600px){ .idle-warn{width:calc(100% - 24px);justify-content:space-between} }
+  /* ---- proveedores 1.2.2: formulario arriba, lista abajo ---- */
+  .pv-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+  .pv-head h3{font-size:18px}
+  .pv-head small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px;max-width:640px}
+  .pv-head .btn{margin-left:auto}
+  #pvDetail .form-card{margin-bottom:16px;border-color:var(--gold);box-shadow:0 10px 30px -22px rgba(0,30,72,.45)}
+  .form-card h3.t .x{margin-left:auto;background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted);line-height:1}
+  .form-card h3.t small{font-weight:500}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:0 14px}
+  .vals{background:#FAFBFC;border:1px solid var(--line);border-radius:12px;padding:12px 14px 2px;margin:2px 0 14px}
+  .vals-h{font-size:13px;margin-bottom:10px}
+  .vals-f{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:-4px 0 10px;font-size:13px}
+  .vals-f .pos{color:var(--ok)} .vals-f .neg{color:var(--bad)}
+  .linkbtn{background:none;border:0;padding:0;color:var(--navy);text-decoration:underline;cursor:pointer;font:inherit}
+  form.pad .acts .grow{flex:1}
+  details{margin:0 0 12px} details summary{cursor:pointer;color:var(--navy);font-weight:600;font-size:13px}
+  .hist{border-top:1px solid var(--line)}
+  .pv-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .pv-tools #pvQ{flex:1 1 220px;min-width:0;border:1px solid var(--line-2);border-radius:10px;padding:9px 12px}
+  .pv-tools .pv-month{margin-left:0}
+  tbody tr.sel td{background:#FFF8EC}
+  td.clip{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  table.money td.c{text-align:center}
+  @media (max-width:900px){ .grid4{grid-template-columns:1fr 1fr} .pv-head .btn{margin-left:0;width:100%} }
 </style>
 </head>
 <body>
@@ -262,8 +286,8 @@
 <!-- Librería de Supabase (conexión a la base). Se carga antes que la app. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Dirección y clave pública del proyecto Supabase (editar UNA vez). -->
-<script src="config.js?v=1.2.1"></script>
+<script src="config.js?v=1.2.2"></script>
 <!-- Toda la lógica del sistema. -->
-<script src="app.js?v=1.2.1"></script>
+<script src="app.js?v=1.2.2"></script>
 </body>
 </html>

@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.2.1";
+  const APP_VERSION = "1.2.2";
 
   // Seguridad de la sesión
   const PASSWORD_MIN = 8;                       // largo mínimo de contraseña
@@ -79,7 +79,7 @@
     filters: { q: "", period: currentPeriod(), seller: "", status: "", showDeleted: false },
     drawer: null,        // {client, tab, loadedUpdatedAt, events}
     cat: null,           // proveedores, servicios, ofertas y valores (se carga al entrar a Proveedores)
-    prov: { tab: "prov", sel: null, q: "", month: currentPeriod(), showOff: false },
+    prov: { tab: "prov", edit: null, dirty: false, q: "", month: currentPeriod(), showOff: false },
     modal: null,
     codeStale: false,    // hay una versión más nueva publicada
     remoteVersion: null,
@@ -792,135 +792,274 @@
     return explainError(err);
   }
 
+  /* ---------- pantalla: arriba el formulario (nuevo / editar), abajo la lista ---------- */
   async function renderProv() {
     const c = $("#content");
     if (!can("verProveedores")) { c.innerHTML = `<div class="placeholder"><b>Sin acceso</b>Proveedores lo ven dirección, operaciones y op. financiero.</div>`; return; }
     const P = state.prov;
     if (!state.cat) {
       c.innerHTML = `<div class="empty">Cargando proveedores…</div>`;
-      try { await db.loadCatalog(); } catch (err) { c.innerHTML = `<div class="placeholder"><b>No se pudo cargar</b>${esc(explainError(err))}<br><br>¿Ya se corrió el SQL de la entrega 1.2 en Supabase?</div>`; return; }
+      try { await db.loadCatalog(); } catch (err) { c.innerHTML = `<div class="placeholder"><b>No se pudo cargar</b>${esc(explainError(err))}<br><br>¿Ya se corrió el SQL de Proveedores en Supabase?</div>`; return; }
       if (state.view !== "prov") return;
     }
+    const isProv = P.tab === "prov", ed = can("editarProveedores");
+    const nOffers = state.cat.offers.filter(o => o.active && (svcById(o.service_id) || {}).active !== false).length;
     c.innerHTML = `
-      <div class="subtabs" id="pvTabs"><button data-t="prov" class="${P.tab === "prov" ? "on" : ""}">Proveedores <span>${state.cat.providers.filter(x => x.active).length}</span></button><button data-t="svc" class="${P.tab === "svc" ? "on" : ""}">Servicios / experiencias <span>${state.cat.services.filter(x => x.active).length}</span></button>
-        <label class="pv-month">Valores de <input type="month" id="pvMonth" value="${P.month}"></label></div>
-      <div class="pv"><div class="card pv-list" id="pvList"></div><div class="stack" id="pvDetail"></div></div>`;
-    $("#pvTabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (!b) return; P.tab = b.dataset.t; P.sel = null; P.q = ""; renderProv(); });
-    $("#pvMonth").addEventListener("change", e => { if (e.target.value) { P.month = e.target.value; renderPvDetail(); } });
-    renderPvList(); renderPvDetail();
+      <div class="subtabs" id="pvTabs"><button data-t="prov" class="${isProv ? "on" : ""}">Proveedores <span>${state.cat.providers.filter(x => x.active).length}</span></button><button data-t="svc" class="${!isProv ? "on" : ""}">Servicios <span>${nOffers}</span></button></div>
+      <div class="pv-head"><div><h3>${isProv ? "Proveedores" : "Servicios"}</h3><small>${isProv ? "Las empresas que hacen las excursiones y traslados, con sus datos de pago." : "Cada servicio con su proveedor y los valores del mes: público (lo que paga el pasajero) y agencia (lo que paga Jeito)."}</small></div>
+        ${ed ? `<button class="btn gold" id="pvNew">+ Nuevo ${isProv ? "proveedor" : "servicio"}</button>` : ""}</div>
+      <div id="pvDetail"></div>
+      <div class="card" id="pvList"></div>`;
+    $("#pvTabs").addEventListener("click", e => {
+      const b = e.target.closest("button[data-t]"); if (!b || b.dataset.t === P.tab) return;
+      if (P.dirty && !confirm("Hay cambios sin guardar en el formulario. ¿Salir igual?")) return;
+      P.tab = b.dataset.t; P.edit = null; P.dirty = false; P.q = ""; renderProv();
+    });
+    if ($("#pvNew")) $("#pvNew").addEventListener("click", () => openForm("new"));
+    renderPvDetail(); renderPvList();
   }
-
-  function renderPvList() {
-    const P = state.prov, el = $("#pvList"); if (!el) return;
-    const q = P.q.trim().toLowerCase();
-    const isProv = P.tab === "prov";
-    const rows = (isProv ? state.cat.providers : state.cat.services)
-      .filter(x => P.showOff || x.active)
-      .filter(x => !q || (isProv ? x.name : [x.name_es, x.name_pt, x.name_en].join(" ")).toLowerCase().includes(q));
-    el.innerHTML = `<h3 class="t">${isProv ? "Proveedores" : "Servicios"}${can("editarProveedores") ? `<button class="btn sm gold" id="pvNew">+ Nuevo</button>` : ""}</h3>
-      <div class="pv-search"><input id="pvQ" placeholder="Buscar…" value="${esc(P.q)}"><label class="toggle"><input type="checkbox" id="pvOff" ${P.showOff ? "checked" : ""}> inactivos</label></div>
-      <ul class="list sel">${rows.map(x => {
-        if (isProv) { const n = offersOfProvider(x.id).filter(o => o.active).length; return `<li data-id="${x.id}" class="${x.id === P.sel ? "on" : ""} ${x.active ? "" : "off"}"><div class="grow"><b>${esc(x.name)}</b><small>${n} experiencia${n === 1 ? "" : "s"} · ${x.currency}${x.active ? "" : " · inactivo"}</small></div></li>`; }
-        const n = offersOfService(x.id).filter(o => o.active).length; const meta = [typeName(x.service_type_id), zoneName(x.zone_id)].filter(Boolean).join(" · ");
-        return `<li data-id="${x.id}" class="${x.id === P.sel ? "on" : ""} ${x.active ? "" : "off"}"><div class="grow"><b>${esc(x.name_es)}</b><small>${meta ? esc(meta) + " · " : ""}${n} proveedor${n === 1 ? "" : "es"}${x.active ? "" : " · inactivo"}</small></div></li>`;
-      }).join("") || `<li class="muted">${q ? "Nada coincide con la búsqueda." : isProv ? "Todavía no hay proveedores. Tocá + Nuevo." : "Todavía no hay servicios."}</li>`}</ul>`;
-    $("#pvQ").addEventListener("input", e => { P.q = e.target.value; const pos = e.target.selectionStart; renderPvList(); const i = $("#pvQ"); i.focus(); i.setSelectionRange(pos, pos); });
-    $("#pvOff").addEventListener("change", e => { P.showOff = e.target.checked; renderPvList(); });
-    if ($("#pvNew")) $("#pvNew").addEventListener("click", () => { P.sel = "new"; renderPvList(); renderPvDetail(); });
-    el.querySelector("ul").addEventListener("click", e => { const li = e.target.closest("li[data-id]"); if (!li) return; P.sel = li.dataset.id; renderPvList(); renderPvDetail(); if (window.innerWidth < 900) $("#pvDetail").scrollIntoView({ behavior: "smooth" }); });
+  function openForm(id) {
+    const P = state.prov;
+    if (P.dirty && P.edit !== id && !confirm("Hay cambios sin guardar en el formulario. ¿Descartarlos?")) return;
+    P.edit = id; P.dirty = false; renderPvDetail(); renderPvList();
+    const el = $("#pvDetail"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const first = el && el.querySelector("input:not([disabled]), select:not([disabled])"); if (first && id === "new") setTimeout(() => first.focus(), 250);
   }
-
+  function closeForm() {
+    const P = state.prov;
+    if (P.dirty && !confirm("Hay cambios sin guardar. ¿Cerrar igual?")) return;
+    P.edit = null; P.dirty = false; renderPvDetail(); renderPvList();
+  }
   function renderPvDetail() {
     const P = state.prov, el = $("#pvDetail"); if (!el) return;
-    if (!P.sel) { el.innerHTML = `<div class="placeholder"><b>${P.tab === "prov" ? "Elegí un proveedor" : "Elegí un servicio"}</b>${P.tab === "prov" ? "Acá ves sus datos, las experiencias que ofrece y los valores público y agencia de cada mes." : "Acá ves cómo lo lee el cliente en cada idioma y qué proveedores lo ofrecen, con sus valores."}</div>`; return; }
-    if (P.tab === "prov") renderProviderDetail(el); else renderServiceDetail(el);
+    if (!P.edit) { el.innerHTML = ""; return; }
+    if (P.dirty && el.firstChild) return;            // no borrar lo que se está escribiendo
+    if (P.tab === "prov") providerForm(el); else serviceForm(el);
+  }
+  function wireDirty(form) {
+    const P = state.prov;
+    form.addEventListener("input", () => { P.dirty = true; });
+    form.addEventListener("change", () => { P.dirty = true; });
   }
 
-  /* ---------- proveedor ---------- */
-  function renderProviderDetail(el) {
-    const P = state.prov, isNew = P.sel === "new";
-    const p = isNew ? null : provById(P.sel); if (!isNew && !p) { P.sel = null; return renderPvDetail(); }
-    const ed = can("editarProveedores");
-    const v = p || { currency: "USD", active: true };
-    const dis = ed ? "" : "disabled";
-    const methods = Array.from(new Set(state.paymentMethods.map(m => m.name).concat(["Zelle", "Transferencia bancaria", "Efectivo", "Tarjeta", "Pix"])));
-    el.innerHTML = `
-      <div class="card"><h3 class="t">${isNew ? "Nuevo proveedor" : esc(p.name)}${!isNew && !p.active ? ' <span class="st no_cerrado">inactivo</span>' : ""}</h3>
-        <form id="provForm" class="pad">
-          <div class="grid2">
-            <div class="field"><label>Nombre *</label><input name="name" required value="${esc(v.name || "")}" ${dis} placeholder="Florida Tours"></div>
-            <div class="field"><label>Moneda en que cobra</label><select name="currency" ${dis}><option value="USD" ${v.currency === "USD" ? "selected" : ""}>Dólares (USD)</option><option value="BRL" ${v.currency === "BRL" ? "selected" : ""}>Reales (BRL)</option></select></div>
-            <div class="field"><label>Forma de pago</label><input name="payment_method" list="pmList" value="${esc(v.payment_method || "")}" ${dis} placeholder="Zelle, transferencia…"><datalist id="pmList">${methods.map(m => `<option value="${esc(m)}">`).join("")}</datalist></div>
-            <div class="field"><label>Datos de pago</label><textarea name="payment_details" rows="2" ${dis} placeholder="Banco, cuenta, mail de Zelle…">${esc(v.payment_details || "")}</textarea></div>
-          </div>
-          <div class="field"><label>Condiciones</label><textarea name="conditions" rows="2" ${dis} placeholder="Seña, política de cancelación, plazo de pago…">${esc(v.conditions || "")}</textarea></div>
-          <div class="field"><label>Notas internas</label><textarea name="notes" rows="2" ${dis}>${esc(v.notes || "")}</textarea></div>
-          ${isNew ? "" : `<div class="meta">Último cambio: ${esc(userName(p.updated_by))} · ${fmtDateLong(p.updated_at)}</div>`}
-          ${ed ? `<div class="acts">${isNew ? "" : `<button type="button" class="btn ghost ${p.active ? "danger" : ""}" id="provToggle">${p.active ? "Desactivar proveedor" : "Volver a activar"}</button>`}<button class="btn primary" type="submit">${isNew ? "Crear proveedor" : "Guardar"}</button></div>` : ""}
-        </form></div>
-      ${isNew ? "" : `<div class="card" id="offersCard"></div><div class="card" id="provHist"><h3 class="t">Historial<button class="btn sm" id="provHistBtn">Ver cambios</button></h3></div>`}`;
-    if (ed) {
-      $("#provForm").addEventListener("submit", async e => {
-        e.preventDefault(); const f = e.target;
-        const fields = { name: f.name.value.trim(), currency: f.currency.value, payment_method: f.payment_method.value.trim() || null, payment_details: f.payment_details.value.trim() || null, conditions: f.conditions.value.trim() || null, notes: f.notes.value.trim() || null };
-        await saveAndRefresh("providers", p, fields, saved => { P.sel = saved.id; }, isNew ? "Proveedor creado. Ahora agregale las experiencias que ofrece." : "Guardado.");
-      });
-      if ($("#provToggle")) $("#provToggle").addEventListener("click", async () => {
-        if (p.active && !confirm("¿Desactivar " + p.name + "? No se borra nada: deja de aparecer para armar itinerarios nuevos.")) return;
-        await saveAndRefresh("providers", p, { active: !p.active }, null, p.active ? "Proveedor desactivado." : "Proveedor activado.");
-      });
+  /* ---------- lista de abajo ---------- */
+  function renderPvList() {
+    const P = state.prov, el = $("#pvList"); if (!el) return;
+    const isProv = P.tab === "prov";
+    const q = P.q.trim().toLowerCase();
+    let body, count;
+    if (isProv) {
+      const rows = state.cat.providers.filter(x => P.showOff || x.active).filter(x => !q || [x.name, x.payment_method, x.conditions].join(" ").toLowerCase().includes(q));
+      count = rows.length;
+      body = `<table><thead><tr><th>Proveedor</th><th>Moneda</th><th>Forma de pago</th><th>Condiciones</th><th class="r">Servicios</th></tr></thead><tbody>${rows.map(x => {
+        const n = offersOfProvider(x.id).filter(o => o.active).length;
+        return `<tr class="row ${x.id === P.edit ? "sel" : ""} ${x.active ? "" : "off"}" data-id="${x.id}"><td><span class="name">${esc(x.name)}</span>${x.active ? "" : '<span class="sub">inactivo</span>'}</td><td>${x.currency}</td><td>${esc(x.payment_method || "—")}</td><td class="clip">${esc(x.conditions || "—")}</td><td class="r">${n}</td></tr>`;
+      }).join("") || `<tr><td colspan="5" class="empty">${q ? "Nada coincide con la búsqueda." : "Todavía no hay proveedores. Tocá “+ Nuevo proveedor”."}</td></tr>`}</tbody></table>`;
+    } else {
+      const rows = state.cat.offers.map(o => ({ o, s: svcById(o.service_id), p: provById(o.provider_id) }))
+        .filter(r => r.s && r.p && (P.showOff || (r.o.active && r.s.active)))
+        .filter(r => !q || [r.s.name_es, r.s.name_pt, r.s.name_en, r.p.name].join(" ").toLowerCase().includes(q))
+        .sort((a, b) => a.s.name_es.localeCompare(b.s.name_es, "es") || a.p.name.localeCompare(b.p.name, "es"));
+      count = rows.length;
+      body = `<table class="money"><thead><tr><th rowspan="2">Servicio</th><th rowspan="2">Proveedor</th><th colspan="2" class="c">Valor público</th><th colspan="2" class="c">Valor agencia</th><th rowspan="2" class="r">Ganancia<br>por adulto</th><th rowspan="2"></th></tr>
+        <tr><th class="r">Adulto</th><th class="r">Menor</th><th class="r">Adulto</th><th class="r">Menor</th></tr></thead><tbody>${rows.map(({ o, s, p }) => {
+          const pr = priceOf(o.id, P.month), miss = missingFor(s);
+          return `<tr class="row ${o.id === P.edit ? "sel" : ""} ${o.active && s.active ? "" : "off"}" data-id="${o.id}"><td><span class="name">${esc(s.name_es)}</span>${miss.length ? `<span class="sub warn">falta: ${esc(miss.join(", "))}</span>` : ""}${o.active ? "" : '<span class="sub">ya no lo ofrece</span>'}</td><td>${esc(p.name)}</td>
+            ${pr ? `<td class="r">${money(pr.public_adult)}</td><td class="r">${money(pr.public_minor)}</td><td class="r">${money(pr.agency_adult)}</td><td class="r">${money(pr.agency_minor)}</td><td class="r">${marginHTML(pr.public_adult, pr.agency_adult)}</td>` : `<td colspan="5" class="c"><span class="sub warn" style="display:inline">sin valores en ${esc(periodLabel(P.month))}</span></td>`}
+            <td class="r"><button class="btn sm" data-act="months">Meses</button></td></tr>`;
+        }).join("") || `<tr><td colspan="8" class="empty">${q ? "Nada coincide con la búsqueda." : state.cat.providers.some(x => x.active) ? "Todavía no hay servicios. Tocá “+ Nuevo servicio”." : "Primero cargá un proveedor en la pestaña Proveedores."}</td></tr>`}</tbody></table>`;
     }
-    if (!isNew) { renderOffersCard(p); $("#provHistBtn").addEventListener("click", () => showHistory("#provHist", "provider_id", p.id)); }
-  }
-
-  function renderOffersCard(p) {
-    const el = $("#offersCard"); if (!el) return;
-    const P = state.prov, ed = can("editarProveedores");
-    const offers = offersOfProvider(p.id).filter(o => P.showOff || o.active)
-      .sort((a, b) => svcName(svcById(a.service_id)).localeCompare(svcName(svcById(b.service_id)), "es"));
-    el.innerHTML = `<h3 class="t">Experiencias que ofrece · ${esc(periodLabel(P.month))}${ed ? `<button class="btn sm gold" id="offerAdd">+ Agregar experiencia</button>` : ""}</h3>
-      <div class="tablewrap"><table class="money">
-        <thead><tr><th rowspan="2">Experiencia</th><th colspan="2" class="c">Valor público</th><th colspan="2" class="c">Valor agencia</th><th rowspan="2" class="r">Ganancia<br>por adulto</th><th rowspan="2"></th></tr>
-        <tr><th class="r">Adulto</th><th class="r">Menor</th><th class="r">Adulto</th><th class="r">Menor</th></tr></thead>
-        <tbody>${offers.map(o => {
-          const s = svcById(o.service_id), pr = priceOf(o.id, P.month);
-          return `<tr data-id="${o.id}" class="${o.active ? "" : "off"}"><td><span class="name">${esc(svcName(s))}</span>${o.active ? "" : '<span class="sub">ya no lo ofrece</span>'}${!pr ? '<span class="sub warn">sin valores este mes</span>' : ""}</td>
-            <td class="r">${money(pr && pr.public_adult)}</td><td class="r">${money(pr && pr.public_minor)}</td>
-            <td class="r">${money(pr && pr.agency_adult)}</td><td class="r">${money(pr && pr.agency_minor)}</td>
-            <td class="r">${pr ? marginHTML(pr.public_adult, pr.agency_adult) : '<span class="muted">—</span>'}</td>
-            <td class="r"><button class="btn sm" data-act="prices">${ed ? "Valores por mes" : "Ver meses"}</button></td></tr>`;
-        }).join("") || `<tr><td colspan="7" class="empty">Este proveedor todavía no tiene experiencias cargadas.</td></tr>`}</tbody>
-      </table></div>
-      <div class="note">Valor público = lo que paga el pasajero. Valor agencia = lo que Jeito le paga al proveedor. Los valores se cargan por mes; arriba a la derecha elegís qué mes ver.</div>`;
-    if ($("#offerAdd")) $("#offerAdd").addEventListener("click", () => addOfferModal(p));
-    el.querySelector("tbody").addEventListener("click", e => { const b = e.target.closest("button[data-act]"); if (!b) return; pricesModal(state.cat.offers.find(o => o.id === b.closest("tr").dataset.id)); });
-  }
-
-  function addOfferModal(p) {
-    const taken = new Set(offersOfProvider(p.id).map(o => o.service_id));
-    const avail = state.cat.services.filter(s => s.active && !taken.has(s.id));
-    openModal(`<h3>Agregar experiencia a ${esc(p.name)}</h3><p>Elegí una del catálogo o creá una nueva. Después cargás los valores por mes.</p>
-      <form id="offForm">
-        <div class="field"><label>Experiencia del catálogo</label><select name="service_id"><option value="">— crear una nueva —</option>${avail.map(s => `<option value="${s.id}">${esc(s.name_es)}</option>`).join("")}</select></div>
-        <div class="field" id="newSvcField"><label>Nombre de la experiencia nueva (en español)</label><input name="name_es" placeholder="Key West día completo"><span class="help">Los nombres en portugués e inglés, la descripción y el tipo se completan después en la pestaña Servicios.</span></div>
-        <div class="acts"><button type="button" class="btn" id="mCancel">Cancelar</button><button type="submit" class="btn primary">Agregar y cargar valores</button></div>
-      </form>`);
-    const f = $("#offForm"), sync = () => { $("#newSvcField").style.display = f.service_id.value ? "none" : ""; };
-    f.service_id.addEventListener("change", sync); sync();
-    $("#mCancel").addEventListener("click", closeModal);
-    f.addEventListener("submit", async e => {
-      e.preventDefault(); const btn = $("button[type=submit]", f); btn.disabled = true;
-      try {
-        let sid = f.service_id.value;
-        if (!sid) {
-          const name = f.name_es.value.trim(); if (!name) { toast("Escribí el nombre de la experiencia.", "bad"); btn.disabled = false; return; }
-          const s = await db.saveRow("services", null, { name_es: name }); sid = s.id;
-        }
-        const off = await db.saveRow("provider_services", null, { provider_id: p.id, service_id: sid });
-        await db.loadCatalog(); closeModal(); renderPvList(); renderPvDetail();
-        pricesModal(state.cat.offers.find(o => o.id === off.id) || off);
-      } catch (err) { toast(catError(err), "bad"); btn.disabled = false; }
+    el.innerHTML = `<div class="pv-tools"><input id="pvQ" placeholder="${isProv ? "Buscar proveedor…" : "Buscar servicio o proveedor…"}" value="${esc(P.q)}">
+        ${isProv ? "" : `<label class="pv-month">Valores de <input type="month" id="pvMonth" value="${P.month}"></label>`}
+        <label class="toggle"><input type="checkbox" id="pvOff" ${P.showOff ? "checked" : ""}> ver inactivos</label></div>
+      <div class="tablewrap">${body}</div>
+      <div class="tfoot">${count} ${isProv ? (count === 1 ? "proveedor" : "proveedores") : (count === 1 ? "servicio" : "servicios")} · tocá un renglón para ${can("editarProveedores") ? "editarlo" : "ver el detalle"}</div>`;
+    $("#pvQ").addEventListener("input", e => { P.q = e.target.value; const pos = e.target.selectionStart; renderPvList(); const i = $("#pvQ"); i.focus(); i.setSelectionRange(pos, pos); });
+    $("#pvOff").addEventListener("change", e => { P.showOff = e.target.checked; renderPvList(); });
+    if ($("#pvMonth")) $("#pvMonth").addEventListener("change", e => { if (!e.target.value) return; P.month = e.target.value; renderPvList(); if (P.edit && !P.dirty) renderPvDetail(); });
+    el.querySelector("tbody").addEventListener("click", e => {
+      const tr = e.target.closest("tr[data-id]"); if (!tr) return;
+      if (e.target.closest("button[data-act=months]")) { pricesModal(state.cat.offers.find(o => o.id === tr.dataset.id)); return; }
+      openForm(tr.dataset.id);
     });
+  }
+  function missingFor(s) {
+    const m = [];
+    if (!s.name_pt) m.push("nombre PT"); if (!s.name_en) m.push("nombre EN");
+    if (!s.service_type_id) m.push("tipo"); if (!s.zone_id) m.push("zona");
+    return m;
+  }
+
+  /* ---------- formulario de proveedor ---------- */
+  function providerForm(el) {
+    const P = state.prov, isNew = P.edit === "new";
+    const p = isNew ? null : provById(P.edit); if (!isNew && !p) { P.edit = null; el.innerHTML = ""; return; }
+    const ed = can("editarProveedores"), dis = ed ? "" : "disabled";
+    const v = p || { currency: "USD", active: true };
+    const methods = Array.from(new Set(state.paymentMethods.map(m => m.name).concat(["Zelle", "Transferencia bancaria", "Efectivo", "Tarjeta", "Pix"])));
+    const nSvc = isNew ? 0 : offersOfProvider(p.id).filter(o => o.active).length;
+    el.innerHTML = `<div class="card form-card"><h3 class="t">${isNew ? "Nuevo proveedor" : esc(p.name)}${!isNew && !p.active ? ' <span class="st no_cerrado">inactivo</span>' : ""}<button class="x" type="button" id="pfClose" title="Cerrar">×</button></h3>
+      <form id="provForm" class="pad">
+        <div class="grid2">
+          <div class="field"><label>Nombre de la empresa *</label><input name="name" required value="${esc(v.name || "")}" ${dis} placeholder="Ej.: Everglades Holiday Park"></div>
+          <div class="field"><label>Moneda en que cobra</label><select name="currency" ${dis}><option value="USD" ${v.currency === "USD" ? "selected" : ""}>Dólares (USD)</option><option value="BRL" ${v.currency === "BRL" ? "selected" : ""}>Reales (BRL)</option></select></div>
+          <div class="field"><label>Forma de pago</label><input name="payment_method" list="pmList" value="${esc(v.payment_method || "")}" ${dis} placeholder="Zelle, transferencia…"><datalist id="pmList">${methods.map(m => `<option value="${esc(m)}">`).join("")}</datalist></div>
+          <div class="field"><label>Datos de pago</label><input name="payment_details" value="${esc(v.payment_details || "")}" ${dis} placeholder="Banco, cuenta, mail de Zelle…"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Condiciones</label><textarea name="conditions" rows="2" ${dis} placeholder="Seña, cancelación, plazo de pago…">${esc(v.conditions || "")}</textarea></div>
+          <div class="field"><label>Notas internas</label><textarea name="notes" rows="2" ${dis}>${esc(v.notes || "")}</textarea></div>
+        </div>
+        ${isNew ? "" : `<div class="meta">Último cambio: ${esc(userName(p.updated_by))} · ${fmtDateLong(p.updated_at)} · ${nSvc} servicio${nSvc === 1 ? "" : "s"} <button type="button" class="linkbtn" id="pfSvcs">ver sus servicios</button> · <button type="button" class="linkbtn" id="pfHist">ver historial</button></div>`}
+        <div class="acts">${ed && !isNew ? `<button type="button" class="btn ghost ${p.active ? "danger" : ""}" id="provToggle">${p.active ? "Desactivar" : "Volver a activar"}</button>` : ""}<span class="grow"></span><button type="button" class="btn" id="pfCancel">${ed ? "Cancelar" : "Cerrar"}</button>${ed ? `<button class="btn primary" type="submit">${isNew ? "Crear proveedor" : "Guardar"}</button>` : ""}</div>
+      </form><div id="pfHistBox"></div></div>`;
+    const form = $("#provForm"); wireDirty(form);
+    $("#pfClose").addEventListener("click", closeForm); $("#pfCancel").addEventListener("click", closeForm);
+    if ($("#pfSvcs")) $("#pfSvcs").addEventListener("click", () => { if (P.dirty && !confirm("Hay cambios sin guardar. ¿Salir igual?")) return; P.tab = "svc"; P.edit = null; P.dirty = false; P.q = p.name; renderProv(); });
+    if ($("#pfHist")) $("#pfHist").addEventListener("click", () => { $("#pfHistBox").className = "hist"; showHistory("#pfHistBox", "provider_id", p.id); });
+    if (!ed) return;
+    form.addEventListener("submit", async e => {
+      e.preventDefault(); const f = e.target, t = k => f[k].value.trim() || null;
+      const fields = { name: f.name.value.trim(), currency: f.currency.value, payment_method: t("payment_method"), payment_details: t("payment_details"), conditions: t("conditions"), notes: t("notes") };
+      await saveAndRefresh(async () => { await db.saveRow("providers", p, fields); }, isNew ? "Proveedor creado." : "Guardado.", true);
+    });
+    if ($("#provToggle")) $("#provToggle").addEventListener("click", async () => {
+      if (p.active && !confirm("¿Desactivar " + p.name + "? No se borra nada: deja de aparecer para armar itinerarios nuevos.")) return;
+      await saveAndRefresh(async () => { await db.saveRow("providers", p, { active: !p.active }); }, p.active ? "Proveedor desactivado." : "Proveedor activado.", true);
+    });
+  }
+
+  /* ---------- formulario de servicio (siempre con su proveedor) ---------- */
+  function serviceForm(el) {
+    const P = state.prov, isNew = P.edit === "new";
+    const o = isNew ? null : state.cat.offers.find(x => x.id === P.edit); if (!isNew && !o) { P.edit = null; el.innerHTML = ""; return; }
+    const s = o ? svcById(o.service_id) : null, p = o ? provById(o.provider_id) : null;
+    const ed = can("editarProveedores"), dis = ed ? "" : "disabled";
+    const v = s || {};
+    const pr = o ? (priceOf(o.id, P.month) || {}) : {};
+    const val = x => x == null ? "" : String(Number(x));
+    const provs = state.cat.providers.filter(x => x.active).sort((a, b) => a.name.localeCompare(b.name, "es"));
+    const opt = (list, cur) => `<option value="">—</option>` + list.filter(x => x.active || x.id === cur).map(x => `<option value="${x.id}" ${x.id === cur ? "selected" : ""}>${esc(x.name)}</option>`).join("");
+    const shared = o ? offersOfService(s.id).filter(x => x.active && x.id !== o.id).length : 0;
+    if (isNew && !provs.length) { el.innerHTML = `<div class="card form-card"><div class="placeholder" style="border:0"><b>Primero cargá un proveedor</b>Cada servicio pertenece a un proveedor. Andá a la pestaña Proveedores y tocá “+ Nuevo proveedor”.</div></div>`; return; }
+    el.innerHTML = `<div class="card form-card"><h3 class="t">${isNew ? "Nuevo servicio" : esc(s.name_es) + ` <small class="muted">· ${esc(p.name)}</small>`}${o && !o.active ? ' <span class="st no_cerrado">ya no lo ofrece</span>' : ""}<button class="x" type="button" id="sfClose" title="Cerrar">×</button></h3>
+      <form id="svcForm" class="pad">
+        <div class="grid2">
+          <div class="field"><label>Proveedor *</label>${isNew ? `<select name="provider_id" required ${dis}><option value="">Elegí el proveedor…</option>${provs.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select>` : `<input value="${esc(p.name)}" disabled><span class="help">El proveedor no se cambia; si es otro, cargá el servicio de nuevo con ese proveedor.</span>`}</div>
+          <div class="field"><label>Nombre del servicio (español) *</label><input name="name_es" required value="${esc(v.name_es || "")}" ${dis} list="svcNames" autocomplete="off" placeholder="Ej.: Everglades en airboat"><datalist id="svcNames">${state.cat.services.map(x => `<option value="${esc(x.name_es)}">`).join("")}</datalist><span class="help" id="sfSame"></span></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Nombre en portugués</label><input name="name_pt" value="${esc(v.name_pt || "")}" ${dis} placeholder="Lo que lee un cliente de Brasil"></div>
+          <div class="field"><label>Nombre en inglés</label><input name="name_en" value="${esc(v.name_en || "")}" ${dis}></div>
+        </div>
+        <div class="grid4">
+          <div class="field"><label>Tipo</label><select name="service_type_id" ${dis}>${opt(state.serviceTypes, v.service_type_id)}</select></div>
+          <div class="field"><label>Zona</label><select name="zone_id" ${dis}>${opt(state.zones, v.zone_id)}</select></div>
+          <div class="field"><label>Horario sugerido</label><input name="default_time" type="time" value="${esc(v.default_time || "")}" ${dis}></div>
+          <div class="field"><label>Duración</label><input name="duration" value="${esc(v.duration || "")}" placeholder="4 h, día completo…" ${dis}></div>
+        </div>
+        <div class="vals"><div class="vals-h"><b>Valores de ${esc(periodLabel(P.month))}</b> <span class="muted">· USD por persona</span>${o ? ` <button type="button" class="linkbtn" id="sfMonths">ver / cargar otros meses</button>` : ""}</div>
+          <div class="grid4">
+            <div class="field"><label>Público adulto</label><input name="pa" inputmode="decimal" value="${val(pr.public_adult)}" ${dis}></div>
+            <div class="field"><label>Público menor</label><input name="pm" inputmode="decimal" value="${val(pr.public_minor)}" ${dis}></div>
+            <div class="field"><label>Agencia adulto</label><input name="aa" inputmode="decimal" value="${val(pr.agency_adult)}" ${dis}></div>
+            <div class="field"><label>Agencia menor</label><input name="am" inputmode="decimal" value="${val(pr.agency_minor)}" ${dis}></div>
+          </div>
+          <div class="vals-f"><span id="sfGain"></span>${ed ? `<label class="toggle"><input type="checkbox" name="all_year"> usar estos valores en los meses vacíos de ${P.month.slice(0, 4)}</label>` : ""}</div>
+        </div>
+        <details ${v.desc_es || v.desc_pt || v.desc_en || v.notes ? "open" : ""}><summary>Descripción para el cliente y notas internas (opcional)</summary>
+          <div class="grid3" style="margin-top:10px">
+            <div class="field"><label>Descripción en español</label><textarea name="desc_es" rows="2" ${dis}>${esc(v.desc_es || "")}</textarea></div>
+            <div class="field"><label>En portugués</label><textarea name="desc_pt" rows="2" ${dis}>${esc(v.desc_pt || "")}</textarea></div>
+            <div class="field"><label>En inglés</label><textarea name="desc_en" rows="2" ${dis}>${esc(v.desc_en || "")}</textarea></div>
+          </div>
+          <div class="field"><label>Notas internas</label><textarea name="notes" rows="2" ${dis}>${esc(v.notes || "")}</textarea></div>
+        </details>
+        ${shared ? `<div class="meta">Nombre, tipo, zona y descripción son del servicio: si los cambiás, se cambian también para ${shared === 1 ? "el otro proveedor" : "los otros " + shared + " proveedores"} que lo ofrecen.</div>` : ""}
+        ${o ? `<div class="meta">Último cambio: ${esc(userName(s.updated_by))} · ${fmtDateLong(s.updated_at)} · <button type="button" class="linkbtn" id="sfHist">ver historial</button></div>` : ""}
+        <div class="acts">${ed && o ? `<button type="button" class="btn ghost ${o.active ? "danger" : ""}" id="offToggle2">${o.active ? "Ya no lo ofrece" : "Lo vuelve a ofrecer"}</button>` : ""}<span class="grow"></span><button type="button" class="btn" id="sfCancel">${ed ? "Cancelar" : "Cerrar"}</button>${ed ? `<button class="btn primary" type="submit">${isNew ? "Crear servicio" : "Guardar"}</button>` : ""}</div>
+      </form><div id="sfHistBox"></div></div>`;
+    const form = $("#svcForm"); wireDirty(form);
+    const gain = () => {
+      const pa = numOrNull(form.pa.value), aa = numOrNull(form.aa.value), pm = numOrNull(form.pm.value), am = numOrNull(form.am.value);
+      $("#sfGain").innerHTML = pa != null && aa != null && !isNaN(pa) && !isNaN(aa) ? "Ganancia por adulto: " + marginHTML(pa, aa).replace('<span class="sub">', " · ").replace("</span>", "") : "";
+      form.aa.classList.toggle("warnbox", pa != null && aa != null && aa > pa); form.am.classList.toggle("warnbox", pm != null && am != null && am > pm);
+    };
+    gain(); form.addEventListener("input", gain);
+    $("#sfClose").addEventListener("click", closeForm); $("#sfCancel").addEventListener("click", closeForm);
+    if ($("#sfMonths")) $("#sfMonths").addEventListener("click", () => pricesModal(o));
+    if ($("#sfHist")) $("#sfHist").addEventListener("click", () => { $("#sfHistBox").className = "hist"; showHistory("#sfHistBox", "service_id", s.id); });
+    // si escriben un servicio que ya existe (lo ofrece otro proveedor), se reutiliza y se completan sus datos
+    if (isNew) form.name_es.addEventListener("change", () => {
+      const ex = state.cat.services.find(x => x.name_es.trim().toLowerCase() === form.name_es.value.trim().toLowerCase());
+      $("#sfSame").textContent = ex ? "Este servicio ya existe con otro proveedor: se usan sus mismos datos y se le suma este proveedor." : "";
+      if (ex) ["name_pt", "name_en", "service_type_id", "zone_id", "default_time", "duration", "desc_es", "desc_pt", "desc_en"].forEach(k => { if (!form[k].value && ex[k]) form[k].value = ex[k]; });
+    });
+    if (!ed) return;
+    if ($("#offToggle2")) $("#offToggle2").addEventListener("click", async () => {
+      if (o.active && !confirm("¿Marcar que " + p.name + " ya no ofrece " + s.name_es + "? No se borra nada.")) return;
+      await saveAndRefresh(async () => { await db.saveRow("provider_services", o, { active: !o.active }); }, o.active ? "Listo: ya no lo ofrece." : "Lo vuelve a ofrecer.", true);
+    });
+    form.addEventListener("submit", async e => {
+      e.preventDefault(); const f = e.target, t = k => f[k].value.trim() || null;
+      const vals = {};
+      for (const [n, col] of [["pa", "public_adult"], ["pm", "public_minor"], ["aa", "agency_adult"], ["am", "agency_minor"]]) {
+        const x = numOrNull(f[n].value); if (Number.isNaN(x)) { toast("Hay un valor que no es un número.", "bad"); f[n].focus(); return; } vals[col] = x;
+      }
+      const svcFields = { name_es: f.name_es.value.trim(), name_pt: t("name_pt"), name_en: t("name_en"), service_type_id: f.service_type_id.value || null, zone_id: f.zone_id.value || null, default_time: t("default_time"), duration: t("duration"), desc_es: t("desc_es"), desc_pt: t("desc_pt"), desc_en: t("desc_en"), notes: t("notes") };
+      const allYear = f.all_year && f.all_year.checked;
+      const btn = $("button[type=submit]", f); btn.disabled = true;
+      await saveAndRefresh(async () => {
+        let offer = o, svc = s;
+        if (isNew) {
+          const pid = f.provider_id.value; if (!pid) throw new Error("Elegí el proveedor.");
+          svc = state.cat.services.find(x => x.name_es.trim().toLowerCase() === svcFields.name_es.toLowerCase()) || null;
+          if (svc) {           // ya existe: solo completo lo que estaba vacío (nunca piso lo que cargó otro)
+            const fill = {}; Object.keys(svcFields).forEach(k => { if (svcFields[k] != null && (svc[k] == null || svc[k] === "")) fill[k] = svcFields[k]; });
+            if (!svc.active) fill.active = true;
+            if (Object.keys(fill).length) svc = await db.saveRow("services", svc, fill);
+          } else svc = await db.saveRow("services", null, svcFields);
+          const prev = state.cat.offers.find(x => x.provider_id === pid && x.service_id === svc.id);
+          if (prev && prev.active) throw new Error("Ese proveedor ya tiene ese servicio cargado. Buscalo en la lista para editarlo.");
+          offer = prev ? await db.saveRow("provider_services", prev, { active: true }) : await db.saveRow("provider_services", null, { provider_id: pid, service_id: svc.id });
+        } else {
+          await db.saveRow("services", s, svcFields);
+        }
+        await savePrices(offer.id, P.month, vals, allYear);
+        state.prov.edit = isNew ? null : offer.id;
+      }, isNew ? "Servicio creado." : "Guardado.", isNew);
+      if ($("#svcForm button[type=submit]")) $("#svcForm button[type=submit]").disabled = false;
+    });
+  }
+  // guarda los valores del mes elegido (y, si se pide, los copia a los meses vacíos del año)
+  async function savePrices(offerId, ym, vals, allYear) {
+    const empty = Object.values(vals).every(x => x == null);
+    const months = allYear && !empty ? Array.from({ length: 12 }, (_, i) => ym.slice(0, 4) + "-" + pad(i + 1)) : [ym];
+    for (const m of months) {
+      const orig = priceOf(offerId, m);
+      if (m !== ym && orig && ["public_adult", "public_minor", "agency_adult", "agency_minor"].some(k => orig[k] != null)) continue;   // no pisar meses ya cargados
+      if (!orig && empty) continue;
+      if (orig && Object.keys(vals).every(k => sameVal(vals[k], orig[k]))) continue;
+      await db.saveRow("offer_prices", orig, orig ? vals : Object.assign({ offer_id: offerId, month: monthKey(m) }, vals));
+    }
+  }
+
+  async function saveAndRefresh(fn, okMsg, closeAfter) {
+    const P = state.prov;
+    setSync("busy", "Guardando…");
+    let ok = false;
+    try { await fn(); ok = true; toast(okMsg, "ok"); }
+    catch (err) { toast(catError(err), "bad"); }
+    await db.loadCatalog().catch(() => { });
+    setSync("ok", "");
+    if (ok) { P.dirty = false; if (closeAfter) P.edit = null; }
+    const keepForm = !ok && P.dirty;          // si falló, no borro lo que la persona escribió
+    if (state.view === "prov") {
+      const tabs = $("#pvTabs");
+      if (tabs) { const nO = state.cat.offers.filter(o => o.active && (svcById(o.service_id) || {}).active !== false).length; tabs.querySelector('[data-t=prov] span').textContent = state.cat.providers.filter(x => x.active).length; tabs.querySelector('[data-t=svc] span').textContent = nO; }
+      if (!keepForm) renderPvDetail();
+      renderPvList();
+    }
   }
 
   function pricesModal(o, year) {
@@ -990,82 +1129,6 @@
       } catch (err) { toast((ok ? "Se guardaron " + ok + " meses, pero " : "") + catError(err), "bad"); }
       setSync("ok", ""); await db.loadCatalog().catch(() => { }); closeModal(); renderPvList(); renderPvDetail();
     });
-  }
-
-  /* ---------- servicio ---------- */
-  function renderServiceDetail(el) {
-    const P = state.prov, isNew = P.sel === "new";
-    const s = isNew ? null : svcById(P.sel); if (!isNew && !s) { P.sel = null; return renderPvDetail(); }
-    const ed = can("editarProveedores"), dis = ed ? "" : "disabled";
-    const v = s || { active: true };
-    const opt = (list, cur) => `<option value="">—</option>` + list.filter(x => x.active || x.id === cur).map(x => `<option value="${x.id}" ${x.id === cur ? "selected" : ""}>${esc(x.name)}</option>`).join("");
-    el.innerHTML = `
-      <div class="card"><h3 class="t">${isNew ? "Nuevo servicio" : esc(s.name_es)}${!isNew && !s.active ? ' <span class="st no_cerrado">inactivo</span>' : ""}</h3>
-        <form id="svcForm" class="pad">
-          <div class="sect">Nombre que lee el cliente</div>
-          <div class="grid3">
-            <div class="field"><label>Español *</label><input name="name_es" required value="${esc(v.name_es || "")}" ${dis}></div>
-            <div class="field"><label>Português</label><input name="name_pt" value="${esc(v.name_pt || "")}" ${dis}></div>
-            <div class="field"><label>English</label><input name="name_en" value="${esc(v.name_en || "")}" ${dis}></div>
-          </div>
-          <div class="sect">Descripción corta (opcional)</div>
-          <div class="grid3">
-            <div class="field"><label>Español</label><textarea name="desc_es" rows="3" ${dis}>${esc(v.desc_es || "")}</textarea></div>
-            <div class="field"><label>Português</label><textarea name="desc_pt" rows="3" ${dis}>${esc(v.desc_pt || "")}</textarea></div>
-            <div class="field"><label>English</label><textarea name="desc_en" rows="3" ${dis}>${esc(v.desc_en || "")}</textarea></div>
-          </div>
-          <div class="sect">Para organizar</div>
-          <div class="grid2">
-            <div class="field"><label>Tipo</label><select name="service_type_id" ${dis}>${opt(state.serviceTypes, v.service_type_id)}</select></div>
-            <div class="field"><label>Zona</label><select name="zone_id" ${dis}>${opt(state.zones, v.zone_id)}</select></div>
-            <div class="field"><label>Horario sugerido</label><input name="default_time" type="time" value="${esc(v.default_time || "")}" ${dis}></div>
-            <div class="field"><label>Duración</label><input name="duration" value="${esc(v.duration || "")}" placeholder="4 h, día completo…" ${dis}></div>
-          </div>
-          <div class="field"><label>Notas internas</label><textarea name="notes" rows="2" ${dis}>${esc(v.notes || "")}</textarea></div>
-          ${isNew ? "" : `<div class="meta">Último cambio: ${esc(userName(s.updated_by))} · ${fmtDateLong(s.updated_at)}</div>`}
-          ${ed ? `<div class="acts">${isNew ? "" : `<button type="button" class="btn ghost ${s.active ? "danger" : ""}" id="svcToggle">${s.active ? "Desactivar servicio" : "Volver a activar"}</button>`}<button class="btn primary" type="submit">${isNew ? "Crear servicio" : "Guardar"}</button></div>` : ""}
-        </form></div>
-      ${isNew ? "" : `<div class="card" id="whoCard"></div><div class="card" id="svcHist"><h3 class="t">Historial<button class="btn sm" id="svcHistBtn">Ver cambios</button></h3></div>`}`;
-    if (ed) {
-      $("#svcForm").addEventListener("submit", async e => {
-        e.preventDefault(); const f = e.target, t = k => f[k].value.trim() || null;
-        const fields = { name_es: f.name_es.value.trim(), name_pt: t("name_pt"), name_en: t("name_en"), desc_es: t("desc_es"), desc_pt: t("desc_pt"), desc_en: t("desc_en"), service_type_id: f.service_type_id.value || null, zone_id: f.zone_id.value || null, default_time: t("default_time"), duration: t("duration"), notes: t("notes") };
-        await saveAndRefresh("services", s, fields, saved => { P.sel = saved.id; }, isNew ? "Servicio creado." : "Guardado.");
-      });
-      if ($("#svcToggle")) $("#svcToggle").addEventListener("click", async () => {
-        if (s.active && !confirm("¿Desactivar " + s.name_es + "? No se borra: deja de aparecer para armar itinerarios nuevos.")) return;
-        await saveAndRefresh("services", s, { active: !s.active }, null, s.active ? "Servicio desactivado." : "Servicio activado.");
-      });
-    }
-    if (!isNew) { renderWhoCard(s); $("#svcHistBtn").addEventListener("click", () => showHistory("#svcHist", "service_id", s.id)); }
-  }
-
-  function renderWhoCard(s) {
-    const el = $("#whoCard"); if (!el) return;
-    const P = state.prov;
-    const rows = offersOfService(s.id).filter(o => P.showOff || o.active).map(o => ({ o, p: provById(o.provider_id), pr: priceOf(o.id, P.month) }));
-    const withAg = rows.filter(r => r.pr && r.pr.agency_adult != null && r.o.active);
-    const best = withAg.length > 1 ? withAg.reduce((a, b) => Number(b.pr.agency_adult) < Number(a.pr.agency_adult) ? b : a) : null;
-    el.innerHTML = `<h3 class="t">Quién lo ofrece · ${esc(periodLabel(P.month))}</h3>
-      <div class="tablewrap"><table class="money"><thead><tr><th rowspan="2">Proveedor</th><th colspan="2" class="c">Valor público</th><th colspan="2" class="c">Valor agencia</th><th rowspan="2" class="r">Ganancia<br>por adulto</th></tr>
-      <tr><th class="r">Adulto</th><th class="r">Menor</th><th class="r">Adulto</th><th class="r">Menor</th></tr></thead>
-      <tbody>${rows.map(({ o, p, pr }) => `<tr data-id="${o.id}" class="row ${o.active ? "" : "off"}"><td><span class="name">${esc(p ? p.name : "—")}</span>${best && best.o.id === o.id ? '<span class="sub ok">el más barato este mes</span>' : ""}${!pr ? '<span class="sub warn">sin valores este mes</span>' : ""}${o.active ? "" : '<span class="sub">ya no lo ofrece</span>'}</td>
-        <td class="r">${money(pr && pr.public_adult)}</td><td class="r">${money(pr && pr.public_minor)}</td><td class="r">${money(pr && pr.agency_adult)}</td><td class="r">${money(pr && pr.agency_minor)}</td><td class="r">${pr ? marginHTML(pr.public_adult, pr.agency_adult) : '<span class="muted">—</span>'}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Ningún proveedor ofrece este servicio todavía. Se agrega desde la ficha del proveedor.</td></tr>`}</tbody></table></div>`;
-    el.querySelector("tbody").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) pricesModal(state.cat.offers.find(o => o.id === tr.dataset.id)); });
-  }
-
-  /* ---------- comunes ---------- */
-  async function saveAndRefresh(table, orig, fields, onSaved, okMsg) {
-    setSync("busy", "Guardando…");
-    try {
-      const saved = await db.saveRow(table, orig, fields);
-      if (onSaved) onSaved(saved);
-      await db.loadCatalog(); toast(okMsg, "ok");
-    } catch (err) {
-      toast(catError(err), "bad");
-      if (err.conflict) await db.loadCatalog().catch(() => { });
-    }
-    setSync("ok", ""); renderPvList(); renderPvDetail();
   }
 
   const AUDIT_LABELS = { name: "nombre", currency: "moneda", payment_method: "forma de pago", payment_details: "datos de pago", conditions: "condiciones", notes: "notas", active: "activo", name_es: "nombre ES", name_pt: "nombre PT", name_en: "nombre EN", desc_es: "descripción ES", desc_pt: "descripción PT", desc_en: "descripción EN", service_type_id: "tipo", zone_id: "zona", default_time: "horario", duration: "duración", public_adult: "público adulto", public_minor: "público menor", agency_adult: "agencia adulto", agency_minor: "agencia menor" };
