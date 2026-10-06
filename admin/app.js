@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.1.0";
+  const APP_VERSION = "1.1.1";
 
   const ROLES = {
     direccion:           "Dirección",
@@ -479,7 +479,7 @@
         <select id="fPeriod"><option value="">Todo</option>${periodsAvailable().map(p => `<option value="${p}" ${p === f.period ? "selected" : ""}>${esc(periodLabel(p))}</option>`).join("")}</select>
         <select id="fSeller"><option value="">Todos los vendedores</option>${sellers.map(u => `<option value="${u.id}" ${u.id === f.seller ? "selected" : ""}>${esc(u.display_name)}</option>`).join("")}</select>
         <div class="chips" id="fStatus"><span class="chip ${!f.status ? "on" : ""}" data-s="">Todos</span>${Object.entries(LEAD_STATUS).map(([k, v]) => `<span class="chip ${f.status === k ? "on" : ""}" data-s="${k}">${v}</span>`).join("")}</div>
-        <label class="toggle"><input type="checkbox" id="fDeleted" ${f.showDeleted ? "checked" : ""}> ver borrados</label>
+        ${state.clients.some(x => x.deleted_at) ? `<label class="toggle"><input type="checkbox" id="fDeleted" ${f.showDeleted ? "checked" : ""}> ver borrados</label>` : ""}
         ${can("editarClientes") ? `<button class="btn gold" id="btnNew">+ Nuevo cliente</button>` : ""}
       </div>
       <div class="card">
@@ -493,7 +493,7 @@
     $("#fQ").addEventListener("input", e => { f.q = e.target.value; refreshTable(); });
     $("#fPeriod").addEventListener("change", e => { f.period = e.target.value; renderActa(); });
     $("#fSeller").addEventListener("change", e => { f.seller = e.target.value; refreshTable(); });
-    $("#fDeleted").addEventListener("change", e => { f.showDeleted = e.target.checked; refreshTable(); });
+    if ($("#fDeleted")) $("#fDeleted").addEventListener("change", e => { f.showDeleted = e.target.checked; refreshTable(); });
     $("#fStatus").addEventListener("click", e => { const ch = e.target.closest(".chip"); if (!ch) return; f.status = ch.dataset.s; $$("#fStatus .chip").forEach(x => x.classList.toggle("on", x === ch)); refreshTable(); });
     $("#btnExport").addEventListener("click", exportCSV);
     if ($("#btnNew")) $("#btnNew").addEventListener("click", () => openDrawer(null));
@@ -598,11 +598,10 @@
       $("#cForm").addEventListener("change", () => { d.dirty = true; syncReason(); });
       $("#cForm").addEventListener("input", () => { d.dirty = true; });
       $("#cForm").addEventListener("submit", e => { e.preventDefault(); saveClient(); });
-      foot.innerHTML = `${!isNew && editable && can("editarClientes") ? `<button class="btn ghost danger" id="btnDel">Marcar como borrado</button>` : ""}${c.deleted_at && can("editarClientes") ? `<button class="btn ghost" id="btnRestore">Restaurar</button>` : ""}
+      foot.innerHTML = `${c.deleted_at && can("editarClientes") ? `<button class="btn ghost" id="btnRestore">Restaurar</button>` : ""}
         <div class="rightside"><button class="btn" id="btnCancel">Cerrar</button>${editable ? `<button class="btn primary" id="btnSave">Guardar</button>` : ""}</div>`;
       $("#btnCancel").addEventListener("click", () => closeDrawer());
       if ($("#btnSave")) $("#btnSave").addEventListener("click", saveClient);
-      if ($("#btnDel")) $("#btnDel").addEventListener("click", () => softDelete(true));
       if ($("#btnRestore")) $("#btnRestore").addEventListener("click", () => softDelete(false));
     } else if (d.tab === "itin") {
       body.innerHTML = `<div class="placeholder"><b>Itinerarios · etapa 4</b>Acá van las versiones del itinerario: cuál ve el pasajero, cuál está cerrada, y el link público en portugués para mandar por WhatsApp.</div>`;
