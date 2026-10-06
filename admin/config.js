@@ -14,5 +14,5 @@ window.JEITO_CONFIG = {
 
   // Dominio ficticio con el que se arman los mails de login (usuario@dominio).
   // Supabase Auth necesita un mail por usuario aunque no se use para nada.
-  AUTH_EMAIL_DOMAIN: "jeitomiami.app"
+  AUTH_EMAIL_DOMAIN: "jeitomiami.com"
 };

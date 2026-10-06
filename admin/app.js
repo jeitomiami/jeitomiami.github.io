@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.0.0";
+  const APP_VERSION = "1.0.1";
 
   const ROLES = {
     direccion:           "Dirección",
@@ -128,9 +128,13 @@
     return c.SUPABASE_URL && c.SUPABASE_ANON_KEY && !/PEGAR_ACA/.test(c.SUPABASE_URL + c.SUPABASE_ANON_KEY);
   }
   function emailFor(username) {
+    const raw = String(username || "").trim().toLowerCase();
+    if (raw.includes("@")) return raw;            // si escriben el mail completo, se usa tal cual
     const dom = (window.JEITO_CONFIG && window.JEITO_CONFIG.AUTH_EMAIL_DOMAIN) || "jeitomiami.app";
     return cleanUsername(username) + "@" + dom;
   }
+  // Acepta la URL aunque se haya pegado con /rest/v1/ o barras al final.
+  function cleanUrl(u) { return String(u || "").trim().replace(/\/+(rest\/v1|auth\/v1)?\/*$/i, ""); }
   function cleanUsername(u) { return String(u || "").trim().toLowerCase().replace(/[^a-z0-9._-]/g, ""); }
 
   async function login(username, password) {
@@ -248,7 +252,7 @@
     async createUser({ username, display_name, role, password }) {
       await assertCanSave();
       const c = window.JEITO_CONFIG;
-      const tmp = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+      const tmp = window.supabase.createClient(cleanUrl(c.SUPABASE_URL), c.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
       const { data, error } = await tmp.auth.signUp({ email: emailFor(username), password, options: { data: { username: cleanUsername(username), display_name, role } } });
       if (error) throw error;
       const newId = data.user && data.user.id;
@@ -863,7 +867,7 @@
   async function boot() {
     if (!configOk() || !window.supabase) { render(); return; }
     const c = window.JEITO_CONFIG;
-    state.supabase = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY);
+    state.supabase = window.supabase.createClient(cleanUrl(c.SUPABASE_URL), c.SUPABASE_ANON_KEY);
     const { data } = await state.supabase.auth.getSession();
     state.session = data.session || null;
     state.supabase.auth.onAuthStateChange((event, session) => {
