@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.2.2";
+  const APP_VERSION = "1.3.0";
 
   // Seguridad de la sesión
   const PASSWORD_MIN = 8;                       // largo mínimo de contraseña
@@ -39,6 +39,9 @@
     editarClientes:  ["direccion", "ventas", "operaciones"],
     verProveedores:  ["direccion", "operaciones", "operador_financiero"],
     editarProveedores: ["direccion", "operaciones"],
+    verItinerarios:  ["direccion", "ventas", "operaciones", "operador_financiero"],
+    editarItinerarios: ["direccion", "ventas", "operaciones"],
+    verCostos:       ["direccion", "operaciones", "operador_financiero"],
     admin:           ["direccion"]
   };
 
@@ -80,6 +83,7 @@
     drawer: null,        // {client, tab, loadedUpdatedAt, events}
     cat: null,           // proveedores, servicios, ofertas y valores (se carga al entrar a Proveedores)
     prov: { tab: "prov", edit: null, dirty: false, q: "", month: currentPeriod(), showOff: false },
+    itin: { clientId: null, itinId: null, versions: [], detail: null, edit: null, dirty: false, token: null, list: null, filters: { q: "", status: "" }, catCache: {} },
     modal: null,
     codeStale: false,    // hay una versión más nueva publicada
     remoteVersion: null,
@@ -172,7 +176,7 @@
     state.loginNote = typeof note === "string" ? note : "";
     state.weakPassword = false; hideIdleWarn();
     await state.supabase.auth.signOut();
-    state.session = null; state.me = null; state.clients = []; state.cat = null;
+    state.session = null; state.me = null; state.clients = []; state.cat = null; state.itin.clientId = null; state.itin.list = null; state.itin.dirty = false;
     render();
   }
   async function loadProfile() {
@@ -385,7 +389,7 @@
   const NAV = [
     { group: "Comercial" },
     { id: "acta", label: "Acta de clientes", icon: "M4 5h16v14H4z M8 9h8M8 13h5", need: "verClientes" },
-    { id: "itin", label: "Itinerarios", icon: "M4 6h16M4 12h16M4 18h10", soon: "etapa 4" },
+    { id: "itin", label: "Itinerarios", icon: "M4 6h16M4 12h16M4 18h10", need: "verItinerarios" },
     { id: "banco", label: "Banco de reservas", icon: "M3 4h18v16H3z M8 2v4M16 2v4M3 10h18", soon: "etapa 6" },
     { group: "Operaciones" },
     { id: "logi", label: "Logística", icon: "M3 7h13l3 4h2v6H3z", soon: "etapa 7" },
@@ -398,7 +402,7 @@
     { group: "Sistema" },
     { id: "admin", label: "Administración", icon: "M12 9a3 3 0 1 0 0 6a3 3 0 0 0 0-6z M12 2v3M12 19v3M2 12h3M19 12h3", need: "admin" }
   ];
-  const TITLES = { acta: "Acta de clientes", prov: "Proveedores y servicios", admin: "Administración", perfil: "Mi usuario" };
+  const TITLES = { acta: "Acta de clientes", itin: "Itinerarios", prov: "Proveedores y servicios", admin: "Administración", perfil: "Mi usuario" };
 
   function shellHTML() {
     const nav = NAV.map(n => {
@@ -430,6 +434,8 @@
     renderBanner();
   }
   function goView(v) {
+    if (state.view === "itin" && state.itin.clientId && state.itin.dirty && !confirm("Hay cambios sin guardar en el itinerario. ¿Salir igual?")) return;
+    if (v === "itin") { state.itin.clientId = null; state.itin.dirty = false; }
     state.view = v; state.drawer = null;
     $$("#nav a[data-view]").forEach(a => a.classList.toggle("on", a.dataset.view === v));
     $("#pageTitle").textContent = TITLES[v] || "";
@@ -450,6 +456,7 @@
     if (state.view === "acta") return renderActa();
     if (state.view === "admin") return renderAdmin();
     if (state.view === "prov") return renderProv();
+    if (state.view === "itin") return renderItin();
     if (state.view === "perfil") return renderPerfil();
     c.innerHTML = `<div class="placeholder"><b>En construcción</b></div>`;
   }
@@ -627,7 +634,7 @@
       if ($("#btnSave")) $("#btnSave").addEventListener("click", saveClient);
       if ($("#btnRestore")) $("#btnRestore").addEventListener("click", () => softDelete(false));
     } else if (d.tab === "itin") {
-      body.innerHTML = `<div class="placeholder"><b>Itinerarios · etapa 4</b>Acá van las versiones del itinerario: cuál ve el pasajero, cuál está cerrada, y el link público en portugués para mandar por WhatsApp.</div>`;
+      renderClientItinTab(body, d.client);
       foot.innerHTML = `<div class="rightside"><button class="btn" id="btnCancel">Cerrar</button></div>`; $("#btnCancel").addEventListener("click", () => closeDrawer());
     } else if (d.tab === "cobros") {
       body.innerHTML = `<div class="placeholder"><b>Cobros · etapa 5</b>Lo que debe según el itinerario cerrado, lo que pagó (en reales o dólares, con la cotización de ese día) y el saldo. Solo lo ve dirección.</div>`;
@@ -728,8 +735,8 @@
     return String(na) === String(nb);
   }
   function svcName(s) { return s ? s.name_es : "—"; }
-  function provById(id) { return (state.cat.providers || []).find(p => p.id === id); }
-  function svcById(id) { return (state.cat.services || []).find(s => s.id === id); }
+  function provById(id) { return ((state.cat || {}).providers || []).find(p => p.id === id); }
+  function svcById(id) { return ((state.cat || {}).services || []).find(s => s.id === id); }
   function offersOfProvider(pid) { return state.cat.offers.filter(o => o.provider_id === pid); }
   function offersOfService(sid) { return state.cat.offers.filter(o => o.service_id === sid); }
   function priceOf(offerId, ym) { return state.cat.prices.find(p => p.offer_id === offerId && p.month === monthKey(ym)) || null; }
@@ -958,6 +965,11 @@
           <div class="field"><label>Horario sugerido</label><input name="default_time" type="time" value="${esc(v.default_time || "")}" ${dis}></div>
           <div class="field"><label>Duración</label><input name="duration" value="${esc(v.duration || "")}" placeholder="4 h, día completo…" ${dis}></div>
         </div>
+        <div class="grid4">
+          <div class="field"><label>Paga como menor hasta</label><div class="suffix"><input name="minor_age_max" type="number" min="0" max="17" value="${esc(v.minor_age_max == null ? 11 : v.minor_age_max)}" ${dis}><span>años</span></div></div>
+          <div class="field"><label>Bebés sin cargo hasta</label><div class="suffix"><input name="infant_age_max" type="number" min="0" max="16" value="${esc(v.id ? (v.infant_age_max == null ? "" : v.infant_age_max) : 2)}" placeholder="—" ${dis}><span>años</span></div></div>
+          <div class="field" style="grid-column:span 2"><span class="help" style="margin-top:22px">Mayores de esa edad pagan como adulto. Si dejás “bebés” vacío, los bebés pagan como menor.</span></div>
+        </div>
         <div class="vals"><div class="vals-h"><b>Valores de ${esc(periodLabel(P.month))}</b> <span class="muted">· USD por persona</span>${o ? ` <button type="button" class="linkbtn" id="sfMonths">ver / cargar otros meses</button>` : ""}</div>
           <div class="grid4">
             <div class="field"><label>Público adulto</label><input name="pa" inputmode="decimal" value="${val(pr.public_adult)}" ${dis}></div>
@@ -993,7 +1005,7 @@
     if (isNew) form.name_es.addEventListener("change", () => {
       const ex = state.cat.services.find(x => x.name_es.trim().toLowerCase() === form.name_es.value.trim().toLowerCase());
       $("#sfSame").textContent = ex ? "Este servicio ya existe con otro proveedor: se usan sus mismos datos y se le suma este proveedor." : "";
-      if (ex) ["name_pt", "name_en", "service_type_id", "zone_id", "default_time", "duration", "desc_es", "desc_pt", "desc_en"].forEach(k => { if (!form[k].value && ex[k]) form[k].value = ex[k]; });
+      if (ex) { ["name_pt", "name_en", "service_type_id", "zone_id", "default_time", "duration", "desc_es", "desc_pt", "desc_en"].forEach(k => { if (!form[k].value && ex[k]) form[k].value = ex[k]; }); form.minor_age_max.value = ex.minor_age_max == null ? 11 : ex.minor_age_max; form.infant_age_max.value = ex.infant_age_max == null ? "" : ex.infant_age_max; }
     });
     if (!ed) return;
     if ($("#offToggle2")) $("#offToggle2").addEventListener("click", async () => {
@@ -1006,7 +1018,10 @@
       for (const [n, col] of [["pa", "public_adult"], ["pm", "public_minor"], ["aa", "agency_adult"], ["am", "agency_minor"]]) {
         const x = numOrNull(f[n].value); if (Number.isNaN(x)) { toast("Hay un valor que no es un número.", "bad"); f[n].focus(); return; } vals[col] = x;
       }
-      const svcFields = { name_es: f.name_es.value.trim(), name_pt: t("name_pt"), name_en: t("name_en"), service_type_id: f.service_type_id.value || null, zone_id: f.zone_id.value || null, default_time: t("default_time"), duration: t("duration"), desc_es: t("desc_es"), desc_pt: t("desc_pt"), desc_en: t("desc_en"), notes: t("notes") };
+      const mAge = parseInt(f.minor_age_max.value, 10), iAge = f.infant_age_max.value.trim() === "" ? null : parseInt(f.infant_age_max.value, 10);
+      if (!(mAge >= 0 && mAge <= 17)) { toast("La edad de menor tiene que ser entre 0 y 17.", "bad"); f.minor_age_max.focus(); return; }
+      if (iAge != null && !(iAge >= 0 && iAge < mAge)) { toast("La edad de bebé tiene que ser menor que la de menor.", "bad"); f.infant_age_max.focus(); return; }
+      const svcFields = { minor_age_max: mAge, infant_age_max: iAge, name_es: f.name_es.value.trim(), name_pt: t("name_pt"), name_en: t("name_en"), service_type_id: f.service_type_id.value || null, zone_id: f.zone_id.value || null, default_time: t("default_time"), duration: t("duration"), desc_es: t("desc_es"), desc_pt: t("desc_pt"), desc_en: t("desc_en"), notes: t("notes") };
       const allYear = f.all_year && f.all_year.checked;
       const btn = $("button[type=submit]", f); btn.disabled = true;
       await saveAndRefresh(async () => {
@@ -1015,7 +1030,7 @@
           const pid = f.provider_id.value; if (!pid) throw new Error("Elegí el proveedor.");
           svc = state.cat.services.find(x => x.name_es.trim().toLowerCase() === svcFields.name_es.toLowerCase()) || null;
           if (svc) {           // ya existe: solo completo lo que estaba vacío (nunca piso lo que cargó otro)
-            const fill = {}; Object.keys(svcFields).forEach(k => { if (svcFields[k] != null && (svc[k] == null || svc[k] === "")) fill[k] = svcFields[k]; });
+            const fill = {}; Object.keys(svcFields).forEach(k => { if (k === "minor_age_max" || k === "infant_age_max") return; if (svcFields[k] != null && (svc[k] == null || svc[k] === "")) fill[k] = svcFields[k]; });
             if (!svc.active) fill.active = true;
             if (Object.keys(fill).length) svc = await db.saveRow("services", svc, fill);
           } else svc = await db.saveRow("services", null, svcFields);
@@ -1131,7 +1146,7 @@
     });
   }
 
-  const AUDIT_LABELS = { name: "nombre", currency: "moneda", payment_method: "forma de pago", payment_details: "datos de pago", conditions: "condiciones", notes: "notas", active: "activo", name_es: "nombre ES", name_pt: "nombre PT", name_en: "nombre EN", desc_es: "descripción ES", desc_pt: "descripción PT", desc_en: "descripción EN", service_type_id: "tipo", zone_id: "zona", default_time: "horario", duration: "duración", public_adult: "público adulto", public_minor: "público menor", agency_adult: "agencia adulto", agency_minor: "agencia menor" };
+  const AUDIT_LABELS = { name: "nombre", currency: "moneda", payment_method: "forma de pago", payment_details: "datos de pago", conditions: "condiciones", notes: "notas", active: "activo", name_es: "nombre ES", name_pt: "nombre PT", name_en: "nombre EN", desc_es: "descripción ES", desc_pt: "descripción PT", desc_en: "descripción EN", service_type_id: "tipo", zone_id: "zona", default_time: "horario", duration: "duración", minor_age_max: "menor hasta", infant_age_max: "bebé hasta", public_adult: "público adulto", public_minor: "público menor", agency_adult: "agencia adulto", agency_minor: "agencia menor" };
   function auditVal(k, x) {
     if (x == null || x === "") return "—";
     if (k === "active") return x ? "sí" : "no";
@@ -1156,6 +1171,434 @@
       return `${who}${w ? " · " + esc(w) : ""} · ${parts.join(" · ")}`;
     };
     el.innerHTML = `<h3 class="t">Historial</h3>${ev.length ? `<ul class="list">${ev.map(e => `<li><div class="grow">${line(e)}</div><small class="nowrap">${fmtDateLong(e.at)}</small></li>`).join("")}</ul>` : `<div class="empty">Sin cambios registrados.</div>`}<div class="note">Lo registra la base de datos sola, con quién y cuándo. No se puede editar.</div>`;
+  }
+
+  /* ==========================================================================
+     6a3. ITINERARIOS
+     Versiones por cliente: borrador → enviada (congelada) → cerrada (una sola).
+     El costo de cada línea vive en otra tabla que ventas no puede leer.
+     ========================================================================== */
+  const ITIN_STATUS = { borrador: "Borrador", enviada: "Enviada", cerrada: "Cerrada", reemplazada: "Reemplazada" };
+  const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  function numSigned(v) { const s = String(v == null ? "" : v).trim().replace(",", ".").replace("−", "-"); if (s === "" || s === "-") return null; const n = Number(s); return isFinite(n) ? Math.round(n * 100) / 100 : NaN; }
+  function itemPublic(i) { return (i.n_adults || 0) * (Number(i.public_adult) || 0) + (i.n_minors || 0) * (Number(i.public_minor) || 0); }
+  function itemCost(i, c) { if (!c) return null; return (i.n_adults || 0) * (Number(c.agency_adult) || 0) + (i.n_minors || 0) * (Number(c.agency_minor) || 0); }
+  function addDays(ymd, n) { const d = new Date(ymd + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+  function daysBetween(a, b) { if (!a || !b || b < a) return []; const out = []; let d = a; for (let k = 0; k < 120 && d <= b; k++) { out.push(d); d = addDays(d, 1); } return out; }
+  function dayLabel(ymd, idx) { const d = new Date(ymd + "T12:00:00"); return (idx != null ? "Día " + (idx + 1) + " · " : "") + DIAS[d.getDay()] + " " + fmtDate(ymd); }
+  function agesCount(t) { return (String(t || "").match(/\d{1,2}/g) || []).length; }
+  function paxText(i) { return [i.n_adults ? i.n_adults + " ad" : "", i.n_minors ? i.n_minors + " men" : "", i.n_infants ? i.n_infants + " bebé" + (i.n_infants > 1 ? "s" : "") : ""].filter(Boolean).join(" · ") || "0 pax"; }
+  function clientById(id) { return state.clients.find(c => String(c.id) === String(id)); }
+  function roteiroUrl(token) { return location.origin + "/roteiro/?c=" + encodeURIComponent(token); }
+  function statusTag(st) { return `<span class="ist ${st}">${ITIN_STATUS[st] || st}</span>`; }
+
+  Object.assign(db, {
+    async itinList() {
+      const sb = state.supabase;
+      const [it, items] = await Promise.all([
+        sb.from("itineraries").select("*").order("version", { ascending: false }).limit(3000),
+        sb.from("itinerary_items").select("itinerary_id, n_adults, n_minors, public_adult, public_minor").limit(20000)
+      ]);
+      for (const r of [it, items]) if (r.error) throw r.error;
+      const tot = {}; (items.data || []).forEach(i => { tot[i.itinerary_id] = (tot[i.itinerary_id] || 0) + itemPublic(i); });
+      return (it.data || []).map(x => Object.assign({}, x, { _total: (tot[x.id] || 0) + Number(x.adjustment || 0), _items: tot[x.id] != null }));
+    },
+    async itinVersions(clientId) {
+      const { data, error } = await state.supabase.from("itineraries").select("*").eq("client_id", clientId).order("version", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    async itinDetail(itinId) {
+      const sb = state.supabase;
+      const [h, it] = await Promise.all([
+        sb.from("itinerary_hotels").select("*").eq("itinerary_id", itinId).order("sort"),
+        sb.from("itinerary_items").select("*").eq("itinerary_id", itinId).order("sort")
+      ]);
+      for (const r of [h, it]) if (r.error) throw r.error;
+      let costs = {};
+      if (can("verCostos") && (it.data || []).length) {
+        const c = await sb.from("itinerary_item_costs").select("*").in("item_id", it.data.map(x => x.id));
+        if (!c.error) (c.data || []).forEach(x => { costs[x.item_id] = x; });
+      }
+      return { hotels: h.data || [], items: it.data || [], costs };
+    },
+    async clientLink(clientId) {
+      if (!can("editarItinerarios")) return null;
+      const { data } = await state.supabase.from("client_links").select("token").eq("client_id", clientId).maybeSingle();
+      return data ? data.token : null;
+    },
+    async rpcOk(fn, args) {
+      await assertCanSave();
+      const { data, error } = await state.supabase.rpc(fn, args);
+      if (error) throw error;
+      return data;
+    },
+    async itinCatalog(ym) {
+      const { data, error } = await state.supabase.rpc("itin_catalog", { p_month: ym + "-01" });
+      if (error) throw error;
+      return data || [];
+    },
+    async deleteRow(table, row) {
+      await assertCanSave();
+      const { data, error } = await state.supabase.from(table).delete().eq("id", row.id).eq("updated_at", row.updated_at).select();
+      if (error) throw error;
+      if (!data || !data.length) { const err = new Error("CONFLICTO"); err.conflict = true; throw err; }
+    }
+  });
+
+  /* ---------- lista general ---------- */
+  async function renderItin() {
+    const c = $("#content");
+    if (!can("verItinerarios")) { c.innerHTML = `<div class="placeholder"><b>Sin acceso</b></div>`; return; }
+    if (state.itin.clientId) return renderItinEditor();
+    c.innerHTML = `<div class="empty">Cargando itinerarios…</div>`;
+    let all;
+    try { all = await db.itinList(); } catch (err) { c.innerHTML = `<div class="placeholder"><b>No se pudo cargar</b>${esc(explainError(err))}<br><br>¿Ya se corrió el SQL de Itinerarios en Supabase?</div>`; return; }
+    if (state.view !== "itin" || state.itin.clientId) return;
+    state.itin.list = all;
+    drawItinList();
+  }
+  function drawItinList() {
+    const c = $("#content"), F = state.itin.filters, all = state.itin.list || [];
+    const byClient = {};
+    all.forEach(x => { const k = String(x.client_id); (byClient[k] = byClient[k] || []).push(x); });
+    let rows = Object.entries(byClient).map(([cid, vs]) => ({ cid, last: vs[0], closed: vs.find(v => v.status === "cerrada"), n: vs.length, client: clientById(cid) }));
+    const q = F.q.trim().toLowerCase();
+    rows = rows.filter(r => (!F.status || r.last.status === F.status) && (!q || (r.client && (fullName(r.client).toLowerCase().includes(q) || String(r.client.number).includes(q)))))
+      .sort((a, b) => String(b.last.updated_at).localeCompare(String(a.last.updated_at)));
+    const chip = (v, l) => `<span class="chip ${F.status === v ? "on" : ""}" data-s="${v}">${l}</span>`;
+    c.innerHTML = `
+      <div class="pv-head"><div><h3>Itinerarios</h3><small>Uno por cliente, con todas sus versiones. Tocá un renglón para abrirlo.</small></div>${can("editarItinerarios") ? `<button class="btn gold" id="itNew">+ Nuevo itinerario</button>` : ""}</div>
+      <div class="card"><div class="pv-tools"><input id="itQ" placeholder="Buscar cliente por nombre o número…" value="${esc(F.q)}"><div class="chips" id="itSt">${chip("", "Todos")}${chip("borrador", "Borradores")}${chip("enviada", "Enviados")}${chip("cerrada", "Cerrados")}</div></div>
+      <div class="tablewrap"><table><thead><tr><th>Cliente</th><th>Viaje</th><th>Pax</th><th>Última versión</th><th class="r">Total</th><th>Vendedor</th><th>Actualizado</th></tr></thead>
+      <tbody>${rows.map(r => { const cl = r.client || {}; return `<tr class="row" data-cid="${esc(r.cid)}"><td><span class="name">${esc(fullName(cl) || "Cliente")}</span><span class="sub">Nº ${esc(cl.number || "—")}${cl.lang ? " · " + cl.lang.toUpperCase() : ""}</span></td>
+        <td class="num">${r.last.start_date ? fmtDate(r.last.start_date) + " → " + fmtDate(r.last.end_date) : "—"}</td><td>${r.last.adults}${agesCount(r.last.minors_ages) ? " + " + agesCount(r.last.minors_ages) : ""}</td>
+        <td>v${r.last.version} ${statusTag(r.last.status)}${r.closed && r.closed.id !== r.last.id ? `<span class="sub">cerrada: v${r.closed.version}</span>` : ""}</td>
+        <td class="r"><b>${money(r.last._total)}</b></td><td>${esc(userName(cl.seller_id))}</td><td class="num">${fmtDateTime(r.last.updated_at)}</td></tr>`; }).join("") || `<tr><td colspan="7" class="empty">${all.length ? "Nada coincide con el filtro." : "Todavía no hay itinerarios. Tocá “+ Nuevo itinerario” o abrí un cliente desde la Acta."}</td></tr>`}</tbody></table></div>
+      <div class="tfoot">${rows.length} cliente${rows.length === 1 ? "" : "s"} con itinerario</div></div>`;
+    $("#itQ").addEventListener("input", e => { F.q = e.target.value; const pos = e.target.selectionStart; drawItinList(); const i = $("#itQ"); i.focus(); i.setSelectionRange(pos, pos); });
+    $("#itSt").addEventListener("click", e => { const ch = e.target.closest(".chip"); if (!ch) return; F.status = ch.dataset.s; drawItinList(); });
+    if ($("#itNew")) $("#itNew").addEventListener("click", newItinModal);
+    c.querySelector("tbody").addEventListener("click", e => { const tr = e.target.closest("tr[data-cid]"); if (tr) openItinEditor(tr.dataset.cid); });
+  }
+  function newItinModal() {
+    const has = new Set((state.itin.list || []).map(x => String(x.client_id)));
+    const cls = state.clients.filter(c => !c.deleted_at).sort((a, b) => b.number - a.number);
+    openModal(`<h3>Nuevo itinerario</h3><p>Elegí el cliente. Las fechas y los pasajeros se toman de su ficha.</p>
+      <form id="niForm"><div class="field"><label>Cliente</label><input id="niQ" placeholder="Buscar por nombre o número…" autocomplete="off"></div>
+      <ul class="list sel pick" id="niList"></ul>
+      <div class="acts"><button type="button" class="btn" id="mCancel">Cancelar</button></div></form>`);
+    const draw = () => {
+      const q = $("#niQ").value.trim().toLowerCase();
+      $("#niList").innerHTML = cls.filter(c => !q || fullName(c).toLowerCase().includes(q) || String(c.number).includes(q)).slice(0, 40)
+        .map(c => `<li data-id="${esc(c.id)}"><div class="grow"><b>${esc(fullName(c))}</b><small>Nº ${c.number} · ${c.arrival ? fmtDate(c.arrival) + " → " + fmtDate(c.departure) : "sin fechas"} · ${c.adults || 0} ad${c.minors ? " + " + c.minors + " men" : ""}</small></div>${has.has(String(c.id)) ? `<span class="ist enviada">ya tiene</span>` : ""}</li>`).join("") || `<li class="muted">No hay clientes con ese nombre.</li>`;
+    };
+    draw(); $("#niQ").addEventListener("input", draw); $("#niQ").focus();
+    $("#mCancel").addEventListener("click", closeModal);
+    $("#niList").addEventListener("click", async e => {
+      const li = e.target.closest("li[data-id]"); if (!li) return;
+      closeModal(); await openItinEditor(li.dataset.id, true);
+    });
+  }
+
+  /* ---------- abrir el editor de un cliente ---------- */
+  async function openItinEditor(clientId, createIfNone) {
+    if (state.view !== "itin") { state.view = "itin"; $$("#nav a[data-view]").forEach(a => a.classList.toggle("on", a.dataset.view === "itin")); $("#pageTitle").textContent = TITLES.itin; }
+    const I = state.itin; I.clientId = String(clientId); I.itinId = null; I.edit = null; I.dirty = false; I.catCache = {};
+    $("#content").innerHTML = `<div class="empty">Cargando itinerario…</div>`;
+    try {
+      let vs = await db.itinVersions(I.clientId);
+      if (!vs.length && createIfNone) {
+        if (!can("editarItinerarios")) throw new Error("Este cliente todavía no tiene itinerario.");
+        await db.rpcOk("create_itinerary", { p_client: I.clientId }); vs = await db.itinVersions(I.clientId);
+        toast("Itinerario creado con las fechas y pasajeros de la ficha.", "ok");
+      }
+      if (can("verProveedores") && !state.cat) await db.loadCatalog().catch(() => { });
+      I.versions = vs; I.itinId = vs.length ? vs[0].id : null;
+      I.token = await db.clientLink(I.clientId).catch(() => null);
+      await loadItinDetail();
+    } catch (err) { toast(explainError(err), "bad"); I.clientId = null; return renderItin(); }
+    renderItinEditor();
+  }
+  async function loadItinDetail() {
+    const I = state.itin; if (!I.itinId) { I.detail = null; return; }
+    I.detail = await db.itinDetail(I.itinId);
+    const it = I.versions.find(v => v.id === I.itinId);
+    I.edit = { it: Object.assign({}, it), hotels: I.detail.hotels.map(h => Object.assign({}, h)), items: I.detail.items.map(x => Object.assign({}, x)), delHotels: [], delItems: [] };
+    I.dirty = false;
+  }
+  async function reloadItin(keepVersion) {
+    const I = state.itin, cur = I.itinId;
+    I.versions = await db.itinVersions(I.clientId);
+    I.itinId = keepVersion && I.versions.some(v => v.id === cur) ? cur : (I.versions[0] || {}).id;
+    I.token = await db.clientLink(I.clientId).catch(() => I.token);
+    await loadItinDetail(); renderItinEditor();
+  }
+  function leaveItinEditor() {
+    const I = state.itin;
+    if (I.dirty && !confirm("Hay cambios sin guardar en el itinerario. ¿Salir igual?")) return;
+    I.clientId = null; I.dirty = false; renderItin();
+  }
+
+  /* ---------- editor ---------- */
+  function renderItinEditor() {
+    const I = state.itin, c = $("#content"), cl = clientById(I.clientId) || {};
+    const E = I.edit, it = E ? E.it : null;
+    const ed = can("editarItinerarios"), canEdit = ed && it && it.status === "borrador";
+    const showCost = can("verCostos");
+    const hasDraft = I.versions.some(v => v.status === "borrador");
+    const vChips = I.versions.map(v => `<button class="ver ${v.id === I.itinId ? "on" : ""}" data-id="${v.id}"><b>v${v.version}</b> ${statusTag(v.status)}</button>`).join("");
+    const lang = cl.lang || "pt";
+    let html = `<div class="it-top card">
+        <div class="it-top-row"><button class="linkbtn" id="itBack">← Todos los itinerarios</button>
+          <div class="it-acts">${ed && I.token ? `<button class="btn sm" id="itCopy">Copiar link</button><a class="btn sm" id="itView" href="${esc(roteiroUrl(I.token))}" target="_blank" rel="noopener">Ver como el cliente</a>` : ""}${ed && !hasDraft && I.versions.length ? `<button class="btn sm gold" id="itNewV">+ Nueva versión</button>` : ""}</div></div>
+        <div class="it-client"><div><h3>${esc(fullName(cl) || "Cliente")}</h3><small>Nº ${esc(cl.number || "—")} · ${esc(countryName(cl.origin_country) || "país sin cargar")} · el cliente lo lee en <b>${esc(LANGS[lang] || lang)}</b> · vendedor: ${esc(userName(cl.seller_id))}</small></div>
+          <div class="vers" id="itVers">${vChips}</div></div>
+        ${I.token && ed ? `<div class="it-link">Link del cliente: <code>${esc(roteiroUrl(I.token))}</code> <button class="linkbtn" id="itRenew">cambiar link</button></div>` : ""}
+      </div>`;
+    if (!it) {
+      html += `<div class="placeholder"><b>Este cliente todavía no tiene itinerario</b>${ed ? `<br><button class="btn gold" id="itCreate">Armar itinerario</button>` : ""}</div>`;
+      c.innerHTML = `<div id="itEd">${html}</div>`; wireItinTop(); if ($("#itCreate")) $("#itCreate").addEventListener("click", () => openItinEditor(I.clientId, true)); return;
+    }
+    if (it.status !== "borrador") {
+      const msg = it.status === "enviada" ? `Versión enviada el ${fmtDateLong(it.sent_at)} por ${esc(userName(it.sent_by))}. Ya no se cambia: es lo que vio el cliente.`
+        : it.status === "cerrada" ? `✓ Versión cerrada: el cliente la aceptó el ${fmtDateLong(it.closed_at)}. Es la que se usa para cobrar y operar.`
+        : `Esta versión fue reemplazada por una cerrada más nueva.`;
+      html += `<div class="it-banner ${it.status}">${msg}${ed && !hasDraft ? ` Para cambiar algo, tocá <b>+ Nueva versión</b> (copia esta).` : ""}${ed && hasDraft ? " Hay un borrador más nuevo: elegilo arriba." : ""}</div>`;
+    }
+    const dis = canEdit ? "" : "disabled";
+    const days = daysBetween(it.start_date, it.end_date);
+    const nAges = agesCount(it.minors_ages);
+    const warnAges = cl.minors && nAges < cl.minors ? `<span class="help warn">La ficha dice ${cl.minors} menor${cl.minors > 1 ? "es" : ""}: cargá sus edades para calcular bien los precios.</span>` : `<span class="help">Separadas por coma, ej. 3, 7, 12. Cada servicio decide quién paga como menor y quién no paga (bebés).</span>`;
+    html += `<div class="card it-sec"><h3 class="t">Viaje</h3><div class="pad"><div class="grid4">
+        <div class="field"><label>Llegada</label><input type="date" data-f="start_date" value="${esc(it.start_date || "")}" ${dis}></div>
+        <div class="field"><label>Salida</label><input type="date" data-f="end_date" value="${esc(it.end_date || "")}" ${dis}></div>
+        <div class="field"><label>Adultos</label><input type="number" min="0" data-f="adults" value="${esc(it.adults)}" ${dis}></div>
+        <div class="field"><label>Edades de los menores</label><input data-f="minors_ages" value="${esc(it.minors_ages || "")}" placeholder="ej. 3, 7, 12" ${dis}>${warnAges}</div>
+      </div></div></div>`;
+    html += `<div class="card it-sec"><h3 class="t">Hoteles${canEdit ? `<button class="btn sm" id="itAddHotel">+ Agregar hotel</button>` : ""}</h3><div class="pad" id="itHotels">${E.hotels.map((h, k) => `<div class="hotel-row" data-k="${k}">
+        <div class="field"><label>Hotel</label><input data-h="name" value="${esc(h.name || "")}" placeholder="Nombre del hotel" ${dis}></div>
+        <div class="field"><label>Desde</label><input type="date" data-h="date_from" value="${esc(h.date_from || "")}" ${dis}></div>
+        <div class="field"><label>Hasta</label><input type="date" data-h="date_to" value="${esc(h.date_to || "")}" ${dis}></div>
+        ${canEdit ? `<button class="btn sm ghost danger" data-act="delhotel" title="Quitar">✕</button>` : ""}</div>`).join("") || `<div class="muted" style="padding:4px 0 10px">Sin hotel cargado.</div>`}</div></div>`;
+    // días
+    const inRange = new Set(days);
+    const byDay = {}; E.items.forEach(x => { (byDay[x.day] = byDay[x.day] || []).push(x); });
+    Object.values(byDay).forEach(l => l.sort((a, b) => (a.time || "99").localeCompare(b.time || "99") || a.sort - b.sort));
+    const out = Object.keys(byDay).filter(d => !inRange.has(d)).sort();
+    const itemRow = x => {
+      const k = E.items.indexOf(x), cst = I.detail.costs[x.id], pub = itemPublic(x), cost = itemCost(x, cst);
+      const changed = (x.catalog_public_adult != null && !sameVal(x.public_adult, x.catalog_public_adult)) || (x.catalog_public_minor != null && !sameVal(x.public_minor, x.catalog_public_minor));
+      const noPrice = x.public_adult == null;
+      return `<div class="it-row" data-k="${k}">
+        <div class="c-time"><input type="time" data-i="time" value="${esc(x.time || "")}" ${dis}>${canEdit && days.length ? `<select data-i="day" title="Mover a otro día">${days.map((d, n) => `<option value="${d}" ${d === x.day ? "selected" : ""}>Día ${n + 1}</option>`).join("")}${inRange.has(x.day) ? "" : `<option value="${x.day}" selected>${fmtDate(x.day)}</option>`}</select>` : ""}</div>
+        <div class="c-name"><b>${esc(x.name_es)}</b><small>${showCost && cst && cst.provider_id ? esc((provById(cst.provider_id) || {}).name || "") + " · " : ""}${paxText(x)}${x.n_infants ? " (bebés sin cargo)" : ""}</small>${noPrice ? `<small class="warn">sin valor del mes: cargalo a mano</small>` : changed ? `<small class="warn">valor cambiado a mano (catálogo: ${money(x.catalog_public_adult)} / ${money(x.catalog_public_minor)})</small>` : ""}</div>
+        <div class="c-pr"><label>Adulto</label><input inputmode="decimal" data-i="public_adult" value="${x.public_adult == null ? "" : Number(x.public_adult)}" ${dis}></div>
+        <div class="c-pr"><label>Menor</label><input inputmode="decimal" data-i="public_minor" value="${x.public_minor == null ? "" : Number(x.public_minor)}" ${dis}></div>
+        <div class="c-sub"><label>Subtotal</label><b>${money(pub)}</b>${showCost ? `<small>costo ${cost == null ? "—" : money(cost)} · <span class="${pub - (cost || 0) < 0 ? "neg" : "pos"}">gan. ${money(pub - (cost || 0))}</span></small>` : ""}</div>
+        <div class="c-x">${canEdit ? `<button class="btn sm ghost danger" data-act="delitem" title="Quitar del itinerario">✕</button>` : ""}</div></div>`;
+    };
+    html += `<div class="card it-sec"><h3 class="t">Día por día</h3><div class="pad">`;
+    if (!days.length) html += `<div class="muted">Cargá la llegada y la salida (arriba) para ver los días del viaje.</div>`;
+    days.forEach((d, n) => {
+      const l = byDay[d] || [];
+      html += `<div class="day"><div class="day-h"><b>${esc(dayLabel(d, n))}</b><span class="muted">${l.length ? l.length + " servicio" + (l.length > 1 ? "s" : "") : "día libre"}</span></div>${l.map(itemRow).join("")}${canEdit ? `<button class="btn sm add-svc" data-day="${d}">+ Agregar servicio</button>` : ""}</div>`;
+    });
+    if (out.length) html += `<div class="day out"><div class="day-h"><b>Fuera de las fechas del viaje</b><span class="muted">movelos a un día del viaje o quitalos</span></div>${out.map(d => byDay[d].map(itemRow).join("")).join("")}</div>`;
+    html += `</div></div>`;
+    // precio
+    html += `<div class="it-price"><div class="card it-sec"><h3 class="t">Precio y nota</h3><div class="pad">
+        <div class="grid2"><div class="field"><label>Ajuste o descuento (US$, negativo = descuento)</label><input inputmode="decimal" data-f="adjustment" value="${Number(it.adjustment) || ""}" placeholder="ej. -100" ${dis}></div>
+        <div class="field"><label>Motivo del ajuste (interno, el cliente no lo ve)</label><input data-f="adjustment_reason" value="${esc(it.adjustment_reason || "")}" ${dis}></div></div>
+        <div class="field"><label>Nota para el cliente (escribila en ${esc(LANGS[lang] || lang)})</label><textarea rows="2" data-f="client_note" ${dis}>${esc(it.client_note || "")}</textarea></div>
+        <div class="field"><label>Qué precios ve el cliente</label><select data-f="show_item_prices" ${dis}><option value="0" ${it.show_item_prices ? "" : "selected"}>Solo el total del viaje</option><option value="1" ${it.show_item_prices ? "selected" : ""}>El total y el precio de cada servicio</option></select></div>
+      </div></div>
+      <div class="sum" id="itSum">${sumHTML()}      </div></div>`;
+    // pie
+    html += `<div class="it-foot" id="itFoot">${canEdit ? `<span class="dirty ${I.dirty ? "" : "hidden"}" id="itDirty">Hay cambios sin guardar</span><span class="grow"></span><button class="btn" id="itSave" ${I.dirty ? "" : "disabled"}>Guardar</button><button class="btn gold" id="itSend">Marcar como enviada</button>` : `<span class="grow"></span>`}${ed && (it.status === "borrador" || it.status === "enviada") ? `<button class="btn ok" id="itClose">Cliente aceptó → Cerrar</button>` : ""}</div>`;
+    c.innerHTML = `<div id="itEd">${html}</div>`;
+    wireItinTop(); wireItinEditor();
+  }
+
+  function sumHTML() {
+    const I = state.itin, E = I.edit, it = E.it, showCost = can("verCostos");
+    const nAges = agesCount(it.minors_ages);
+    const sub = E.items.reduce((a, x) => a + itemPublic(x), 0), adjN = numSigned(it.adjustment), adj = Number.isNaN(adjN) ? 0 : Number(adjN || 0), total = sub + adj;
+    const costT = E.items.reduce((a, x) => a + (itemCost(x, I.detail.costs[x.id]) || 0), 0);
+    const payers = Number(it.adults || 0) + nAges, fx = Number(state.settings.fx_brl_usd) || 0;
+    return `<div class="l"><span>Servicios (${E.items.length})</span><span>${money(sub)}</span></div>${adj ? `<div class="l"><span>Ajuste${it.adjustment_reason ? " · " + esc(it.adjustment_reason) : ""}</span><span>${adj < 0 ? "−" : "+"} ${money(Math.abs(adj))}</span></div>` : ""}
+        <div class="l big"><span>Total</span><span>${money(total)}</span></div>
+        ${fx ? `<div class="l sm"><span>Referencia en reales (cotiz. ${fx})</span><span>R$ ${Math.round(total * fx).toLocaleString("es-AR")}</span></div>` : ""}
+        ${payers ? `<div class="l sm"><span>Promedio por pasajero (${payers})</span><span>${money(Math.round(total / payers))}</span></div>` : ""}
+        ${showCost ? `<div class="l sm sep"><span>Costo (lo que paga Jeito)</span><span>${money(costT)}</span></div><div class="l"><span>Ganancia</span><b class="${total - costT < 0 ? "neg" : "pos"}">${money(total - costT)}${total > 0 ? " · " + Math.round((total - costT) * 100 / total) + "%" : ""}</b></div>` : ""}`;
+  }
+  function wireItinTop() {
+    const I = state.itin;
+    $("#itBack").addEventListener("click", leaveItinEditor);
+    if ($("#itVers")) $("#itVers").addEventListener("click", async e => {
+      const b = e.target.closest("button[data-id]"); if (!b || b.dataset.id === I.itinId) return;
+      if (I.dirty && !confirm("Hay cambios sin guardar. ¿Cambiar de versión igual?")) return;
+      I.itinId = b.dataset.id; try { await loadItinDetail(); } catch (err) { toast(explainError(err), "bad"); } renderItinEditor();
+    });
+    if ($("#itCopy")) $("#itCopy").addEventListener("click", () => copyText(roteiroUrl(I.token)));
+    if ($("#itRenew")) $("#itRenew").addEventListener("click", async () => {
+      if (!confirm("¿Hacer un link nuevo? El link anterior deja de funcionar (usalo si se lo mandaste a quien no correspondía).")) return;
+      try { I.token = await db.rpcOk("renew_client_link", { p_client: I.clientId }); toast("Link nuevo listo. El anterior ya no funciona.", "ok"); renderItinEditor(); } catch (err) { toast(explainError(err), "bad"); }
+    });
+    if ($("#itNewV")) $("#itNewV").addEventListener("click", async () => {
+      try { await db.rpcOk("create_itinerary", { p_client: I.clientId }); toast("Versión nueva creada (copia de la anterior).", "ok"); await reloadItin(false); } catch (err) { toast(explainError(err), "bad"); }
+    });
+  }
+  function copyText(t) {
+    const done = () => toast("Link copiado. Pegalo en el WhatsApp del cliente.", "ok");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, () => prompt("Copiá el link:", t));
+    else prompt("Copiá el link:", t);
+  }
+
+  function wireItinEditor() {
+    const I = state.itin, E = I.edit; if (!E) return;
+    const c = $("#itEd");
+    const markDirty = () => { I.dirty = true; const d = $("#itDirty"); if (d) d.classList.remove("hidden"); const s = $("#itSave"); if (s) s.disabled = false; };
+    c.addEventListener("input", e => {
+      const t = e.target;
+      if (t.dataset.f) { E.it[t.dataset.f] = t.dataset.f === "show_item_prices" ? t.value === "1" : t.value; markDirty(); if (["adjustment"].includes(t.dataset.f)) refreshSums(); }
+      else if (t.dataset.h) { E.hotels[+t.closest(".hotel-row").dataset.k][t.dataset.h] = t.value; markDirty(); }
+      else if (t.dataset.i) {
+        const x = E.items[+t.closest(".it-row").dataset.k];
+        if (t.dataset.i === "public_adult" || t.dataset.i === "public_minor") { const v = numOrNull(t.value); x[t.dataset.i] = Number.isNaN(v) ? x[t.dataset.i] : v; refreshSums(); }
+        else x[t.dataset.i] = t.value;
+        markDirty();
+      }
+    });
+    c.addEventListener("change", e => {
+      const t = e.target;
+      if (t.dataset.f === "show_item_prices") { E.it.show_item_prices = t.value === "1"; markDirty(); }
+      if (t.dataset.i === "day") { E.items[+t.closest(".it-row").dataset.k].day = t.value; markDirty(); renderItinEditor(); }
+      if (t.dataset.f === "start_date" || t.dataset.f === "end_date") renderItinEditor();
+    });
+    c.addEventListener("click", async e => {
+      const b = e.target.closest("button"); if (!b) return;
+      if (b.dataset.act === "delhotel") { const k = +b.closest(".hotel-row").dataset.k; const h = E.hotels[k]; if (h.id) E.delHotels.push(h); E.hotels.splice(k, 1); markDirty(); renderItinEditor(); }
+      else if (b.dataset.act === "delitem") { const k = +b.closest(".it-row").dataset.k; E.delItems.push(E.items[k]); E.items.splice(k, 1); markDirty(); renderItinEditor(); toast("Quitado. Se aplica al tocar Guardar."); }
+      else if (b.id === "itAddHotel") { E.hotels.push({ name: "", date_from: E.it.start_date || null, date_to: E.it.end_date || null, sort: E.hotels.length + 1 }); markDirty(); renderItinEditor(); const ins = $$("#itHotels [data-h=name]"); if (ins.length) ins[ins.length - 1].focus(); }
+      else if (b.classList.contains("add-svc")) { if (I.dirty && !(await saveItin(true))) return; pickServiceModal(b.dataset.day); }
+      else if (b.id === "itSave") saveItin();
+      else if (b.id === "itSend") sendItin();
+      else if (b.id === "itClose") closeItin();
+    });
+    function refreshSums() {
+      // recalcula subtotales y total sin redibujar (no se pierde el foco)
+      $$(".it-row").forEach(row => { const x = E.items[+row.dataset.k]; const s = $(".c-sub b", row); if (s) s.textContent = money(itemPublic(x)); });
+      const box = $("#itSum"); if (box) box.innerHTML = sumHTML();
+    }
+  }
+
+  // guarda todo lo que cambió: datos del viaje, hoteles y líneas (cada fila por separado, con candado)
+  async function saveItin(silent) {
+    const I = state.itin, E = I.edit; if (!E) return false;
+    const it = E.it, orig = I.versions.find(v => v.id === I.itinId);
+    for (const x of E.items) for (const k of ["public_adult", "public_minor"]) if (x[k] != null && (isNaN(x[k]) || x[k] < 0)) { toast("Revisá los valores: hay uno que no es un número válido.", "bad"); return false; }
+    if (it.start_date && it.end_date && it.end_date < it.start_date) { toast("La salida no puede ser antes que la llegada.", "bad"); return false; }
+    for (const h of E.hotels) if (!String(h.name || "").trim()) { toast("Escribí el nombre del hotel (o quitá ese renglón).", "bad"); return false; }
+    const adj = numSigned(it.adjustment); if (Number.isNaN(adj)) { toast("El ajuste tiene que ser un número.", "bad"); return false; }
+    setSync("busy", "Guardando…"); const btn = $("#itSave"); if (btn) btn.disabled = true;
+    try {
+      const fields = { start_date: it.start_date || null, end_date: it.end_date || null, adults: Math.max(0, parseInt(it.adults, 10) || 0), minors_ages: String(it.minors_ages || "").trim() || null, adjustment: adj == null ? 0 : adj, adjustment_reason: String(it.adjustment_reason || "").trim() || null, client_note: String(it.client_note || "").trim() || null, show_item_prices: !!it.show_item_prices };
+      const paxChanged = !sameVal(fields.adults, orig.adults) || !sameVal(fields.minors_ages, orig.minors_ages);
+      await db.saveRow("itineraries", orig, fields);
+      for (const h of E.delHotels) await db.deleteRow("itinerary_hotels", h);
+      for (const [k, h] of E.hotels.entries()) {
+        const f = { name: String(h.name).trim(), date_from: h.date_from || null, date_to: h.date_to || null, sort: k + 1 };
+        if (h.id) await db.saveRow("itinerary_hotels", I.detail.hotels.find(o => o.id === h.id), f);
+        else await db.saveRow("itinerary_hotels", null, Object.assign({ itinerary_id: I.itinId }, f));
+      }
+      for (const x of E.delItems) await db.deleteRow("itinerary_items", I.detail.items.find(o => o.id === x.id) || x);
+      for (const x of E.items) {
+        const o = I.detail.items.find(y => y.id === x.id); if (!o) continue;
+        await db.saveRow("itinerary_items", o, { time: x.time || null, day: x.day, public_adult: x.public_adult, public_minor: x.public_minor });
+      }
+      if (paxChanged) await db.rpcOk("recount_itinerary", { p_itin: I.itinId });
+      if (!silent) toast(paxChanged ? "Guardado. Se recalcularon los pasajeros de cada servicio." : "Guardado.", "ok");
+      setSync("ok", "Guardado " + ago(new Date().toISOString()));
+      await reloadItin(true);
+      return true;
+    } catch (err) {
+      setSync("ok", "");
+      if (err.conflict) { toast("Otra persona cambió este itinerario mientras lo editabas. Te muestro lo actual: volvé a hacer tu cambio.", "bad"); await reloadItin(true).catch(() => { }); }
+      else { toast(explainError(err), "bad"); if (btn) btn.disabled = false; }
+      return false;
+    }
+  }
+  async function sendItin() {
+    const I = state.itin, E = I.edit;
+    if (!E.items.length) return toast("Agregá al menos un servicio antes de enviarlo.", "bad");
+    if (E.items.some(x => x.public_adult == null)) return toast("Hay servicios sin valor. Cargalos antes de enviarlo.", "bad");
+    if (I.dirty && !(await saveItin(true))) return;
+    if (!confirm("¿Marcar la versión " + E.it.version + " como enviada? Queda congelada (ya no se cambia) y el link del cliente pasa a mostrar esta versión.")) return;
+    try { I.token = await db.rpcOk("send_itinerary", { p_itin: I.itinId }); await reloadItin(true); toast("Enviada. Copiá el link y mandáselo al cliente.", "ok"); }
+    catch (err) { toast(explainError(err), "bad"); }
+  }
+  async function closeItin() {
+    const I = state.itin, E = I.edit, cl = clientById(I.clientId);
+    if (!E.items.length) return toast("El itinerario no tiene servicios.", "bad");
+    if (E.it.status === "borrador" && E.items.some(x => x.public_adult == null)) return toast("Hay servicios sin valor. Cargalos antes de cerrar.", "bad");
+    if (I.dirty && !(await saveItin(true))) return;
+    const prevClosed = I.versions.find(v => v.status === "cerrada");
+    if (!confirm("¿El cliente aceptó la versión " + E.it.version + "? Queda cerrada y es la que se usa para cobrar y operar." + (prevClosed ? " La versión " + prevClosed.version + " (cerrada antes) pasa a reemplazada." : ""))) return;
+    try {
+      I.token = await db.rpcOk("close_itinerary", { p_itin: I.itinId }); await reloadItin(true); toast("Versión cerrada.", "ok");
+      if (cl && cl.lead_status !== "cerrado" && can("editarClientes") && confirm("¿Pasar la ficha de " + fullName(cl) + " a “Cerrado” en la Acta?")) {
+        try { const saved = await db.updateClient(cl.id, cl.updated_at, { lead_status: "cerrado" }); const k = state.clients.findIndex(x => x.id === saved.id); if (k >= 0) state.clients[k] = saved; toast("Ficha pasada a Cerrado.", "ok"); }
+        catch (err) { toast(err.conflict ? "La ficha cambió mientras tanto: pasala a Cerrado desde la Acta." : explainError(err), "bad"); }
+      }
+    } catch (err) { toast(explainError(err), "bad"); }
+  }
+
+  /* ---------- elegir servicio del catálogo ---------- */
+  async function pickServiceModal(day) {
+    const I = state.itin, E = I.edit, it = E.it, ym = day.slice(0, 7), priv = can("verCostos");
+    const days = daysBetween(it.start_date, it.end_date);
+    openModal(`<h3>Agregar servicio</h3><p>${esc(dayLabel(day, days.indexOf(day) >= 0 ? days.indexOf(day) : null))} · valores de ${esc(periodLabel(ym))}</p><div class="empty">Cargando catálogo…</div>`);
+    $("#modal .box").classList.add("wide");
+    let cat; try { I.catCache = I.catCache || {}; cat = I.catCache[ym] || (I.catCache[ym] = await db.itinCatalog(ym)); } catch (err) { closeModal(); return toast(explainError(err), "bad"); }
+    const counts = s => { let a = Number(it.adults) || 0, m = 0, i = 0; (String(it.minors_ages || "").match(/\d{1,2}/g) || []).map(Number).forEach(x => { if (x > s.minor_age_max) a++; else if (s.infant_age_max != null && x <= s.infant_age_max) i++; else m++; }); return { a, m, i }; };
+    const groups = {}; cat.forEach(o => { (groups[o.service_id] = groups[o.service_id] || []).push(o); });
+    const draw = q => {
+      q = (q || "").trim().toLowerCase();
+      const list = Object.values(groups).filter(g => !q || [g[0].name_es, g[0].name_pt, g[0].name_en].concat(g.map(o => o.provider || "")).join(" ").toLowerCase().includes(q));
+      $("#pkList").innerHTML = list.map(g => {
+        const s = g[0], n = counts(s), meta = [typeName(s.service_type_id), zoneName(s.zone_id), s.duration].filter(Boolean).join(" · ");
+        const minAg = g.filter(o => o.agency_adult != null).reduce((a, o) => a == null || o.agency_adult < a ? o.agency_adult : a, null);
+        return `<div class="pk"><div class="pk-h"><b>${esc(s.name_es)}</b><small>${meta ? esc(meta) + " · " : ""}menor hasta ${s.minor_age_max} años${s.infant_age_max != null ? " · bebés gratis hasta " + s.infant_age_max : ""}</small><small>Para este grupo: ${n.a} adulto${n.a === 1 ? "" : "s"}${n.m ? " · " + n.m + " menor" + (n.m > 1 ? "es" : "") : ""}${n.i ? " · " + n.i + " bebé" + (n.i > 1 ? "s" : "") + " sin cargo" : ""}</small></div>
+          ${g.map(o => { const sub = o.public_adult == null ? null : n.a * Number(o.public_adult) + n.m * Number(o.public_minor || 0); const cost = o.agency_adult == null ? null : n.a * Number(o.agency_adult) + n.m * Number(o.agency_minor || 0);
+            return `<div class="pk-o"><div class="grow">${priv ? `<b>${esc(o.provider || "")}</b>${g.length > 1 && o.agency_adult != null && o.agency_adult === minAg ? ' <span class="ist cerrada">menor costo</span>' : ""}<br>` : ""}<small>${o.public_adult == null ? `<span class="warn">sin valor en ${esc(periodLabel(ym))}: se agrega vacío y lo cargás a mano</span>` : `${money(o.public_adult)} adulto · ${money(o.public_minor)} menor → <b>${money(sub)}</b>`}${priv && cost != null && sub != null ? ` · costo ${money(cost)} · <span class="${sub - cost < 0 ? "neg" : "pos"}">gan. ${money(sub - cost)}</span>` : ""}</small></div><button class="btn sm primary" data-offer="${o.offer_id}" data-time="${esc(s.default_time || "")}">Agregar</button></div>`; }).join("")}</div>`;
+      }).join("") || `<div class="empty">${cat.length ? "Nada coincide con la búsqueda." : "El catálogo está vacío: cargá servicios en Proveedores → Servicios."}</div>`;
+    };
+    $("#modal .box").innerHTML = `<h3>Agregar servicio</h3><p>${esc(dayLabel(day, days.indexOf(day) >= 0 ? days.indexOf(day) : null))} · valores de ${esc(periodLabel(ym))}</p>
+      <div class="grid2"><div class="field"><label>Buscar</label><input id="pkQ" placeholder="Nombre del servicio${priv ? " o proveedor" : ""}…" autocomplete="off"></div><div class="field"><label>Horario (vacío = el sugerido)</label><input id="pkTime" type="time"></div></div>
+      <div id="pkList" class="pk-list"></div><div class="acts"><button type="button" class="btn" id="mCancel">Cerrar</button></div>`;
+    draw(""); $("#pkQ").focus();
+    $("#pkQ").addEventListener("input", e => draw(e.target.value));
+    $("#mCancel").addEventListener("click", closeModal);
+    $("#pkList").addEventListener("click", async e => {
+      const b = e.target.closest("button[data-offer]"); if (!b) return; b.disabled = true;
+      try { await db.rpcOk("add_itinerary_item", { p_itin: I.itinId, p_offer: b.dataset.offer, p_day: day, p_time: $("#pkTime").value || null }); closeModal(); await reloadItin(true); toast("Servicio agregado.", "ok"); }
+      catch (err) { toast(explainError(err), "bad"); b.disabled = false; }
+    });
+  }
+
+  /* ---------- pestaña “Itinerarios” en la ficha del cliente ---------- */
+  async function renderClientItinTab(body, client) {
+    body.innerHTML = `<div class="empty">Cargando…</div>`;
+    let vs; try { vs = await db.itinVersions(client.id); } catch (err) { body.innerHTML = `<div class="placeholder"><b>No se pudo cargar</b>${esc(explainError(err))}</div>`; return; }
+    if (!state.drawer || !state.drawer.client || state.drawer.client.id !== client.id || state.drawer.tab !== "itin") return;
+    const ed = can("editarItinerarios");
+    body.innerHTML = vs.length ? `<ul class="list">${vs.map(v => `<li><div class="grow"><b>Versión ${v.version}</b> ${statusTag(v.status)}<small> · ${v.status === "borrador" ? "editada " + fmtDateLong(v.updated_at) : v.status === "cerrada" ? "cerrada " + fmtDateLong(v.closed_at) : "enviada " + fmtDateLong(v.sent_at)}</small></div></li>`).join("")}</ul>
+      <div style="margin-top:14px"><button class="btn primary" id="ciOpen">Abrir itinerario</button></div>`
+      : `<div class="placeholder"><b>Todavía no tiene itinerario</b>Se arma con las fechas y pasajeros de esta ficha.${ed ? `<br><br><button class="btn gold" id="ciCreate">Armar itinerario</button>` : ""}</div>`;
+    const go = create => { closeDrawer(true); openItinEditor(client.id, create); };
+    if ($("#ciOpen")) $("#ciOpen").addEventListener("click", () => go(false));
+    if ($("#ciCreate")) $("#ciCreate").addEventListener("click", () => go(true));
   }
 
   /* ==========================================================================

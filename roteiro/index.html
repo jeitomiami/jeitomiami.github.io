@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#001E48">
+<title>Jeito Miami</title>
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Jeito Miami · itinerario para el cliente. Solo muestra lo que devuelve get_roteiro (nada interno). */
+  :root{--navy:#001E48;--navy2:#0B3B7A;--gold:#E4B472;--gold2:#BC873C;--ink:#14213D;--muted:#5F6B78;--line:#E6EAF0;--bg:#F4F6F9}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:640px;margin:0 auto;min-height:100vh;background:#fff;box-shadow:0 0 60px -30px rgba(0,30,72,.35)}
+  .bar{display:flex;align-items:center;justify-content:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .bar img{height:46px;width:auto;display:block}
+  .bar .wm{font-weight:800;letter-spacing:.12em;color:var(--navy);font-size:20px}.bar .wm i{font-style:normal;color:var(--gold)}
+  .hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff;padding:26px 22px 24px}
+  .hero .st{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.14)}
+  .hero .st.ok{background:#22C55E;color:#062F17}
+  .hero h1{font-size:24px;line-height:1.25;margin:14px 0 6px;font-weight:800}
+  .hero p{margin:0;color:#C9D6EA;font-size:15px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chips span{background:rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:13px}
+  main{padding:18px 16px 8px}
+  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 4px 10px}
+  .hotel{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+  .hotel .ic{width:40px;height:40px;border-radius:12px;background:#FBEBD3;display:grid;place-items:center;font-size:20px;flex:0 0 auto}
+  .hotel b{display:block}.hotel small{color:var(--muted)}
+  .day{margin-bottom:16px}
+  .day .h{display:flex;align-items:baseline;gap:8px;margin:0 4px 8px}
+  .day .h b{color:var(--navy);font-size:16px}
+  .day .h small{color:var(--muted);font-size:13px}
+  .svc{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px}
+  .svc .t{font-weight:700;color:var(--gold2);font-size:14px;min-width:46px;padding-top:1px}
+  .svc .n{font-weight:600;line-height:1.35}
+  .svc .d{color:var(--muted);font-size:13px;margin-top:3px;line-height:1.45}
+  .svc .p{font-size:13px;margin-top:6px;color:var(--navy);font-weight:600}
+  .svc.free{background:#FAFBFC;border-style:dashed}.svc.free .n{color:var(--muted);font-weight:500}
+  .total{background:#FFF8EC;border:1px solid #F3D9AE;border-radius:16px;padding:16px 18px;margin:18px 0 6px}
+  .total .row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:2px 0}
+  .total .big{font-size:28px;font-weight:800;color:var(--navy);margin-top:4px}
+  .total small{color:var(--muted)}
+  .note{background:#F2F6FC;border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.55;color:#24324A;white-space:pre-line;margin-top:12px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 16px 30px;line-height:1.6}
+  .msg{padding:60px 24px;text-align:center;color:var(--muted);line-height:1.6}
+  .msg b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+  .skel{height:14px;border-radius:7px;background:linear-gradient(90deg,#EEF1F5,#F7F9FB,#EEF1F5);background-size:200% 100%;animation:sk 1.2s infinite;margin:10px 0}
+  @keyframes sk{to{background-position:-200% 0}}
+  @media print{.wrap{box-shadow:none}.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar"><img src="../logo.webp" alt="Jeito Miami" onerror="this.outerHTML='<span class=wm>JEI<i>TO</i> MIAMI</span>'"></div>
+  <div id="app"><div class="msg"><div class="skel" style="width:60%;margin:0 auto 14px"></div><div class="skel"></div><div class="skel" style="width:80%"></div></div></div>
+</div>
+<script src="../admin/config.js"></script>
+<script>
+(function () {
+  "use strict";
+  var T = {
+    pt: { hi: "Olá, {n}!", hiAnon: "Olá!", sub: "Este é o seu roteiro em Miami", proposal: "Proposta · versão {v}", confirmed: "✓ Confirmado", adults: ["adulto", "adultos"], minors: ["criança", "crianças"], days: ["dia", "dias"], hotel: "Hospedagem", nights: ["noite", "noites"], plan: "Dia a dia", free: "Dia livre para aproveitar", day: "Dia", total: "Valor total", per: "para {p}", adj: "Ajuste / desconto", foot: "Valores em dólares americanos (US$), sujeitos a disponibilidade.", upd: "Atualizado em {d}", none: "Este link não está disponível.", noneSub: "Fale com a Jeito Miami para receber o link atualizado.", wait: "Seu roteiro está sendo preparado.", waitSub: "Em breve ele aparece aqui.", err: "Não foi possível carregar o roteiro.", errSub: "Verifique sua conexão e tente de novo.", infants: ["bebê", "bebês"], infFree: "sem custo", title: "Seu roteiro · Jeito Miami" },
+    es: { hi: "¡Hola, {n}!", hiAnon: "¡Hola!", sub: "Este es tu itinerario en Miami", proposal: "Propuesta · versión {v}", confirmed: "✓ Confirmado", adults: ["adulto", "adultos"], minors: ["menor", "menores"], days: ["día", "días"], hotel: "Alojamiento", nights: ["noche", "noches"], plan: "Día por día", free: "Día libre para disfrutar", day: "Día", total: "Valor total", per: "para {p}", adj: "Ajuste / descuento", foot: "Valores en dólares estadounidenses (US$), sujetos a disponibilidad.", upd: "Actualizado el {d}", none: "Este link no está disponible.", noneSub: "Escríbenos para recibir el link actualizado.", wait: "Tu itinerario se está preparando.", waitSub: "En breve aparece aquí.", err: "No se pudo cargar el itinerario.", errSub: "Revisa tu conexión e inténtalo de nuevo.", infants: ["bebé", "bebés"], infFree: "sin cargo", title: "Tu itinerario · Jeito Miami" },
+    en: { hi: "Hi, {n}!", hiAnon: "Hi!", sub: "This is your Miami itinerary", proposal: "Proposal · version {v}", confirmed: "✓ Confirmed", adults: ["adult", "adults"], minors: ["child", "children"], days: ["day", "days"], hotel: "Accommodation", nights: ["night", "nights"], plan: "Day by day", free: "Free day to enjoy", day: "Day", total: "Total price", per: "for {p}", adj: "Adjustment / discount", foot: "Prices in US dollars (US$), subject to availability.", upd: "Updated on {d}", none: "This link is not available.", noneSub: "Please contact Jeito Miami for an updated link.", wait: "Your itinerary is being prepared.", waitSub: "It will show up here soon.", err: "The itinerary could not be loaded.", errSub: "Check your connection and try again.", infants: ["infant", "infants"], infFree: "free", title: "Your itinerary · Jeito Miami" }
+  };
+  var app = document.getElementById("app");
+  var guess = (navigator.language || "pt").slice(0, 2); if (!T[guess]) guess = "pt";
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function fill(s, o) { return s.replace(/\{(\w+)\}/g, function (_, k) { return o[k]; }); }
+  function plural(n, w) { return n + " " + (n === 1 ? w[0] : w[1]); }
+  function msg(L, a, b) { app.innerHTML = '<div class="msg"><b>' + esc(T[L][a]) + "</b>" + esc(T[L][b]) + "</div>"; }
+  var token = new URLSearchParams(location.search).get("c") || "";
+  var cfg = window.JEITO_CONFIG || {};
+  var base = String(cfg.SUPABASE_URL || "").trim().replace(/\/+(rest\/v1|auth\/v1)?\/*$/i, "");
+  if (!/^[a-f0-9]{40,128}$/i.test(token) || !base) { msg(guess, "none", "noneSub"); return; }
+  fetch(base + "/rest/v1/rpc/get_roteiro", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: cfg.SUPABASE_ANON_KEY, Authorization: "Bearer " + cfg.SUPABASE_ANON_KEY },
+    body: JSON.stringify({ p_token: token }),
+    cache: "no-store", referrerPolicy: "no-referrer"
+  }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) { draw(d); })
+    .catch(function () { msg(guess, "err", "errSub"); });
+
+  function draw(d) {
+    if (!d) return msg(guess, "none", "noneSub");
+    var L = T[d.lang] ? d.lang : "pt", t = T[L];
+    document.documentElement.lang = L === "pt" ? "pt-BR" : L;
+    if (d.empty) return msg(L, "wait", "waitSub");
+    document.title = t.title;
+    var loc = L === "pt" ? "pt-BR" : L === "es" ? "es" : "en-US";
+    var fD = function (ymd, o) { return new Date(ymd + "T12:00:00").toLocaleDateString(loc, o); };
+    var money = function (n) { return "US$ " + Number(n || 0).toLocaleString(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 }); };
+    var days = [], k;
+    if (d.start && d.end) { for (k = new Date(d.start + "T12:00:00"); k <= new Date(d.end + "T12:00:00") && days.length < 120; k.setDate(k.getDate() + 1)) days.push(k.toISOString().slice(0, 10)); }
+    var byDay = {}; (d.items || []).forEach(function (i) { (byDay[i.day] = byDay[i.day] || []).push(i); });
+    Object.keys(byDay).forEach(function (x) { if (days.indexOf(x) < 0) days.push(x); }); days.sort();
+    var pax = [plural(d.adults, t.adults)]; if (d.minors) pax.push(plural(d.minors, t.minors));
+    var h = '<div class="hero"><span class="st ' + (d.confirmed ? "ok" : "") + '">' + esc(d.confirmed ? t.confirmed : fill(t.proposal, { v: d.version })) + "</span>";
+    h += "<h1>" + esc(d.name ? fill(t.hi, { n: d.name }) : t.hiAnon) + "<br>" + esc(t.sub) + "</h1>";
+    if (d.start && d.end) h += "<p>" + esc(fD(d.start, { day: "numeric", month: "long" }) + " → " + fD(d.end, { day: "numeric", month: "long", year: "numeric" })) + "</p>";
+    h += '<div class="chips"><span>' + esc(pax.join(" · ")) + "</span>" + (d.start && d.end ? "<span>" + esc(plural(days.length, t.days)) + "</span>" : "") + "</div></div><main>";
+    if ((d.hotels || []).length) {
+      h += "<h2>" + esc(t.hotel) + "</h2>";
+      d.hotels.forEach(function (o) {
+        var n = o.from && o.to ? Math.round((new Date(o.to) - new Date(o.from)) / 864e5) : 0;
+        h += '<div class="hotel"><div class="ic">🏨</div><div><b>' + esc(o.name) + "</b><small>" + (o.from && o.to ? esc(fD(o.from, { day: "numeric", month: "short" }) + " → " + fD(o.to, { day: "numeric", month: "short" }) + (n > 0 ? " · " + plural(n, t.nights) : "")) : "") + "</small></div></div>";
+      });
+    }
+    h += "<h2>" + esc(t.plan) + "</h2>";
+    days.forEach(function (x, n) {
+      h += '<div class="day"><div class="h"><b>' + esc(t.day + " " + (n + 1)) + "</b><small>" + esc(fD(x, { weekday: "long", day: "numeric", month: "short" })) + "</small></div>";
+      var l = byDay[x] || [];
+      if (!l.length) h += '<div class="svc free"><div class="t">☀️</div><div class="n">' + esc(t.free) + "</div></div>";
+      l.forEach(function (i) {
+        h += '<div class="svc"><div class="t">' + esc(i.time || "") + '</div><div><div class="n">' + esc(i.name) + "</div>" + (i.desc ? '<div class="d">' + esc(i.desc) + "</div>" : "");
+        if (i.pax && i.pax.i) h += '<div class="d">' + esc(plural(i.pax.i, t.infants) + " " + t.infFree) + "</div>";
+        if (d.show_prices && i.price != null) h += '<div class="p">' + esc(money(i.price)) + "</div>";
+        h += "</div></div>";
+      });
+      h += "</div>";
+    });
+    h += '<div class="total">';
+    if (d.show_prices && d.adjustment) h += '<div class="row"><span>' + esc(t.adj) + "</span><span>" + (d.adjustment < 0 ? "− " : "+ ") + esc(money(Math.abs(d.adjustment))) + "</span></div>";
+    h += "<small>" + esc(t.total) + '</small><div class="big">' + esc(money(d.total)) + "</div><small>" + esc(fill(t.per, { p: pax.join(" · ") })) + "</small></div>";
+    if (d.note) h += '<div class="note">' + esc(d.note) + "</div>";
+    h += "</main><footer>" + esc(t.foot) + "<br>" + esc(fill(t.upd, { d: fD(d.updated, { day: "numeric", month: "long", year: "numeric" }) })) + "<br><b>Jeito Miami</b> · jeitomiami.com</footer>";
+    app.innerHTML = h;
+  }
+})();
+</script>
+</body>
+</html>
