@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.3.0";
+  const APP_VERSION = "1.4.0";
 
   // Seguridad de la sesión
   const PASSWORD_MIN = 8;                       // largo mínimo de contraseña
@@ -752,14 +752,18 @@
   Object.assign(db, {
     async loadCatalog() {
       const sb = state.supabase;
-      const [p, s, o, pr] = await Promise.all([
+      const [p, s, o, pr, ti, tr, tp] = await Promise.all([
         sb.from("providers").select("*").order("name"),
         sb.from("services").select("*").order("name_es"),
         sb.from("provider_services").select("*"),
-        sb.from("offer_prices").select("*")
+        sb.from("offer_prices").select("*"),
+        sb.from("vehicle_tiers").select("*").order("pax_from"),
+        sb.from("transfers").select("*").order("name_es"),
+        sb.from("transfer_prices").select("*")
       ]);
       for (const r of [p, s, o, pr]) if (r.error) throw r.error;
-      state.cat = { providers: p.data || [], services: s.data || [], offers: o.data || [], prices: pr.data || [] };
+      const ok = r => (r.error ? [] : r.data || []);     // si todavía no se corrió el SQL de traslados, sigue andando
+      state.cat = { providers: p.data || [], services: s.data || [], offers: o.data || [], prices: pr.data || [], tiers: ok(ti), transfers: ok(tr), tprices: ok(tp) };
     },
     // Guarda UNA fila: si es nueva la crea; si existe manda solo los campos que
     // cambiaron, con candado (updated_at = el que leí). Regla 3.
@@ -779,6 +783,11 @@
     },
     async auditFor(col, id) {
       const { data, error } = await state.supabase.from("audit_events").select("*").eq(col, id).order("at", { ascending: false }).limit(80);
+      if (error) throw error;
+      return data || [];
+    },
+    async rpcRead(fn, args) {
+      const { data, error } = await state.supabase.rpc(fn, args);
       if (error) throw error;
       return data || [];
     },
@@ -809,12 +818,15 @@
       try { await db.loadCatalog(); } catch (err) { c.innerHTML = `<div class="placeholder"><b>No se pudo cargar</b>${esc(explainError(err))}<br><br>¿Ya se corrió el SQL de Proveedores en Supabase?</div>`; return; }
       if (state.view !== "prov") return;
     }
-    const isProv = P.tab === "prov", ed = can("editarProveedores");
+    const isProv = P.tab === "prov", isTrf = P.tab === "trf", ed = can("editarProveedores");
     const nOffers = state.cat.offers.filter(o => o.active && (svcById(o.service_id) || {}).active !== false).length;
+    const H = { prov: ["Proveedores", "Las empresas que hacen las excursiones, con sus datos de pago.", "proveedor"],
+                svc: ["Servicios", "Cada servicio con su proveedor y los valores del mes: público (lo que paga el pasajero) y agencia (lo que paga Jeito).", "servicio"],
+                trf: ["Traslados", "Los hacen nuestros choferes. Precio por traslado según cuántos pasajeros van, por mes. En el itinerario se puede cambiar a mano.", "traslado"] }[P.tab];
     c.innerHTML = `
-      <div class="subtabs" id="pvTabs"><button data-t="prov" class="${isProv ? "on" : ""}">Proveedores <span>${state.cat.providers.filter(x => x.active).length}</span></button><button data-t="svc" class="${!isProv ? "on" : ""}">Servicios <span>${nOffers}</span></button></div>
-      <div class="pv-head"><div><h3>${isProv ? "Proveedores" : "Servicios"}</h3><small>${isProv ? "Las empresas que hacen las excursiones y traslados, con sus datos de pago." : "Cada servicio con su proveedor y los valores del mes: público (lo que paga el pasajero) y agencia (lo que paga Jeito)."}</small></div>
-        ${ed ? `<button class="btn gold" id="pvNew">+ Nuevo ${isProv ? "proveedor" : "servicio"}</button>` : ""}</div>
+      <div class="subtabs" id="pvTabs"><button data-t="prov" class="${isProv ? "on" : ""}">Proveedores <span>${state.cat.providers.filter(x => x.active).length}</span></button><button data-t="svc" class="${P.tab === "svc" ? "on" : ""}">Servicios <span>${nOffers}</span></button><button data-t="trf" class="${isTrf ? "on" : ""}">Traslados <span>${state.cat.transfers.filter(x => x.active).length}</span></button></div>
+      <div class="pv-head"><div><h3>${H[0]}</h3><small>${H[1]}${isTrf ? ` · Tramos: <b>${esc(tiersActive().map(tierLabel).join(" · ") || "sin cargar")}</b>` : ""}</small></div>
+        <div class="pv-head-btns">${ed && isTrf ? `<button class="btn" id="pvTiers">Tramos de pasajeros</button>` : ""}${ed ? `<button class="btn gold" id="pvNew">+ Nuevo ${H[2]}</button>` : ""}</div></div>
       <div id="pvDetail"></div>
       <div class="card" id="pvList"></div>`;
     $("#pvTabs").addEventListener("click", e => {
@@ -823,6 +835,7 @@
       P.tab = b.dataset.t; P.edit = null; P.dirty = false; P.q = ""; renderProv();
     });
     if ($("#pvNew")) $("#pvNew").addEventListener("click", () => openForm("new"));
+    if ($("#pvTiers")) $("#pvTiers").addEventListener("click", tiersModal);
     renderPvDetail(); renderPvList();
   }
   function openForm(id) {
@@ -841,7 +854,7 @@
     const P = state.prov, el = $("#pvDetail"); if (!el) return;
     if (!P.edit) { el.innerHTML = ""; return; }
     if (P.dirty && el.firstChild) return;            // no borrar lo que se está escribiendo
-    if (P.tab === "prov") providerForm(el); else serviceForm(el);
+    if (P.tab === "prov") providerForm(el); else if (P.tab === "trf") transferForm(el); else serviceForm(el);
   }
   function wireDirty(form) {
     const P = state.prov;
@@ -852,10 +865,11 @@
   /* ---------- lista de abajo ---------- */
   function renderPvList() {
     const P = state.prov, el = $("#pvList"); if (!el) return;
-    const isProv = P.tab === "prov";
+    const isProv = P.tab === "prov", isTrf = P.tab === "trf";
     const q = P.q.trim().toLowerCase();
     let body, count;
-    if (isProv) {
+    if (isTrf) { const r = renderTrfList(q); body = r.body; count = r.count; }
+    else if (isProv) {
       const rows = state.cat.providers.filter(x => P.showOff || x.active).filter(x => !q || [x.name, x.payment_method, x.conditions].join(" ").toLowerCase().includes(q));
       count = rows.length;
       body = `<table><thead><tr><th>Proveedor</th><th>Moneda</th><th>Forma de pago</th><th>Condiciones</th><th class="r">Servicios</th></tr></thead><tbody>${rows.map(x => {
@@ -876,17 +890,17 @@
             <td class="r"><button class="btn sm" data-act="months">Meses</button></td></tr>`;
         }).join("") || `<tr><td colspan="8" class="empty">${q ? "Nada coincide con la búsqueda." : state.cat.providers.some(x => x.active) ? "Todavía no hay servicios. Tocá “+ Nuevo servicio”." : "Primero cargá un proveedor en la pestaña Proveedores."}</td></tr>`}</tbody></table>`;
     }
-    el.innerHTML = `<div class="pv-tools"><input id="pvQ" placeholder="${isProv ? "Buscar proveedor…" : "Buscar servicio o proveedor…"}" value="${esc(P.q)}">
+    el.innerHTML = `<div class="pv-tools"><input id="pvQ" placeholder="${isProv ? "Buscar proveedor…" : isTrf ? "Buscar traslado…" : "Buscar servicio o proveedor…"}" value="${esc(P.q)}">
         ${isProv ? "" : `<label class="pv-month">Valores de <input type="month" id="pvMonth" value="${P.month}"></label>`}
         <label class="toggle"><input type="checkbox" id="pvOff" ${P.showOff ? "checked" : ""}> ver inactivos</label></div>
       <div class="tablewrap">${body}</div>
-      <div class="tfoot">${count} ${isProv ? (count === 1 ? "proveedor" : "proveedores") : (count === 1 ? "servicio" : "servicios")} · tocá un renglón para ${can("editarProveedores") ? "editarlo" : "ver el detalle"}</div>`;
+      <div class="tfoot">${count} ${isProv ? (count === 1 ? "proveedor" : "proveedores") : isTrf ? (count === 1 ? "traslado" : "traslados") : (count === 1 ? "servicio" : "servicios")} · tocá un renglón para ${can("editarProveedores") ? "editarlo" : "ver el detalle"}</div>`;
     $("#pvQ").addEventListener("input", e => { P.q = e.target.value; const pos = e.target.selectionStart; renderPvList(); const i = $("#pvQ"); i.focus(); i.setSelectionRange(pos, pos); });
     $("#pvOff").addEventListener("change", e => { P.showOff = e.target.checked; renderPvList(); });
     if ($("#pvMonth")) $("#pvMonth").addEventListener("change", e => { if (!e.target.value) return; P.month = e.target.value; renderPvList(); if (P.edit && !P.dirty) renderPvDetail(); });
     el.querySelector("tbody").addEventListener("click", e => {
       const tr = e.target.closest("tr[data-id]"); if (!tr) return;
-      if (e.target.closest("button[data-act=months]")) { pricesModal(state.cat.offers.find(o => o.id === tr.dataset.id)); return; }
+      if (e.target.closest("button[data-act=months]")) { if (P.tab === "trf") trfMonthsModal(trfById(tr.dataset.id)); else pricesModal(state.cat.offers.find(o => o.id === tr.dataset.id)); return; }
       openForm(tr.dataset.id);
     });
   }
@@ -1071,7 +1085,7 @@
     const keepForm = !ok && P.dirty;          // si falló, no borro lo que la persona escribió
     if (state.view === "prov") {
       const tabs = $("#pvTabs");
-      if (tabs) { const nO = state.cat.offers.filter(o => o.active && (svcById(o.service_id) || {}).active !== false).length; tabs.querySelector('[data-t=prov] span').textContent = state.cat.providers.filter(x => x.active).length; tabs.querySelector('[data-t=svc] span').textContent = nO; }
+      if (tabs) { const nO = state.cat.offers.filter(o => o.active && (svcById(o.service_id) || {}).active !== false).length; tabs.querySelector('[data-t=prov] span').textContent = state.cat.providers.filter(x => x.active).length; tabs.querySelector('[data-t=svc] span').textContent = nO; const ts = tabs.querySelector('[data-t=trf] span'); if (ts) ts.textContent = state.cat.transfers.filter(x => x.active).length; }
       if (!keepForm) renderPvDetail();
       renderPvList();
     }
@@ -1146,13 +1160,13 @@
     });
   }
 
-  const AUDIT_LABELS = { name: "nombre", currency: "moneda", payment_method: "forma de pago", payment_details: "datos de pago", conditions: "condiciones", notes: "notas", active: "activo", name_es: "nombre ES", name_pt: "nombre PT", name_en: "nombre EN", desc_es: "descripción ES", desc_pt: "descripción PT", desc_en: "descripción EN", service_type_id: "tipo", zone_id: "zona", default_time: "horario", duration: "duración", minor_age_max: "menor hasta", infant_age_max: "bebé hasta", public_adult: "público adulto", public_minor: "público menor", agency_adult: "agencia adulto", agency_minor: "agencia menor" };
+  const AUDIT_LABELS = { name: "nombre", currency: "moneda", payment_method: "forma de pago", payment_details: "datos de pago", conditions: "condiciones", notes: "notas", active: "activo", name_es: "nombre ES", name_pt: "nombre PT", name_en: "nombre EN", desc_es: "descripción ES", desc_pt: "descripción PT", desc_en: "descripción EN", service_type_id: "tipo", zone_id: "zona", default_time: "horario", duration: "duración", pax_from: "desde", pax_to: "hasta", price: "precio", minor_age_max: "menor hasta", infant_age_max: "bebé hasta", public_adult: "público adulto", public_minor: "público menor", agency_adult: "agencia adulto", agency_minor: "agencia menor" };
   function auditVal(k, x) {
     if (x == null || x === "") return "—";
     if (k === "active") return x ? "sí" : "no";
     if (k === "service_type_id") return typeName(x) || "—";
     if (k === "zone_id") return zoneName(x) || "—";
-    if (/^(public|agency)_/.test(k)) return money(x);
+    if (/^(public|agency)_/.test(k) || k === "price") return money(x);
     return String(x);
   }
   async function showHistory(sel, col, id) {
@@ -1160,6 +1174,7 @@
     el.innerHTML = `<h3 class="t">Historial</h3><div class="empty">Cargando…</div>`;
     let ev; try { ev = await db.auditFor(col, id); } catch (err) { el.innerHTML = `<h3 class="t">Historial</h3><div class="note">${esc(explainError(err))}</div>`; return; }
     const what = e => {
+      if (e.table_name === "transfer_prices") { const pr = state.cat.tprices.find(x => x.id === e.row_id) || {}; const t = state.cat.tiers.find(x => x.id === (e.detail.tier_id || pr.tier_id)); const m = e.detail.month || pr.month || ""; return "precio " + (m ? periodLabel(m.slice(0, 7)) : "") + (t ? " · " + tierLabel(t) : ""); }
       if (e.table_name === "offer_prices") { const o = state.cat.offers.find(x => x.id === (e.detail.offer_id || "")) || null; const pr = state.cat.prices.find(x => x.id === e.row_id); const off = o || (pr && state.cat.offers.find(x => x.id === pr.offer_id)); const m = (e.detail.month || (pr && pr.month) || ""); return "valores " + (m ? periodLabel(m.slice(0, 7)) : "") + (off ? " · " + (col === "provider_id" ? svcName(svcById(off.service_id)) : (provById(off.provider_id) || {}).name || "") : ""); }
       if (e.table_name === "provider_services") { const o = state.cat.offers.find(x => x.id === e.row_id); return o ? (col === "provider_id" ? "experiencia " + svcName(svcById(o.service_id)) : "proveedor " + ((provById(o.provider_id) || {}).name || "")) : "experiencia"; }
       return "";
@@ -1181,13 +1196,20 @@
   const ITIN_STATUS = { borrador: "Borrador", enviada: "Enviada", cerrada: "Cerrada", reemplazada: "Reemplazada" };
   const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
   function numSigned(v) { const s = String(v == null ? "" : v).trim().replace(",", ".").replace("−", "-"); if (s === "" || s === "-") return null; const n = Number(s); return isFinite(n) ? Math.round(n * 100) / 100 : NaN; }
-  function itemPublic(i) { return (i.n_adults || 0) * (Number(i.public_adult) || 0) + (i.n_minors || 0) * (Number(i.public_minor) || 0); }
-  function itemCost(i, c) { if (!c) return null; return (i.n_adults || 0) * (Number(c.agency_adult) || 0) + (i.n_minors || 0) * (Number(c.agency_minor) || 0); }
+  function itemPublic(i) { if (i.kind === "transfer") return Number(i.total_price) || 0; return (i.n_adults || 0) * (Number(i.public_adult) || 0) + (i.n_minors || 0) * (Number(i.public_minor) || 0); }
+  function itemCost(i, c) { if (i.kind === "transfer" || !c) return null; return (i.n_adults || 0) * (Number(c.agency_adult) || 0) + (i.n_minors || 0) * (Number(c.agency_minor) || 0); }
   function addDays(ymd, n) { const d = new Date(ymd + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
   function daysBetween(a, b) { if (!a || !b || b < a) return []; const out = []; let d = a; for (let k = 0; k < 120 && d <= b; k++) { out.push(d); d = addDays(d, 1); } return out; }
   function dayLabel(ymd, idx) { const d = new Date(ymd + "T12:00:00"); return (idx != null ? "Día " + (idx + 1) + " · " : "") + DIAS[d.getDay()] + " " + fmtDate(ymd); }
   function agesCount(t) { return (String(t || "").match(/\d{1,2}/g) || []).length; }
-  function paxText(i) { return [i.n_adults ? i.n_adults + " ad" : "", i.n_minors ? i.n_minors + " men" : "", i.n_infants ? i.n_infants + " bebé" + (i.n_infants > 1 ? "s" : "") : ""].filter(Boolean).join(" · ") || "0 pax"; }
+  function paxText(i) { if (i.kind === "transfer") return "traslado · " + (i.pax || 0) + " pax" + (i.tier_label ? " · tramo " + i.tier_label : " · sin tramo");
+    return [i.n_adults ? i.n_adults + " ad" : "", i.n_minors ? i.n_minors + " men" : "", i.n_infants ? i.n_infants + " bebé" + (i.n_infants > 1 ? "s" : "") : ""].filter(Boolean).join(" · ") || "0 pax"; }
+  function dayCount(l) {
+    if (!l.length) return "día libre";
+    const t = l.filter(x => x.kind === "transfer").length, sv = l.length - t;
+    return [sv ? sv + " servicio" + (sv > 1 ? "s" : "") : "", t ? t + " traslado" + (t > 1 ? "s" : "") : ""].filter(Boolean).join(" · ");
+  }
+  function noPriceItem(x) { return x.kind === "transfer" ? x.total_price == null : x.public_adult == null; }
   function clientById(id) { return state.clients.find(c => String(c.id) === String(id)); }
   function roteiroUrl(token) { return location.origin + "/roteiro/?c=" + encodeURIComponent(token); }
   function statusTag(st) { return `<span class="ist ${st}">${ITIN_STATUS[st] || st}</span>`; }
@@ -1197,7 +1219,7 @@
       const sb = state.supabase;
       const [it, items] = await Promise.all([
         sb.from("itineraries").select("*").order("version", { ascending: false }).limit(3000),
-        sb.from("itinerary_items").select("itinerary_id, n_adults, n_minors, public_adult, public_minor").limit(20000)
+        sb.from("itinerary_items").select("itinerary_id, kind, n_adults, n_minors, public_adult, public_minor, total_price").limit(20000)
       ]);
       for (const r of [it, items]) if (r.error) throw r.error;
       const tot = {}; (items.data || []).forEach(i => { tot[i.itinerary_id] = (tot[i.itinerary_id] || 0) + itemPublic(i); });
@@ -1388,21 +1410,24 @@
     const out = Object.keys(byDay).filter(d => !inRange.has(d)).sort();
     const itemRow = x => {
       const k = E.items.indexOf(x), cst = I.detail.costs[x.id], pub = itemPublic(x), cost = itemCost(x, cst);
-      const changed = (x.catalog_public_adult != null && !sameVal(x.public_adult, x.catalog_public_adult)) || (x.catalog_public_minor != null && !sameVal(x.public_minor, x.catalog_public_minor));
-      const noPrice = x.public_adult == null;
+      const isT = x.kind === "transfer";
+      const changed = isT ? (x.catalog_total_price != null && !sameVal(x.total_price, x.catalog_total_price))
+        : (x.catalog_public_adult != null && !sameVal(x.public_adult, x.catalog_public_adult)) || (x.catalog_public_minor != null && !sameVal(x.public_minor, x.catalog_public_minor));
+      const noPrice = isT ? x.total_price == null : x.public_adult == null;
       return `<div class="it-row" data-k="${k}">
         <div class="c-time"><input type="time" data-i="time" value="${esc(x.time || "")}" ${dis}>${canEdit && days.length ? `<select data-i="day" title="Mover a otro día">${days.map((d, n) => `<option value="${d}" ${d === x.day ? "selected" : ""}>Día ${n + 1}</option>`).join("")}${inRange.has(x.day) ? "" : `<option value="${x.day}" selected>${fmtDate(x.day)}</option>`}</select>` : ""}</div>
-        <div class="c-name"><b>${esc(x.name_es)}</b><small>${showCost && cst && cst.provider_id ? esc((provById(cst.provider_id) || {}).name || "") + " · " : ""}${paxText(x)}${x.n_infants ? " (bebés sin cargo)" : ""}</small>${noPrice ? `<small class="warn">sin valor del mes: cargalo a mano</small>` : changed ? `<small class="warn">valor cambiado a mano (catálogo: ${money(x.catalog_public_adult)} / ${money(x.catalog_public_minor)})</small>` : ""}</div>
-        <div class="c-pr"><label>Adulto</label><input inputmode="decimal" data-i="public_adult" value="${x.public_adult == null ? "" : Number(x.public_adult)}" ${dis}></div>
-        <div class="c-pr"><label>Menor</label><input inputmode="decimal" data-i="public_minor" value="${x.public_minor == null ? "" : Number(x.public_minor)}" ${dis}></div>
-        <div class="c-sub"><label>Subtotal</label><b>${money(pub)}</b>${showCost ? `<small>costo ${cost == null ? "—" : money(cost)} · <span class="${pub - (cost || 0) < 0 ? "neg" : "pos"}">gan. ${money(pub - (cost || 0))}</span></small>` : ""}</div>
+        <div class="c-name"><b>${esc(x.name_es)}</b><small>${showCost && cst && cst.provider_id ? esc((provById(cst.provider_id) || {}).name || "") + " · " : ""}${paxText(x)}${x.n_infants ? " (bebés sin cargo)" : ""}</small>${noPrice ? `<small class="warn">${isT ? "sin precio para este tramo o mes: cargalo a mano" : "sin valor del mes: cargalo a mano"}</small>` : changed ? `<small class="warn">valor cambiado a mano (catálogo: ${isT ? money(x.catalog_total_price) : money(x.catalog_public_adult) + " / " + money(x.catalog_public_minor)})</small>` : ""}</div>
+        ${isT ? `<div class="c-pr"><label>Precio</label><input inputmode="decimal" data-i="total_price" value="${x.total_price == null ? "" : Number(x.total_price)}" ${dis}></div><div class="c-pr"></div>`
+        : `<div class="c-pr"><label>Adulto</label><input inputmode="decimal" data-i="public_adult" value="${x.public_adult == null ? "" : Number(x.public_adult)}" ${dis}></div>
+        <div class="c-pr"><label>Menor</label><input inputmode="decimal" data-i="public_minor" value="${x.public_minor == null ? "" : Number(x.public_minor)}" ${dis}></div>`}
+        <div class="c-sub"><label>Subtotal</label><b>${money(pub)}</b>${showCost ? (isT ? `<small>chofer propio (costo en Logística)</small>` : `<small>costo ${cost == null ? "—" : money(cost)} · <span class="${pub - (cost || 0) < 0 ? "neg" : "pos"}">gan. ${money(pub - (cost || 0))}</span></small>`) : ""}</div>
         <div class="c-x">${canEdit ? `<button class="btn sm ghost danger" data-act="delitem" title="Quitar del itinerario">✕</button>` : ""}</div></div>`;
     };
     html += `<div class="card it-sec"><h3 class="t">Día por día</h3><div class="pad">`;
     if (!days.length) html += `<div class="muted">Cargá la llegada y la salida (arriba) para ver los días del viaje.</div>`;
     days.forEach((d, n) => {
       const l = byDay[d] || [];
-      html += `<div class="day"><div class="day-h"><b>${esc(dayLabel(d, n))}</b><span class="muted">${l.length ? l.length + " servicio" + (l.length > 1 ? "s" : "") : "día libre"}</span></div>${l.map(itemRow).join("")}${canEdit ? `<button class="btn sm add-svc" data-day="${d}">+ Agregar servicio</button>` : ""}</div>`;
+      html += `<div class="day"><div class="day-h"><b>${esc(dayLabel(d, n))}</b><span class="muted">${dayCount(l)}</span></div>${l.map(itemRow).join("")}${canEdit ? `<div class="day-add"><button class="btn sm add-svc" data-day="${d}">+ Servicio</button><button class="btn sm add-trf" data-day="${d}">+ Traslado</button></div>` : ""}</div>`;
     });
     if (out.length) html += `<div class="day out"><div class="day-h"><b>Fuera de las fechas del viaje</b><span class="muted">movelos a un día del viaje o quitalos</span></div>${out.map(d => byDay[d].map(itemRow).join("")).join("")}</div>`;
     html += `</div></div>`;
@@ -1430,7 +1455,7 @@
         <div class="l big"><span>Total</span><span>${money(total)}</span></div>
         ${fx ? `<div class="l sm"><span>Referencia en reales (cotiz. ${fx})</span><span>R$ ${Math.round(total * fx).toLocaleString("es-AR")}</span></div>` : ""}
         ${payers ? `<div class="l sm"><span>Promedio por pasajero (${payers})</span><span>${money(Math.round(total / payers))}</span></div>` : ""}
-        ${showCost ? `<div class="l sm sep"><span>Costo (lo que paga Jeito)</span><span>${money(costT)}</span></div><div class="l"><span>Ganancia</span><b class="${total - costT < 0 ? "neg" : "pos"}">${money(total - costT)}${total > 0 ? " · " + Math.round((total - costT) * 100 / total) + "%" : ""}</b></div>` : ""}`;
+        ${showCost ? `<div class="l sm sep"><span>Costo (lo que paga Jeito)${E.items.some(x => x.kind === "transfer") ? "<br><small>sin los traslados: los hacen nuestros choferes (se ve en Logística)</small>" : ""}</span><span>${money(costT)}</span></div><div class="l"><span>Ganancia</span><b class="${total - costT < 0 ? "neg" : "pos"}">${money(total - costT)}${total > 0 ? " · " + Math.round((total - costT) * 100 / total) + "%" : ""}</b></div>` : ""}`;
   }
   function wireItinTop() {
     const I = state.itin;
@@ -1465,7 +1490,7 @@
       else if (t.dataset.h) { E.hotels[+t.closest(".hotel-row").dataset.k][t.dataset.h] = t.value; markDirty(); }
       else if (t.dataset.i) {
         const x = E.items[+t.closest(".it-row").dataset.k];
-        if (t.dataset.i === "public_adult" || t.dataset.i === "public_minor") { const v = numOrNull(t.value); x[t.dataset.i] = Number.isNaN(v) ? x[t.dataset.i] : v; refreshSums(); }
+        if (t.dataset.i === "public_adult" || t.dataset.i === "public_minor" || t.dataset.i === "total_price") { const v = numOrNull(t.value); x[t.dataset.i] = Number.isNaN(v) ? x[t.dataset.i] : v; refreshSums(); }
         else x[t.dataset.i] = t.value;
         markDirty();
       }
@@ -1482,6 +1507,7 @@
       else if (b.dataset.act === "delitem") { const k = +b.closest(".it-row").dataset.k; E.delItems.push(E.items[k]); E.items.splice(k, 1); markDirty(); renderItinEditor(); toast("Quitado. Se aplica al tocar Guardar."); }
       else if (b.id === "itAddHotel") { E.hotels.push({ name: "", date_from: E.it.start_date || null, date_to: E.it.end_date || null, sort: E.hotels.length + 1 }); markDirty(); renderItinEditor(); const ins = $$("#itHotels [data-h=name]"); if (ins.length) ins[ins.length - 1].focus(); }
       else if (b.classList.contains("add-svc")) { if (I.dirty && !(await saveItin(true))) return; pickServiceModal(b.dataset.day); }
+      else if (b.classList.contains("add-trf")) { if (I.dirty && !(await saveItin(true))) return; pickTransferModal(b.dataset.day); }
       else if (b.id === "itSave") saveItin();
       else if (b.id === "itSend") sendItin();
       else if (b.id === "itClose") closeItin();
@@ -1497,7 +1523,7 @@
   async function saveItin(silent) {
     const I = state.itin, E = I.edit; if (!E) return false;
     const it = E.it, orig = I.versions.find(v => v.id === I.itinId);
-    for (const x of E.items) for (const k of ["public_adult", "public_minor"]) if (x[k] != null && (isNaN(x[k]) || x[k] < 0)) { toast("Revisá los valores: hay uno que no es un número válido.", "bad"); return false; }
+    for (const x of E.items) for (const k of ["public_adult", "public_minor", "total_price"]) if (x[k] != null && (isNaN(x[k]) || x[k] < 0)) { toast("Revisá los valores: hay uno que no es un número válido.", "bad"); return false; }
     if (it.start_date && it.end_date && it.end_date < it.start_date) { toast("La salida no puede ser antes que la llegada.", "bad"); return false; }
     for (const h of E.hotels) if (!String(h.name || "").trim()) { toast("Escribí el nombre del hotel (o quitá ese renglón).", "bad"); return false; }
     const adj = numSigned(it.adjustment); if (Number.isNaN(adj)) { toast("El ajuste tiene que ser un número.", "bad"); return false; }
@@ -1515,7 +1541,7 @@
       for (const x of E.delItems) await db.deleteRow("itinerary_items", I.detail.items.find(o => o.id === x.id) || x);
       for (const x of E.items) {
         const o = I.detail.items.find(y => y.id === x.id); if (!o) continue;
-        await db.saveRow("itinerary_items", o, { time: x.time || null, day: x.day, public_adult: x.public_adult, public_minor: x.public_minor });
+        await db.saveRow("itinerary_items", o, x.kind === "transfer" ? { time: x.time || null, day: x.day, total_price: x.total_price } : { time: x.time || null, day: x.day, public_adult: x.public_adult, public_minor: x.public_minor });
       }
       if (paxChanged) await db.rpcOk("recount_itinerary", { p_itin: I.itinId });
       if (!silent) toast(paxChanged ? "Guardado. Se recalcularon los pasajeros de cada servicio." : "Guardado.", "ok");
@@ -1532,7 +1558,7 @@
   async function sendItin() {
     const I = state.itin, E = I.edit;
     if (!E.items.length) return toast("Agregá al menos un servicio antes de enviarlo.", "bad");
-    if (E.items.some(x => x.public_adult == null)) return toast("Hay servicios sin valor. Cargalos antes de enviarlo.", "bad");
+    if (E.items.some(noPriceItem)) return toast("Hay servicios o traslados sin precio. Cargalos antes de enviarlo.", "bad");
     if (I.dirty && !(await saveItin(true))) return;
     if (!confirm("¿Marcar la versión " + E.it.version + " como enviada? Queda congelada (ya no se cambia) y el link del cliente pasa a mostrar esta versión.")) return;
     try { I.token = await db.rpcOk("send_itinerary", { p_itin: I.itinId }); await reloadItin(true); toast("Enviada. Copiá el link y mandáselo al cliente.", "ok"); }
@@ -1541,7 +1567,7 @@
   async function closeItin() {
     const I = state.itin, E = I.edit, cl = clientById(I.clientId);
     if (!E.items.length) return toast("El itinerario no tiene servicios.", "bad");
-    if (E.it.status === "borrador" && E.items.some(x => x.public_adult == null)) return toast("Hay servicios sin valor. Cargalos antes de cerrar.", "bad");
+    if (E.it.status === "borrador" && E.items.some(noPriceItem)) return toast("Hay servicios o traslados sin precio. Cargalos antes de cerrar.", "bad");
     if (I.dirty && !(await saveItin(true))) return;
     const prevClosed = I.versions.find(v => v.status === "cerrada");
     if (!confirm("¿El cliente aceptó la versión " + E.it.version + "? Queda cerrada y es la que se usa para cobrar y operar." + (prevClosed ? " La versión " + prevClosed.version + " (cerrada antes) pasa a reemplazada." : ""))) return;
@@ -1583,6 +1609,179 @@
     $("#pkList").addEventListener("click", async e => {
       const b = e.target.closest("button[data-offer]"); if (!b) return; b.disabled = true;
       try { await db.rpcOk("add_itinerary_item", { p_itin: I.itinId, p_offer: b.dataset.offer, p_day: day, p_time: $("#pkTime").value || null }); closeModal(); await reloadItin(true); toast("Servicio agregado.", "ok"); }
+      catch (err) { toast(explainError(err), "bad"); b.disabled = false; }
+    });
+  }
+
+  /* ---------- TRASLADOS (choferes propios): precio por tramo de pasajeros y por mes ---------- */
+  function tiersActive() { return ((state.cat || {}).tiers || []).filter(t => t.active).sort((a, b) => a.pax_from - b.pax_from); }
+  function tierLabel(t) { return t.pax_from + "–" + t.pax_to + " pax"; }
+  function trfById(id) { return ((state.cat || {}).transfers || []).find(t => t.id === id); }
+  function trfPrice(trfId, tierId, ym) { return ((state.cat || {}).tprices || []).find(p => p.transfer_id === trfId && p.tier_id === tierId && p.month === monthKey(ym)) || null; }
+
+  function renderTrfList(q) {
+    const P = state.prov, tiers = tiersActive();
+    const rows = state.cat.transfers.filter(x => P.showOff || x.active).filter(x => !q || [x.name_es, x.name_pt, x.name_en].join(" ").toLowerCase().includes(q));
+    const body = `<table class="money"><thead><tr><th>Traslado</th><th>Horario</th>${tiers.map(t => `<th class="r">${esc(tierLabel(t))}</th>`).join("")}<th></th></tr></thead><tbody>${rows.map(x => {
+      const prs = tiers.map(t => trfPrice(x.id, t.id, P.month)), none = prs.every(p => !p || p.price == null);
+      const miss = []; if (!x.name_pt) miss.push("nombre PT"); if (!x.name_en) miss.push("nombre EN");
+      return `<tr class="row ${x.id === P.edit ? "sel" : ""} ${x.active ? "" : "off"}" data-id="${x.id}"><td><span class="name">${esc(x.name_es)}</span>${miss.length ? `<span class="sub warn">falta: ${esc(miss.join(", "))}</span>` : ""}${x.active ? "" : '<span class="sub">inactivo</span>'}</td><td class="num">${esc(x.default_time || "—")}</td>
+        ${none ? `<td colspan="${tiers.length}" class="c"><span class="sub warn" style="display:inline">sin valores en ${esc(periodLabel(P.month))}</span></td>` : prs.map(p => `<td class="r">${p && p.price != null ? money(p.price) : '<span class="muted">—</span>'}</td>`).join("")}
+        <td class="r"><button class="btn sm" data-act="months">Meses</button></td></tr>`;
+    }).join("") || `<tr><td colspan="${tiers.length + 3}" class="empty">${q ? "Nada coincide con la búsqueda." : "Todavía no hay traslados. Tocá “+ Nuevo traslado”."}</td></tr>`}</tbody></table>`;
+    return { body, count: rows.length };
+  }
+
+  function transferForm(el) {
+    const P = state.prov, isNew = P.edit === "new";
+    const x = isNew ? null : trfById(P.edit); if (!isNew && !x) { P.edit = null; el.innerHTML = ""; return; }
+    const ed = can("editarProveedores"), dis = ed ? "" : "disabled", v = x || {}, tiers = tiersActive();
+    const val = n => n == null ? "" : String(Number(n));
+    el.innerHTML = `<div class="card form-card"><h3 class="t">${isNew ? "Nuevo traslado" : esc(x.name_es)}${x && !x.active ? ' <span class="st no_cerrado">inactivo</span>' : ""}<button class="x" type="button" id="tfClose" title="Cerrar">×</button></h3>
+      <form id="trfForm" class="pad">
+        <div class="grid3">
+          <div class="field"><label>Nombre (español) *</label><input name="name_es" required value="${esc(v.name_es || "")}" ${dis} placeholder="Ej.: Aeropuerto MIA → Brickell"></div>
+          <div class="field"><label>Nombre en portugués</label><input name="name_pt" value="${esc(v.name_pt || "")}" ${dis} placeholder="Aeroporto MIA → Brickell"></div>
+          <div class="field"><label>Nombre en inglés</label><input name="name_en" value="${esc(v.name_en || "")}" ${dis}></div>
+        </div>
+        <div class="grid4"><div class="field"><label>Horario sugerido</label><input name="default_time" type="time" value="${esc(v.default_time || "")}" ${dis}></div></div>
+        <div class="vals"><div class="vals-h"><b>Precios de ${esc(periodLabel(P.month))}</b> <span class="muted">· US$ por traslado (el vehículo completo), según cuántos pasajeros van</span>${x ? ` <button type="button" class="linkbtn" id="tfMonths">ver / cargar otros meses</button>` : ""}</div>
+          <div class="tiers-grid">${tiers.map(t => { const p = x ? trfPrice(x.id, t.id, P.month) : null; return `<div class="field"><label>${esc(tierLabel(t))}</label><input inputmode="decimal" data-tier="${t.id}" value="${val(p && p.price)}" ${dis}></div>`; }).join("") || `<div class="muted">No hay tramos de pasajeros. Cargalos con “Tramos de pasajeros”.</div>`}</div>
+          ${ed ? `<div class="vals-f"><span></span><label class="toggle"><input type="checkbox" name="all_year"> usar estos precios en los meses vacíos de ${P.month.slice(0, 4)}</label></div>` : ""}
+        </div>
+        <details ${v.desc_es || v.desc_pt || v.desc_en || v.notes ? "open" : ""}><summary>Descripción para el cliente y notas internas (opcional)</summary>
+          <div class="grid3" style="margin-top:10px">
+            <div class="field"><label>Descripción en español</label><textarea name="desc_es" rows="2" ${dis}>${esc(v.desc_es || "")}</textarea></div>
+            <div class="field"><label>En portugués</label><textarea name="desc_pt" rows="2" ${dis}>${esc(v.desc_pt || "")}</textarea></div>
+            <div class="field"><label>En inglés</label><textarea name="desc_en" rows="2" ${dis}>${esc(v.desc_en || "")}</textarea></div>
+          </div>
+          <div class="field"><label>Notas internas</label><textarea name="notes" rows="2" ${dis}>${esc(v.notes || "")}</textarea></div>
+        </details>
+        ${x ? `<div class="meta">Último cambio: ${esc(userName(x.updated_by))} · ${fmtDateLong(x.updated_at)} · <button type="button" class="linkbtn" id="tfHist">ver historial</button></div>` : ""}
+        <div class="acts">${ed && x ? `<button type="button" class="btn ghost ${x.active ? "danger" : ""}" id="tfToggle">${x.active ? "Desactivar" : "Volver a activar"}</button>` : ""}<span class="grow"></span><button type="button" class="btn" id="tfCancel">${ed ? "Cancelar" : "Cerrar"}</button>${ed ? `<button class="btn primary" type="submit">${isNew ? "Crear traslado" : "Guardar"}</button>` : ""}</div>
+      </form><div id="tfHistBox"></div></div>`;
+    const form = $("#trfForm"); wireDirty(form);
+    $("#tfClose").addEventListener("click", closeForm); $("#tfCancel").addEventListener("click", closeForm);
+    if ($("#tfMonths")) $("#tfMonths").addEventListener("click", () => trfMonthsModal(x));
+    if ($("#tfHist")) $("#tfHist").addEventListener("click", () => { $("#tfHistBox").className = "hist"; showHistory("#tfHistBox", "transfer_id", x.id); });
+    if (!ed) return;
+    if ($("#tfToggle")) $("#tfToggle").addEventListener("click", async () => {
+      if (x.active && !confirm("¿Desactivar " + x.name_es + "? No se borra: deja de aparecer para armar itinerarios nuevos.")) return;
+      await saveAndRefresh(async () => { await db.saveRow("transfers", x, { active: !x.active }); }, x.active ? "Traslado desactivado." : "Traslado activado.", true);
+    });
+    form.addEventListener("submit", async e => {
+      e.preventDefault(); const f = e.target, t = k => f[k].value.trim() || null;
+      const vals = {};
+      for (const inp of $$("[data-tier]", f)) { const n = numOrNull(inp.value); if (Number.isNaN(n)) { toast("Hay un precio que no es un número.", "bad"); inp.focus(); return; } vals[inp.dataset.tier] = n; }
+      const fields = { name_es: f.name_es.value.trim(), name_pt: t("name_pt"), name_en: t("name_en"), default_time: t("default_time"), desc_es: t("desc_es"), desc_pt: t("desc_pt"), desc_en: t("desc_en"), notes: t("notes") };
+      const allYear = f.all_year && f.all_year.checked;
+      await saveAndRefresh(async () => {
+        const saved = await db.saveRow("transfers", x, fields);
+        await saveTrfPrices(saved.id, P.month, vals, allYear);
+      }, isNew ? "Traslado creado." : "Guardado.", true);
+    });
+  }
+  // guarda los precios del mes (y si se pide, los copia a los meses vacíos del año); nunca pisa meses cargados
+  async function saveTrfPrices(trfId, ym, vals, allYear) {
+    const any = Object.values(vals).some(v => v != null);
+    const months = allYear && any ? Array.from({ length: 12 }, (_, i) => ym.slice(0, 4) + "-" + pad(i + 1)) : [ym];
+    for (const m of months) {
+      const monthHasData = tiersActive().some(t => { const p = trfPrice(trfId, t.id, m); return p && p.price != null; });
+      if (m !== ym && monthHasData) continue;
+      for (const [tierId, price] of Object.entries(vals)) {
+        const orig = trfPrice(trfId, tierId, m);
+        if (!orig && price == null) continue;
+        if (orig && sameVal(orig.price, price)) continue;
+        await db.saveRow("transfer_prices", orig, orig ? { price } : { transfer_id: trfId, tier_id: tierId, month: monthKey(m), price });
+      }
+    }
+  }
+  function trfMonthsModal(x, year) {
+    const P = state.prov, ed = can("editarProveedores"), tiers = tiersActive();
+    const y = year || +P.month.slice(0, 4), months = Array.from({ length: 12 }, (_, i) => y + "-" + pad(i + 1));
+    const dis = ed ? "" : "disabled", val = n => n == null ? "" : String(Number(n));
+    openModal(`<h3>${esc(x.name_es)}</h3><p>Precio en US$ por traslado, según cuántos pasajeros van. Dejá vacío lo que no tenga precio.</p>
+      <div class="row-y"><button class="btn sm" id="yPrev">← ${y - 1}</button><b>${y}</b><button class="btn sm" id="yNext">${y + 1} →</button></div>
+      <form id="tmForm"><div class="tablewrap"><table class="money prices"><thead><tr><th>Mes</th>${tiers.map(t => `<th>${esc(tierLabel(t))}</th>`).join("")}</tr></thead>
+      <tbody>${months.map((ym, i) => `<tr data-ym="${ym}"><td>${MESES[i].slice(0, 3)}</td>${tiers.map(t => { const p = trfPrice(x.id, t.id, ym); return `<td><input inputmode="decimal" data-tier="${t.id}" value="${val(p && p.price)}" ${dis}></td>`; }).join("")}</tr>`).join("")}</tbody></table></div>
+      ${ed ? `<div class="acts" style="justify-content:space-between;flex-wrap:wrap"><button type="button" class="btn sm" id="tmFill">Repetir el primer mes en los vacíos</button><div style="display:flex;gap:8px"><button type="button" class="btn" id="mCancel">Cancelar</button><button type="submit" class="btn primary">Guardar precios</button></div></div>` : `<div class="acts"><button type="button" class="btn" id="mCancel">Cerrar</button></div>`}</form>`);
+    $("#modal .box").classList.add("wide");
+    $("#mCancel").addEventListener("click", closeModal);
+    $("#yPrev").addEventListener("click", () => trfMonthsModal(x, y - 1)); $("#yNext").addEventListener("click", () => trfMonthsModal(x, y + 1));
+    if (!ed) return;
+    const form = $("#tmForm");
+    $("#tmFill").addEventListener("click", () => {
+      const rows = $$("tbody tr", form), src = rows.find(tr => $$("input", tr).some(i => i.value.trim() !== ""));
+      if (!src) return toast("Cargá primero un mes.", "bad");
+      rows.forEach(tr => { if ($$("input", tr).every(i => i.value.trim() === "")) $$("input", tr).forEach((i, k) => { i.value = $$("input", src)[k].value; }); });
+    });
+    form.addEventListener("submit", async e => {
+      e.preventDefault(); const todo = [];
+      for (const tr of $$("tbody tr", form)) for (const inp of $$("input", tr)) {
+        const n = numOrNull(inp.value); if (Number.isNaN(n)) { toast("Hay un precio que no es un número.", "bad"); inp.focus(); return; }
+        const orig = trfPrice(x.id, inp.dataset.tier, tr.dataset.ym);
+        if ((!orig && n == null) || (orig && sameVal(orig.price, n))) continue;
+        todo.push({ orig, fields: orig ? { price: n } : { transfer_id: x.id, tier_id: inp.dataset.tier, month: monthKey(tr.dataset.ym), price: n } });
+      }
+      if (!todo.length) { closeModal(); return toast("No había cambios."); }
+      const btn = $("button[type=submit]", form); btn.disabled = true; setSync("busy", "Guardando…"); let ok = 0;
+      try { for (const t of todo) { await db.saveRow("transfer_prices", t.orig, t.fields); ok++; } toast("Precios guardados.", "ok"); }
+      catch (err) { toast((ok ? "Se guardaron " + ok + " precios, pero " : "") + catError(err), "bad"); }
+      setSync("ok", ""); await db.loadCatalog().catch(() => { }); closeModal(); renderPvList(); renderPvDetail();
+    });
+  }
+  function tiersModal() {
+    const all = (state.cat.tiers || []).slice().sort((a, b) => a.pax_from - b.pax_from);
+    const rows = all.map(t => Object.assign({}, t));
+    const draw = () => {
+      $("#tiList").innerHTML = rows.map((t, k) => `<div class="tier-row ${t.active === false ? "off" : ""}" data-k="${k}"><label>De</label><input type="number" min="1" data-f="pax_from" value="${t.pax_from || ""}"><label>a</label><input type="number" min="1" data-f="pax_to" value="${t.pax_to || ""}"><span>pasajeros</span>${t.id ? `<label class="toggle"><input type="checkbox" data-f="active" ${t.active !== false ? "checked" : ""}> en uso</label>` : `<button type="button" class="btn sm ghost danger" data-del="${k}">✕</button>`}</div>`).join("");
+    };
+    openModal(`<h3>Tramos de pasajeros</h3><p>Son los rangos de los vehículos. Cada traslado tiene un precio por tramo, y el itinerario elige el tramo según cuántos viajan (bebés incluidos, porque ocupan lugar).</p>
+      <div id="tiList"></div><button type="button" class="btn sm" id="tiAdd">+ Agregar tramo</button>
+      <div class="acts"><button type="button" class="btn" id="mCancel">Cancelar</button><button type="button" class="btn primary" id="tiSave">Guardar tramos</button></div>`);
+    draw();
+    $("#mCancel").addEventListener("click", closeModal);
+    $("#tiAdd").addEventListener("click", () => { const last = rows.filter(r => r.active !== false).reduce((a, r) => Math.max(a, +r.pax_to || 0), 0); rows.push({ pax_from: last + 1, pax_to: last + 4, active: true }); draw(); });
+    $("#tiList").addEventListener("input", e => { const k = +e.target.closest(".tier-row").dataset.k, f = e.target.dataset.f; rows[k][f] = f === "active" ? e.target.checked : parseInt(e.target.value, 10); });
+    $("#tiList").addEventListener("change", e => { if (e.target.dataset.f === "active") { rows[+e.target.closest(".tier-row").dataset.k].active = e.target.checked; draw(); } });
+    $("#tiList").addEventListener("click", e => { const b = e.target.closest("[data-del]"); if (b) { rows.splice(+b.dataset.del, 1); draw(); } });
+    $("#tiSave").addEventListener("click", async () => {
+      const act = rows.filter(r => r.active !== false).sort((a, b) => a.pax_from - b.pax_from);
+      for (const r of act) if (!(r.pax_from >= 1 && r.pax_to >= r.pax_from)) return toast("Cada tramo necesita “de” y “a”, con “a” mayor o igual que “de”.", "bad");
+      for (let i = 1; i < act.length; i++) if (act[i].pax_from <= act[i - 1].pax_to) return toast("Los tramos " + tierLabel(act[i - 1]) + " y " + tierLabel(act[i]) + " se superponen.", "bad");
+      setSync("busy", "Guardando…");
+      try {
+        for (const r of rows) {
+          const f = { pax_from: r.pax_from, pax_to: r.pax_to, active: r.active !== false };
+          if (r.id) await db.saveRow("vehicle_tiers", all.find(o => o.id === r.id), f); else await db.saveRow("vehicle_tiers", null, f);
+        }
+        toast("Tramos guardados.", "ok");
+      } catch (err) { toast(catError(err), "bad"); }
+      setSync("ok", ""); await db.loadCatalog().catch(() => { }); closeModal(); renderProv();
+    });
+  }
+
+  /* ---------- itinerario: elegir traslado ---------- */
+  async function pickTransferModal(day) {
+    const I = state.itin, it = I.edit.it, ym = day.slice(0, 7);
+    const days = daysBetween(it.start_date, it.end_date), pax = (Number(it.adults) || 0) + agesCount(it.minors_ages);
+    openModal(`<h3>Agregar traslado</h3><p>Cargando…</p>`); $("#modal .box").classList.add("wide");
+    let list; try { I.trfCache = I.trfCache || {}; list = I.trfCache[ym] || (I.trfCache[ym] = await db.rpcRead("itin_transfers", { p_month: ym + "-01" })); } catch (err) { closeModal(); return toast(explainError(err), "bad"); }
+    const draw = q => {
+      q = (q || "").trim().toLowerCase();
+      $("#ptList").innerHTML = list.filter(t => !q || [t.name_es, t.name_pt].join(" ").toLowerCase().includes(q)).map(t => {
+        const tier = (t.tiers || []).find(x => pax >= x.from && pax <= x.to);
+        return `<div class="pk-o" style="padding-left:14px"><div class="grow"><b>${esc(t.name_es)}</b><br><small>${tier ? (tier.price != null ? `Tramo ${tier.from}–${tier.to} pax → <b>${money(tier.price)}</b>` : `<span class="warn">sin precio para ${tier.from}–${tier.to} pax en ${esc(periodLabel(ym))}: se agrega vacío y lo cargás a mano</span>`) : `<span class="warn">ningún tramo cubre ${pax} pasajeros: se agrega vacío y lo cargás a mano</span>`}</small></div><button class="btn sm primary" data-trf="${t.transfer_id}">Agregar</button></div>`;
+      }).join("") || `<div class="empty">${list.length ? "Nada coincide con la búsqueda." : "Todavía no hay traslados cargados: se cargan en Proveedores → Traslados."}</div>`;
+    };
+    $("#modal .box").innerHTML = `<h3>Agregar traslado</h3><p>${esc(dayLabel(day, days.indexOf(day) >= 0 ? days.indexOf(day) : null))} · ${pax} pasajero${pax === 1 ? "" : "s"} · precios de ${esc(periodLabel(ym))}</p>
+      <div class="grid2"><div class="field"><label>Buscar</label><input id="ptQ" placeholder="Ej.: aeropuerto" autocomplete="off"></div><div class="field"><label>Horario (vacío = el sugerido)</label><input id="ptTime" type="time"></div></div>
+      <div id="ptList" class="pk-list"></div><div class="acts"><button type="button" class="btn" id="mCancel">Cerrar</button></div>`;
+    draw(""); $("#ptQ").focus(); $("#ptQ").addEventListener("input", e => draw(e.target.value));
+    $("#mCancel").addEventListener("click", closeModal);
+    $("#ptList").addEventListener("click", async e => {
+      const b = e.target.closest("button[data-trf]"); if (!b) return; b.disabled = true;
+      try { await db.rpcOk("add_itinerary_transfer", { p_itin: I.itinId, p_transfer: b.dataset.trf, p_day: day, p_time: $("#ptTime").value || null }); closeModal(); await reloadItin(true); toast("Traslado agregado. El precio se puede cambiar en la línea.", "ok"); }
       catch (err) { toast(explainError(err), "bad"); b.disabled = false; }
     });
   }
