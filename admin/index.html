@@ -338,6 +338,48 @@
   .tier-row label{font-size:13px;color:var(--muted)} .tier-row.off{opacity:.55}
   .day-add{display:flex;gap:8px;margin:10px 14px;flex-wrap:wrap} .day .day-add .add-svc{margin:0}
   @media (max-width:900px){ .pv-head-btns{margin-left:0;width:100%} .pv-head-btns .btn{flex:1} }
+  /* ---- itinerarios 1.5: versiones y opciones ---- */
+  .draftbar{background:#FFF4E5;border:1px solid #F5D9A8;color:#7A4D00;border-radius:10px;padding:9px 14px;margin-top:12px;font-size:13px;line-height:1.5}
+  .okbar{background:#F5F8FD;border:1px solid #DCE6F5;color:#1E3A5F;border-radius:10px;padding:9px 14px;margin-top:12px;font-size:13px;line-height:1.5}
+  .draftbar .btn,.okbar .btn{margin-left:4px}
+  .vers-t td{vertical-align:middle} .vers-t tr.cur td{background:#FFF8EC} .vers-t .sub{display:block;color:var(--muted);font-size:12px;font-weight:400}
+  .vers-t th .lc{text-transform:none;letter-spacing:0;font-weight:500}
+  input.opt{border:1px solid var(--line-2);border-radius:8px;padding:6px 8px;font:500 13px inherit;font-family:inherit;width:170px;max-width:100%;min-height:34px;background:#fff}
+  input.opt:disabled{background:var(--bg);color:var(--ink)}
+  .chk{width:22px;height:22px;accent-color:var(--navy);cursor:pointer}
+  .ist.aplicada{background:#E6F6EE;color:#15803D} .ist.noapl{background:#F1F3F5;color:#6B7280} .ist.guardada{background:#E8F0FE;color:#1D4ED8}
+  .ist.cerrada{background:var(--navy);color:#fff}
+  .choice{border:1.5px solid var(--line-2);border-radius:12px;padding:12px 14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:flex-start}
+  .choice input[type=radio]{position:absolute;opacity:0;pointer-events:none}
+  .choice.on{border-color:var(--navy);background:#F5F8FD} .choice b{display:block;margin-bottom:2px} .choice small{color:var(--muted);line-height:1.45;display:block}
+  .choice .rd{width:18px;height:18px;border-radius:50%;border:2px solid var(--line-2);flex:0 0 auto;margin-top:2px;box-sizing:border-box} .choice.on .rd{border:6px solid var(--navy)}
+  .choice input.opt{width:220px}
+  .hist li{display:grid;grid-template-columns:170px 1fr auto;gap:12px;align-items:center}
+  .hist .hd b{display:block;font-size:13px} .hist .hd small{color:var(--muted);font-size:12px}
+  .pk-img{float:right;width:64px;height:48px;object-fit:cover;border-radius:8px;margin-left:10px}
+  .pk-h::after{content:"";display:block;clear:both}
+  .sum .pix{color:#FDE6BF} .sum .pix b{color:#FDE6BF}
+  /* foto del servicio / traslado */
+  .photo-box{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border:1px dashed var(--line-2);border-radius:12px;padding:10px;margin-bottom:14px}
+  .photo-box img{width:120px;height:84px;object-fit:cover;border-radius:10px;background:var(--bg)}
+  .photo-box .ph-empty{width:120px;height:84px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center}
+  .photo-box .grow small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+  .photo-box input[type=file]{display:none}
+  @media (max-width:900px){
+    .hist li{grid-template-columns:1fr auto} .hist li .hd{grid-column:1/-1}
+    .it-acts{width:100%} .it-acts .btn{flex:1}
+    /* versiones como tarjetas en el celular */
+    .vers-t thead{display:none} .vers-t,.vers-t tbody{display:block;width:100%}
+    .vers-t tr{display:grid;grid-template-columns:1fr auto;gap:8px 12px;padding:12px 14px;border-bottom:1px solid var(--line);align-items:center}
+    .vers-t td{display:block;padding:0;border:0;background:transparent!important} .vers-t tr.cur{background:#FFF8EC}
+    .vers-t td:nth-child(1){grid-column:1/-1} .vers-t td:nth-child(1) input.opt{width:100%}
+    .vers-t td:nth-child(3){display:none}
+    .vers-t td:nth-child(4){text-align:right}
+    .vers-t td:nth-child(5){display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+    .vers-t td:nth-child(5)::after{content:"Mostrar al pasajero"}
+    .vers-t td:nth-child(6){text-align:right}
+    .vers-t td:nth-child(8){text-align:right}
+  }
 </style>
 </head>
 <body>
@@ -347,8 +389,8 @@
 <!-- Librería de Supabase (conexión a la base). Se carga antes que la app. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <!-- Dirección y clave pública del proyecto Supabase (editar UNA vez). -->
-<script src="config.js?v=1.4.0"></script>
+<script src="config.js?v=1.5.0"></script>
 <!-- Toda la lógica del sistema. -->
-<script src="app.js?v=1.4.0"></script>
+<script src="app.js?v=1.5.0"></script>
 </body>
 </html>

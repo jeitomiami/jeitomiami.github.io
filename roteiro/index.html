@@ -5,132 +5,258 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.supabase.co; connect-src https://*.supabase.co; base-uri 'none'; form-action 'none'">
 <meta name="theme-color" content="#001E48">
 <title>Jeito Miami</title>
 <link rel="icon" href="../favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
 <style>
   /* Jeito Miami · itinerario para el cliente. Solo muestra lo que devuelve get_roteiro (nada interno). */
-  :root{--navy:#001E48;--navy2:#0B3B7A;--gold:#E4B472;--gold2:#BC873C;--ink:#14213D;--muted:#5F6B78;--line:#E6EAF0;--bg:#F4F6F9}
+  :root{--navy:#001E48;--navy2:#0E4A8F;--gold:#E4B472;--gold2:#BC873C;--ink:#14213D;--muted:#5F6B78;--line:#E6EAF0;--line2:#D5DCE5;--bg:#F6F7FA}
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
-  .wrap{max-width:640px;margin:0 auto;min-height:100vh;background:#fff;box-shadow:0 0 60px -30px rgba(0,30,72,.35)}
-  .bar{display:flex;align-items:center;justify-content:center;padding:16px 20px;border-bottom:1px solid var(--line)}
-  .bar img{height:46px;width:auto;display:block}
-  .bar .wm{font-weight:800;letter-spacing:.12em;color:var(--navy);font-size:20px}.bar .wm i{font-style:normal;color:var(--gold)}
-  .hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff;padding:26px 22px 24px}
-  .hero .st{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.14)}
-  .hero .st.ok{background:#22C55E;color:#062F17}
-  .hero h1{font-size:24px;line-height:1.25;margin:14px 0 6px;font-weight:800}
-  .hero p{margin:0;color:#C9D6EA;font-size:15px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-  .chips span{background:rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;font-size:13px}
-  main{padding:18px 16px 8px}
-  h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 4px 10px}
-  .hotel{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px}
-  .hotel .ic{width:40px;height:40px;border-radius:12px;background:#FBEBD3;display:grid;place-items:center;font-size:20px;flex:0 0 auto}
-  .hotel b{display:block}.hotel small{color:var(--muted)}
-  .day{margin-bottom:16px}
-  .day .h{display:flex;align-items:baseline;gap:8px;margin:0 4px 8px}
-  .day .h b{color:var(--navy);font-size:16px}
-  .day .h small{color:var(--muted);font-size:13px}
-  .svc{display:flex;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px}
-  .svc .t{font-weight:700;color:var(--gold2);font-size:14px;min-width:46px;padding-top:1px}
-  .svc .n{font-weight:600;line-height:1.35}
-  .svc .d{color:var(--muted);font-size:13px;margin-top:3px;line-height:1.45}
-  .svc .p{font-size:13px;margin-top:6px;color:var(--navy);font-weight:600}
-  .svc.free{background:#FAFBFC;border-style:dashed}.svc.free .n{color:var(--muted);font-weight:500}
-  .total{background:#FFF8EC;border:1px solid #F3D9AE;border-radius:16px;padding:16px 18px;margin:18px 0 6px}
-  .total .row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:2px 0}
-  .total .big{font-size:28px;font-weight:800;color:var(--navy);margin-top:4px}
-  .total small{color:var(--muted)}
-  .note{background:#F2F6FC;border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.55;color:#24324A;white-space:pre-line;margin-top:12px}
-  footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 16px 30px;line-height:1.6}
-  .msg{padding:60px 24px;text-align:center;color:var(--muted);line-height:1.6}
+  html,body{margin:0}
+  body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#E9EDF3;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+  .wrap{max-width:640px;margin:0 auto;min-height:100vh;background:var(--bg);box-shadow:0 0 60px -30px rgba(0,30,72,.35)}
+  .prev{position:sticky;top:0;z-index:5;background:#B7791F;color:#fff;text-align:center;font-size:11.5px;font-weight:800;letter-spacing:.12em;padding:7px 10px}
+  .prev span{font-weight:500;letter-spacing:0;opacity:.9}
+  /* portada */
+  .cover{background:radial-gradient(120% 80% at 80% 0%,var(--navy2) 0%,var(--navy) 55%,#00122E 100%);color:#fff;padding:26px 20px 28px;text-align:center}
+  .cover .logo{width:180px;max-width:56%;height:auto;display:block;margin:4px auto 20px}
+  .cover .wm{display:block;font-weight:800;letter-spacing:.14em;font-size:24px;margin:10px 0 22px}.cover .wm i{font-style:normal;color:var(--gold)}
+  .hello{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-weight:600;font-size:32px;line-height:1.15;margin:0 0 6px}
+  .lead{color:#C9D6EA;margin:0 0 20px;font-size:15px}
+  .ok{display:inline-block;background:#22C55E;color:#062F17;font-weight:800;font-size:12px;letter-spacing:.04em;border-radius:999px;padding:5px 12px;margin:-6px 0 18px}
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left}
+  .facts div{background:rgba(255,255,255,.07);border:1px solid rgba(228,180,114,.35);border-radius:14px;padding:11px 13px}
+  .facts small{display:block;color:var(--gold);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:2px}
+  .facts b{font-size:15.5px;line-height:1.3}
+  .facts .wide{grid-column:1/-1}
+  .facts .sub{color:#C9D6EA;font-size:12.5px;display:block;margin-top:2px}
+  /* opciones */
+  .opts{padding:16px 14px 6px;background:#fff;border-bottom:1px solid var(--line)}
+  .opts p{margin:0 0 10px;font-size:13.5px;font-weight:600;text-align:center}
+  .opts .ob{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:10px}
+  .opts button{flex:1 0 auto;font:inherit;border:1.5px solid var(--line2);background:#fff;border-radius:14px;padding:10px 14px;text-align:center;min-width:128px;cursor:pointer;color:var(--ink)}
+  .opts button b{display:block;color:var(--navy);font-size:14.5px}.opts button small{color:var(--muted);font-size:12.5px}
+  .opts button.on{background:var(--navy);border-color:var(--navy)}.opts button.on b{color:#fff}.opts button.on small{color:var(--gold)}
+  .opts button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  /* contenido */
+  .sec{padding:18px 14px 6px}
+  h2{margin:4px 2px 12px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2)}
+  .card{display:flex;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;margin:0 0 8px}
+  .card.hotel{align-items:center}
+  .img{width:96px;height:96px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;overflow:hidden;position:relative;background:linear-gradient(160deg,#41546F,#0B2547)}
+  .img img{width:100%;height:100%;object-fit:cover;display:block}
+  .img svg{width:44px;height:44px}
+  .hotel .img{width:56px;height:56px}.hotel .img svg{width:28px;height:28px}
+  .i-transfer{background:linear-gradient(160deg,#41546F,#0B2547)}
+  .i-park{background:linear-gradient(160deg,#F2A65A,#C2477B)}
+  .i-boat{background:linear-gradient(160deg,#4FC3E0,#0E6BA8)}
+  .i-shop{background:linear-gradient(160deg,#E4B472,#BC873C)}
+  .i-food{background:linear-gradient(160deg,#E57A5A,#9E2B3C)}
+  .i-nature{background:linear-gradient(160deg,#5FA88A,#1F5D4A)}
+  .i-city{background:linear-gradient(160deg,#6C7FD8,#2B3A8C)}
+  .i-hotel{background:linear-gradient(160deg,#F4C98A,#C88A3E)}
+  .i-star{background:linear-gradient(160deg,#0E4A8F,#001E48)}
+  .tx{min-width:0;flex:1;padding:2px 2px 2px 0}
+  .tx .t{font-weight:800;color:var(--gold2);font-size:13px}
+  .tx .n{font-weight:700;line-height:1.3;margin:1px 0 3px;font-size:15px}
+  .tx .d{color:var(--muted);font-size:13px;line-height:1.45}
+  .tx .p{font-size:13px;margin-top:6px;color:var(--navy);font-weight:700}
+  .dayh{display:flex;align-items:center;gap:10px;margin:18px 2px 8px}
+  .dayh .n{width:42px;height:42px;border-radius:12px;background:var(--navy);color:#fff;display:grid;place-items:center;align-content:center;font-weight:800;font-size:15px;flex:0 0 auto;line-height:1.05;text-align:center}
+  .dayh .n small{display:block;font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.08em}
+  .dayh b{color:var(--navy);font-size:15.5px}.dayh .w{color:var(--muted);font-size:13px}
+  .free{background:#fff;border:1px dashed var(--line2);border-radius:16px;padding:14px;color:var(--muted);text-align:center;font-size:14px;margin-bottom:8px}
+  /* total */
+  .totalc{background:#fff;border-radius:18px;border:1px solid #F0D7AE;overflow:hidden;margin:18px 0 8px}
+  .totalc .a{padding:16px 16px 14px}
+  .totalc .a small{color:var(--muted);font-size:13px}
+  .totalc .row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);padding:0 0 8px}
+  .totalc .usd{font-size:31px;font-weight:800;color:var(--navy);margin:2px 0}
+  .totalc .b{background:linear-gradient(90deg,#FFF6E8,#FDEBCB);padding:12px 16px;display:flex;align-items:center;gap:12px}
+  .pixi{width:36px;height:36px;border-radius:10px;background:#32BCAD;display:grid;place-items:center;color:#fff;font-weight:800;font-size:11.5px;flex:0 0 auto;letter-spacing:.04em}
+  .totalc .b b{font-size:20px;color:var(--navy)}.totalc .b small{display:block;color:#7A5A20;font-size:12px}
+  .note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.55;color:#24324A;white-space:pre-line;margin:10px 0}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 16px 34px;line-height:1.7}
+  .msg{padding:60px 24px;text-align:center;color:var(--muted);line-height:1.6;background:#fff;min-height:60vh}
   .msg b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
+  .msg .logo2{width:150px;margin:0 auto 26px;display:block;background:var(--navy);border-radius:16px;padding:14px}
   .skel{height:14px;border-radius:7px;background:linear-gradient(90deg,#EEF1F5,#F7F9FB,#EEF1F5);background-size:200% 100%;animation:sk 1.2s infinite;margin:10px 0}
   @keyframes sk{to{background-position:-200% 0}}
-  @media print{.wrap{box-shadow:none}.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  @media (min-width:520px){.img{width:112px;height:112px}}
+  @media print{body{background:#fff}.wrap{box-shadow:none}.opts,.prev{display:none}.cover,.dayh .n,.img,.totalc .b,.pixi{-webkit-print-color-adjust:exact;print-color-adjust:exact}.card,.dayh{break-inside:avoid}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="bar"><img src="../logo.webp" alt="Jeito Miami" onerror="this.outerHTML='<span class=wm>JEI<i>TO</i> MIAMI</span>'"></div>
-  <div id="app"><div class="msg"><div class="skel" style="width:60%;margin:0 auto 14px"></div><div class="skel"></div><div class="skel" style="width:80%"></div></div></div>
-</div>
+<div class="wrap" id="app"><div class="msg"><div class="skel" style="width:60%;margin:0 auto 14px"></div><div class="skel"></div><div class="skel" style="width:80%"></div></div></div>
 <script src="../admin/config.js"></script>
 <script>
 (function () {
   "use strict";
   var T = {
-    pt: { hi: "Olá, {n}!", hiAnon: "Olá!", sub: "Este é o seu roteiro em Miami", proposal: "Proposta · versão {v}", confirmed: "✓ Confirmado", adults: ["adulto", "adultos"], minors: ["criança", "crianças"], days: ["dia", "dias"], hotel: "Hospedagem", nights: ["noite", "noites"], plan: "Dia a dia", free: "Dia livre para aproveitar", day: "Dia", total: "Valor total", per: "para {p}", adj: "Ajuste / desconto", foot: "Valores em dólares americanos (US$), sujeitos a disponibilidade.", upd: "Atualizado em {d}", none: "Este link não está disponível.", noneSub: "Fale com a Jeito Miami para receber o link atualizado.", wait: "Seu roteiro está sendo preparado.", waitSub: "Em breve ele aparece aqui.", err: "Não foi possível carregar o roteiro.", errSub: "Verifique sua conexão e tente de novo.", infants: ["bebê", "bebês"], infFree: "sem custo", title: "Seu roteiro · Jeito Miami" },
-    es: { hi: "¡Hola, {n}!", hiAnon: "¡Hola!", sub: "Este es tu itinerario en Miami", proposal: "Propuesta · versión {v}", confirmed: "✓ Confirmado", adults: ["adulto", "adultos"], minors: ["menor", "menores"], days: ["día", "días"], hotel: "Alojamiento", nights: ["noche", "noches"], plan: "Día por día", free: "Día libre para disfrutar", day: "Día", total: "Valor total", per: "para {p}", adj: "Ajuste / descuento", foot: "Valores en dólares estadounidenses (US$), sujetos a disponibilidad.", upd: "Actualizado el {d}", none: "Este link no está disponible.", noneSub: "Escríbenos para recibir el link actualizado.", wait: "Tu itinerario se está preparando.", waitSub: "En breve aparece aquí.", err: "No se pudo cargar el itinerario.", errSub: "Revisa tu conexión e inténtalo de nuevo.", infants: ["bebé", "bebés"], infFree: "sin cargo", title: "Tu itinerario · Jeito Miami" },
-    en: { hi: "Hi, {n}!", hiAnon: "Hi!", sub: "This is your Miami itinerary", proposal: "Proposal · version {v}", confirmed: "✓ Confirmed", adults: ["adult", "adults"], minors: ["child", "children"], days: ["day", "days"], hotel: "Accommodation", nights: ["night", "nights"], plan: "Day by day", free: "Free day to enjoy", day: "Day", total: "Total price", per: "for {p}", adj: "Adjustment / discount", foot: "Prices in US dollars (US$), subject to availability.", upd: "Updated on {d}", none: "This link is not available.", noneSub: "Please contact Jeito Miami for an updated link.", wait: "Your itinerary is being prepared.", waitSub: "It will show up here soon.", err: "The itinerary could not be loaded.", errSub: "Check your connection and try again.", infants: ["infant", "infants"], infFree: "free", title: "Your itinerary · Jeito Miami" }
+    pt: { hi: "Olá, {n}!", hiAnon: "Olá!", lead: "Preparamos o seu roteiro em Miami", client: "Cliente nº", travelers: "Viajantes", dates: "Datas", confirmed: "✓ Roteiro confirmado",
+      adults: ["adulto", "adultos"], minors: ["criança", "crianças"], days: ["dia", "dias"], nights: ["noite", "noites"], infants: ["bebê", "bebês"], infFree: "sem custo",
+      choose: "Preparamos estas opções para você · toque em cada uma para ver", option: "Opção", hotel: "Hospedagem", plan: "Dia a dia", free: "☀️ Dia livre para aproveitar", day: "DIA",
+      total: "Valor total", totalOf: "Valor total · {o}", per: "para {p}", adj: "Ajuste / desconto", pix: "pagando por Pix · cotação R$ {fx} por US$",
+      foot: "Valores em dólares americanos (US$), sujeitos a disponibilidade.", upd: "Atualizado em {d}",
+      none: "Este link não está disponível.", noneSub: "Fale com a Jeito Miami para receber o link atualizado.", wait: "Seu roteiro está sendo preparado.", waitSub: "Em breve ele aparece aqui.",
+      err: "Não foi possível carregar o roteiro.", errSub: "Verifique sua conexão e tente de novo.", title: "Seu roteiro · Jeito Miami" },
+    es: { hi: "¡Hola, {n}!", hiAnon: "¡Hola!", lead: "Preparamos tu itinerario en Miami", client: "Cliente nº", travelers: "Viajeros", dates: "Fechas", confirmed: "✓ Itinerario confirmado",
+      adults: ["adulto", "adultos"], minors: ["menor", "menores"], days: ["día", "días"], nights: ["noche", "noches"], infants: ["bebé", "bebés"], infFree: "sin cargo",
+      choose: "Preparamos estas opciones para ti · toca cada una para verla", option: "Opción", hotel: "Alojamiento", plan: "Día por día", free: "☀️ Día libre para disfrutar", day: "DÍA",
+      total: "Valor total", totalOf: "Valor total · {o}", per: "para {p}", adj: "Ajuste / descuento", pix: "pagando por Pix · cotización R$ {fx} por US$",
+      foot: "Valores en dólares estadounidenses (US$), sujetos a disponibilidad.", upd: "Actualizado el {d}",
+      none: "Este link no está disponible.", noneSub: "Escríbenos para recibir el link actualizado.", wait: "Tu itinerario se está preparando.", waitSub: "En breve aparece aquí.",
+      err: "No se pudo cargar el itinerario.", errSub: "Revisa tu conexión e inténtalo de nuevo.", title: "Tu itinerario · Jeito Miami" },
+    en: { hi: "Hi, {n}!", hiAnon: "Hi!", lead: "Here is your Miami itinerary", client: "Client no.", travelers: "Travelers", dates: "Dates", confirmed: "✓ Itinerary confirmed",
+      adults: ["adult", "adults"], minors: ["child", "children"], days: ["day", "days"], nights: ["night", "nights"], infants: ["infant", "infants"], infFree: "free",
+      choose: "We prepared these options for you · tap each one to see it", option: "Option", hotel: "Accommodation", plan: "Day by day", free: "☀️ Free day to enjoy", day: "DAY",
+      total: "Total price", totalOf: "Total price · {o}", per: "for {p}", adj: "Adjustment / discount", pix: "paying by Pix · rate R$ {fx} per US$",
+      foot: "Prices in US dollars (US$), subject to availability.", upd: "Updated on {d}",
+      none: "This link is not available.", noneSub: "Please contact Jeito Miami for an updated link.", wait: "Your itinerary is being prepared.", waitSub: "It will show up here soon.",
+      err: "The itinerary could not be loaded.", errSub: "Check your connection and try again.", title: "Your itinerary · Jeito Miami" }
   };
-  var app = document.getElementById("app");
-  var guess = (navigator.language || "pt").slice(0, 2); if (!T[guess]) guess = "pt";
+  // ilustración por tipo de servicio cuando no hay foto
+  var ICONS = {
+    transfer: '<rect x="6" y="13" width="36" height="19" rx="4"/><circle cx="14" cy="34" r="4"/><circle cx="34" cy="34" r="4"/><path d="M6 21h36M17 13v8M31 13v8"/>',
+    park: '<circle cx="24" cy="20" r="13"/><circle cx="24" cy="20" r="2"/><path d="M24 7v26M11 20h26M15 11l18 18M33 11L15 29M17 42l7-9 7 9M13 42h22"/>',
+    boat: '<path d="M4 31c6-4 10-4 16 0s10 4 16 0 8-3 8-3M4 39c6-4 10-4 16 0s10 4 16 0 8-3 8-3"/><path d="M24 25V7l11 12H24"/>',
+    shop: '<path d="M10 16h28l-2 25H12z"/><path d="M18 20v-7a6 6 0 0 1 12 0v7"/>',
+    food: '<path d="M15 6v14a4 4 0 0 1-8 0V6M11 6v36M33 42V6c-5 2-7 8-7 15h7"/>',
+    nature: '<path d="M24 6l-12 18h7l-9 13h28l-9-13h7z"/><path d="M24 37v6"/>',
+    city: '<path d="M6 42V20l8-6 8 6v22M22 42V10l9-4 9 4v32M2 42h44M28 16h6M28 23h6M28 30h6M11 26h4M11 33h4"/>',
+    hotel: '<path d="M5 38V12M5 30h38v8M43 30v-6a6 6 0 0 0-6-6H21v12"/><circle cx="13" cy="22" r="4"/>',
+    star: '<path d="M24 5l5.6 12.2 13.4 1.4-10 9 2.9 13.2L24 34l-11.9 6.8L15 27.6l-10-9 13.4-1.4z"/>'
+  };
+  function kindOf(i) {
+    var s = String(i.icon || "") + " " + String(i.name || "");
+    if (i.kind === "transfer" || /transf|traslad|aeroporto|aeropuerto|airport/i.test(String(i.icon || ""))) return "transfer";
+    if (/parque|park|disney|universal|seaworld|legoland|tem[aá]tic|theme/i.test(s)) return "park";
+    if (/n[aá]ut|barco|bote|boat|lancha|crucero|cruzeiro|cruise|yate|iate|yacht|airboat|snorkel|playa|praia|beach/i.test(s)) return "boat";
+    if (/compra|shop|outlet|mall/i.test(s)) return "shop";
+    if (/gastr|restaur|cena|jantar|dinner|comida|food|almuerzo|almo[cç]o/i.test(s)) return "food";
+    if (/everglades|natur|key west|keys|safari|zoo/i.test(s)) return "nature";
+    if (/city|ciudad|cidade|tour|paseo|passeio|excurs/i.test(s)) return "city";
+    return "star";
+  }
+  function art(k) { return '<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[k] + "</svg>"; }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function fill(s, o) { return s.replace(/\{(\w+)\}/g, function (_, k) { return o[k]; }); }
   function plural(n, w) { return n + " " + (n === 1 ? w[0] : w[1]); }
-  function msg(L, a, b) { app.innerHTML = '<div class="msg"><b>' + esc(T[L][a]) + "</b>" + esc(T[L][b]) + "</div>"; }
-  var token = new URLSearchParams(location.search).get("c") || "";
+  function cap(s) { s = String(s || ""); return s.charAt(0).toUpperCase() + s.slice(1); }
+  function safeImg(u) { return /^https:\/\/[^\s"'<>]+$/i.test(String(u || "")) ? u : null; }
+
+  var app = document.getElementById("app");
+  var guess = (navigator.language || "pt").slice(0, 2); if (!T[guess]) guess = "pt";
+  var logoHTML = '<img class="logo" src="logo-blanco.png" alt="Jeito Miami" width="180" height="120" onerror="this.outerHTML=\'<span class=wm>JEI<i>TO</i> MIAMI</span>\'">';
+  function msg(L, a, b) { app.innerHTML = '<div class="msg"><img class="logo2" src="logo-blanco.png" alt="Jeito Miami" onerror="this.remove()"><b>' + esc(T[L][a]) + "</b>" + esc(T[L][b]) + "</div>"; }
+
+  var qs = new URLSearchParams(location.search), D = null, sel = 0, preview = qs.get("preview") === "1";
+
+  // VISTA PREVIA: la arma el sistema (admin) en este mismo navegador, sin guardar nada
+  if (preview) {
+    var raw = null; try { raw = localStorage.getItem("jm_preview"); } catch (e) { }
+    var pd = null; try { pd = raw ? JSON.parse(raw) : null; } catch (e) { }
+    if (!pd || !pd.options) return msg("es", "none", "noneSub");
+    D = pd; return draw();
+  }
+
+  var token = qs.get("c") || "";
   var cfg = window.JEITO_CONFIG || {};
   var base = String(cfg.SUPABASE_URL || "").trim().replace(/\/+(rest\/v1|auth\/v1)?\/*$/i, "");
-  if (!/^[a-f0-9]{40,128}$/i.test(token) || !base) { msg(guess, "none", "noneSub"); return; }
+  if (!/^[a-f0-9]{40,128}$/i.test(token) || !base) return msg(guess, "none", "noneSub");
   fetch(base + "/rest/v1/rpc/get_roteiro", {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: cfg.SUPABASE_ANON_KEY, Authorization: "Bearer " + cfg.SUPABASE_ANON_KEY },
     body: JSON.stringify({ p_token: token }),
-    cache: "no-store", referrerPolicy: "no-referrer"
+    cache: "no-store", referrerPolicy: "no-referrer", credentials: "omit"
   }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(function (d) { draw(d); })
+    .then(function (d) {
+      if (!d) return msg(guess, "none", "noneSub");
+      var L = T[d.lang] ? d.lang : "pt";
+      if (d.empty || !d.options || !d.options.length) return msg(L, "wait", "waitSub");
+      D = d; draw();
+    })
     .catch(function () { msg(guess, "err", "errSub"); });
 
-  function draw(d) {
-    if (!d) return msg(guess, "none", "noneSub");
-    var L = T[d.lang] ? d.lang : "pt", t = T[L];
+  function draw() {
+    var L = T[D.lang] ? D.lang : "pt", t = T[L], opts = D.options, o = opts[sel] || opts[0];
     document.documentElement.lang = L === "pt" ? "pt-BR" : L;
-    if (d.empty) return msg(L, "wait", "waitSub");
     document.title = t.title;
     var loc = L === "pt" ? "pt-BR" : L === "es" ? "es" : "en-US";
-    var fD = function (ymd, o) { return new Date(ymd + "T12:00:00").toLocaleDateString(loc, o); };
+    var fD = function (ymd, f) { return new Date(ymd + "T12:00:00").toLocaleDateString(loc, f); };
     var money = function (n) { return "US$ " + Number(n || 0).toLocaleString(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 }); };
+    var optName = function (x, k) { return x.name || (t.option + " " + (k + 1)); };
     var days = [], k;
-    if (d.start && d.end) { for (k = new Date(d.start + "T12:00:00"); k <= new Date(d.end + "T12:00:00") && days.length < 120; k.setDate(k.getDate() + 1)) days.push(k.toISOString().slice(0, 10)); }
-    var byDay = {}; (d.items || []).forEach(function (i) { (byDay[i.day] = byDay[i.day] || []).push(i); });
+    if (o.start && o.end) { for (k = new Date(o.start + "T12:00:00"); k <= new Date(o.end + "T12:00:00") && days.length < 120; k.setDate(k.getDate() + 1)) days.push(k.toISOString().slice(0, 10)); }
+    var byDay = {}; (o.items || []).forEach(function (i) { (byDay[i.day] = byDay[i.day] || []).push(i); });
     Object.keys(byDay).forEach(function (x) { if (days.indexOf(x) < 0) days.push(x); }); days.sort();
-    var pax = [plural(d.adults, t.adults)]; if (d.minors) pax.push(plural(d.minors, t.minors));
-    var h = '<div class="hero"><span class="st ' + (d.confirmed ? "ok" : "") + '">' + esc(d.confirmed ? t.confirmed : fill(t.proposal, { v: d.version })) + "</span>";
-    h += "<h1>" + esc(d.name ? fill(t.hi, { n: d.name }) : t.hiAnon) + "<br>" + esc(t.sub) + "</h1>";
-    if (d.start && d.end) h += "<p>" + esc(fD(d.start, { day: "numeric", month: "long" }) + " → " + fD(d.end, { day: "numeric", month: "long", year: "numeric" })) + "</p>";
-    h += '<div class="chips"><span>' + esc(pax.join(" · ")) + "</span>" + (d.start && d.end ? "<span>" + esc(plural(days.length, t.days)) + "</span>" : "") + "</div></div><main>";
-    if ((d.hotels || []).length) {
+    Object.keys(byDay).forEach(function (x) { byDay[x].sort(function (a, b) { return String(a.time || "99").localeCompare(String(b.time || "99")); }); });
+    var pax = [plural(o.adults || 0, t.adults)]; if (o.minors) pax.push(plural(o.minors, t.minors));
+
+    var h = preview ? '<div class="prev">VISTA PREVIA <span>· así lo va a ver el cliente cuando guardes</span></div>' : "";
+    // portada
+    h += '<div class="cover">' + logoHTML + '<p class="hello">' + esc(D.name ? fill(t.hi, { n: D.name }) : t.hiAnon) + '</p><p class="lead">' + esc(t.lead) + "</p>";
+    if (o.confirmed) h += '<div class="ok">' + esc(t.confirmed) + "</div>";
+    h += '<div class="facts"><div><small>' + esc(t.client) + "</small><b>" + esc(D.number || "—") + "</b></div><div><small>" + esc(t.travelers) + "</small><b>" + esc(pax.join(" · ")) + "</b></div>";
+    if (o.start && o.end) {
+      var nd = days.length, nn = Math.max(0, Math.round((new Date(o.end + "T12:00:00") - new Date(o.start + "T12:00:00")) / 864e5));
+      var sameY = o.start.slice(0, 4) === o.end.slice(0, 4), sameM = sameY && o.start.slice(5, 7) === o.end.slice(5, 7);
+      var from = sameM ? String(+o.start.slice(8, 10)) : fD(o.start, sameY ? { day: "numeric", month: "long" } : { day: "numeric", month: "long", year: "numeric" });
+      h += '<div class="wide"><small>' + esc(t.dates) + "</small><b>" + esc(from + " → " + fD(o.end, { day: "numeric", month: "long", year: "numeric" })) + '</b><span class="sub">' + esc(plural(nd, t.days) + " · " + plural(nn, t.nights)) + "</span></div>";
+    }
+    h += "</div></div>";
+    // botones de opciones
+    if (opts.length > 1) {
+      h += '<div class="opts" role="tablist"><p>' + esc(t.choose) + '</p><div class="ob">';
+      opts.forEach(function (x, j) { h += '<button type="button" role="tab" aria-selected="' + (j === sel) + '" data-o="' + j + '" class="' + (j === sel ? "on" : "") + '"><b>' + esc((x.confirmed ? "✓ " : "") + optName(x, j)) + "</b><small>" + esc(money(x.total)) + "</small></button>"; });
+      h += "</div></div>";
+    }
+    // hospedaje
+    h += '<div class="sec">';
+    if ((o.hotels || []).length) {
       h += "<h2>" + esc(t.hotel) + "</h2>";
-      d.hotels.forEach(function (o) {
-        var n = o.from && o.to ? Math.round((new Date(o.to) - new Date(o.from)) / 864e5) : 0;
-        h += '<div class="hotel"><div class="ic">🏨</div><div><b>' + esc(o.name) + "</b><small>" + (o.from && o.to ? esc(fD(o.from, { day: "numeric", month: "short" }) + " → " + fD(o.to, { day: "numeric", month: "short" }) + (n > 0 ? " · " + plural(n, t.nights) : "")) : "") + "</small></div></div>";
+      o.hotels.forEach(function (x) {
+        var n = x.from && x.to ? Math.round((new Date(x.to + "T12:00:00") - new Date(x.from + "T12:00:00")) / 864e5) : 0;
+        h += '<div class="card hotel"><div class="img i-hotel">' + art("hotel") + '</div><div class="tx"><div class="n">' + esc(x.name) + '</div><div class="d">' + (x.from && x.to ? esc(fD(x.from, { day: "numeric", month: "short" }) + " → " + fD(x.to, { day: "numeric", month: "short" }) + (n > 0 ? " · " + plural(n, t.nights) : "")) : "") + "</div></div></div>";
       });
     }
-    h += "<h2>" + esc(t.plan) + "</h2>";
+    // día por día
+    h += '<h2 style="margin-top:20px">' + esc(t.plan) + "</h2>";
     days.forEach(function (x, n) {
-      h += '<div class="day"><div class="h"><b>' + esc(t.day + " " + (n + 1)) + "</b><small>" + esc(fD(x, { weekday: "long", day: "numeric", month: "short" })) + "</small></div>";
+      h += '<div class="dayh"><div class="n"><small>' + esc(t.day) + "</small>" + (n + 1) + '</div><div><b>' + esc(cap(fD(x, { weekday: "long" }))) + '</b><div class="w">' + esc(fD(x, { day: "numeric", month: "long" })) + "</div></div></div>";
       var l = byDay[x] || [];
-      if (!l.length) h += '<div class="svc free"><div class="t">☀️</div><div class="n">' + esc(t.free) + "</div></div>";
+      if (!l.length) h += '<div class="free">' + esc(t.free) + "</div>";
       l.forEach(function (i) {
-        h += '<div class="svc"><div class="t">' + esc(i.time || "") + '</div><div><div class="n">' + esc(i.name) + "</div>" + (i.desc ? '<div class="d">' + esc(i.desc) + "</div>" : "");
+        var kd = kindOf(i), src = safeImg(i.image);
+        h += '<div class="card"><div class="img i-' + kd + '" data-k="' + kd + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' : art(kd)) + '</div><div class="tx">';
+        if (i.time) h += '<div class="t">' + esc(String(i.time).slice(0, 5)) + "</div>";
+        h += '<div class="n">' + esc(i.name) + "</div>" + (i.desc ? '<div class="d">' + esc(i.desc) + "</div>" : "");
         if (i.pax && i.pax.i) h += '<div class="d">' + esc(plural(i.pax.i, t.infants) + " " + t.infFree) + "</div>";
-        if (d.show_prices && i.price != null) h += '<div class="p">' + esc(money(i.price)) + "</div>";
+        if (o.show_prices && i.price != null) h += '<div class="p">' + esc(money(i.price)) + "</div>";
         h += "</div></div>";
       });
-      h += "</div>";
     });
-    h += '<div class="total">';
-    if (d.show_prices && d.adjustment) h += '<div class="row"><span>' + esc(t.adj) + "</span><span>" + (d.adjustment < 0 ? "− " : "+ ") + esc(money(Math.abs(d.adjustment))) + "</span></div>";
-    h += "<small>" + esc(t.total) + '</small><div class="big">' + esc(money(d.total)) + "</div><small>" + esc(fill(t.per, { p: pax.join(" · ") })) + "</small></div>";
-    if (d.note) h += '<div class="note">' + esc(d.note) + "</div>";
-    h += "</main><footer>" + esc(t.foot) + "<br>" + esc(fill(t.upd, { d: fD(d.updated, { day: "numeric", month: "long", year: "numeric" }) })) + "<br><b>Jeito Miami</b> · jeitomiami.com</footer>";
+    // total
+    h += '<div class="totalc"><div class="a">';
+    if (o.show_prices && o.adjustment) h += '<div class="row"><span>' + esc(t.adj) + "</span><span>" + (o.adjustment < 0 ? "− " : "+ ") + esc(money(Math.abs(o.adjustment))) + "</span></div>";
+    h += "<small>" + esc(opts.length > 1 ? fill(t.totalOf, { o: optName(o, sel) }) : t.total) + '</small><div class="usd">' + esc(money(o.total)) + "</div><small>" + esc(fill(t.per, { p: pax.join(" · ") })) + "</small></div>";
+    if (o.fx && o.total_brl != null) h += '<div class="b"><div class="pixi">PIX</div><div><b>R$ ' + esc(Number(o.total_brl).toLocaleString("pt-BR")) + "</b><small>" + esc(fill(t.pix, { fx: Number(o.fx).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }) })) + "</small></div></div>";
+    h += "</div>";
+    if (o.note) h += '<div class="note">' + esc(o.note) + "</div>";
+    h += "</div><footer>" + esc(t.foot) + "<br>" + (o.updated ? esc(fill(t.upd, { d: fD(o.updated, { day: "numeric", month: "long", year: "numeric" }) })) + "<br>" : "") + "<b>Jeito Miami</b> · jeitomiami.com</footer>";
     app.innerHTML = h;
+    // foto que no carga → ilustración
+    Array.prototype.forEach.call(app.querySelectorAll(".img img"), function (im) { im.addEventListener("error", function () { var b = im.parentNode; b.innerHTML = art(b.getAttribute("data-k") || "star"); }); });
+    Array.prototype.forEach.call(app.querySelectorAll(".opts button"), function (b) {
+      b.addEventListener("click", function () {
+        var j = +b.getAttribute("data-o"); if (j === sel) return;
+        var y = window.scrollY; sel = j; draw(); window.scrollTo(0, y);
+        var on = app.querySelector(".opts button.on"); if (on && on.scrollIntoView) on.scrollIntoView({ block: "nearest", inline: "center" });
+      });
+    });
   }
 })();
 </script>
