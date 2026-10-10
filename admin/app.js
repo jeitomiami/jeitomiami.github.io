@@ -17,7 +17,7 @@
   /* ==========================================================================
      1. CONSTANTES Y ESTADO
      ========================================================================== */
-  const APP_VERSION = "1.5.0";
+  const APP_VERSION = "1.5.1";
 
   // Seguridad de la sesión
   const PASSWORD_MIN = 8;                       // largo mínimo de contraseña
@@ -1762,7 +1762,7 @@
       name: base && base.option_name || null, version: (I.versions[0] ? I.versions[0].version : 0) + (I.dirty || !base ? 1 : 0), confirmed: false, updated: new Date().toISOString().slice(0, 10),
       start: W.it.start_date, end: W.it.end_date, adults: Number(W.it.adults) || 0, minors: agesCount(W.it.minors_ages), note: String(W.it.client_note || "").trim() || null,
       show_prices: !!W.it.show_item_prices, hotels: W.hotels.filter(h => h.name).map(h => ({ name: h.name, from: h.date_from, to: h.date_to })), items,
-      adjustment: W.it.show_item_prices && adj ? adj : null, total, fx: fx && !Number.isNaN(fx) ? fx : null, total_brl: fx && !Number.isNaN(fx) ? Math.round(total * fx) : null }] };
+      adjustment: W.it.show_item_prices && adj ? adj : null, total, total_brl: fx && !Number.isNaN(fx) ? Math.round(total * fx) : null }] };
     try { localStorage.setItem("jm_preview", JSON.stringify(data)); } catch (e) { return toast("No se pudo abrir la vista previa en este navegador.", "bad"); }
     window.open("/roteiro/?preview=1", "_blank", "noopener");
   }

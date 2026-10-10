@@ -99,21 +99,21 @@
     pt: { hi: "Olá, {n}!", hiAnon: "Olá!", lead: "Preparamos o seu roteiro em Miami", client: "Cliente nº", travelers: "Viajantes", dates: "Datas", confirmed: "✓ Roteiro confirmado",
       adults: ["adulto", "adultos"], minors: ["criança", "crianças"], days: ["dia", "dias"], nights: ["noite", "noites"], infants: ["bebê", "bebês"], infFree: "sem custo",
       choose: "Preparamos estas opções para você · toque em cada uma para ver", option: "Opção", hotel: "Hospedagem", plan: "Dia a dia", free: "☀️ Dia livre para aproveitar", day: "DIA",
-      total: "Valor total", totalOf: "Valor total · {o}", per: "para {p}", adj: "Ajuste / desconto", pix: "pagando por Pix · cotação R$ {fx} por US$",
+      total: "Valor total", totalOf: "Valor total · {o}", per: "para {p}", adj: "Ajuste / desconto", pix: "pagando por Pix",
       foot: "Valores em dólares americanos (US$), sujeitos a disponibilidade.", upd: "Atualizado em {d}",
       none: "Este link não está disponível.", noneSub: "Fale com a Jeito Miami para receber o link atualizado.", wait: "Seu roteiro está sendo preparado.", waitSub: "Em breve ele aparece aqui.",
       err: "Não foi possível carregar o roteiro.", errSub: "Verifique sua conexão e tente de novo.", title: "Seu roteiro · Jeito Miami" },
     es: { hi: "¡Hola, {n}!", hiAnon: "¡Hola!", lead: "Preparamos tu itinerario en Miami", client: "Cliente nº", travelers: "Viajeros", dates: "Fechas", confirmed: "✓ Itinerario confirmado",
       adults: ["adulto", "adultos"], minors: ["menor", "menores"], days: ["día", "días"], nights: ["noche", "noches"], infants: ["bebé", "bebés"], infFree: "sin cargo",
       choose: "Preparamos estas opciones para ti · toca cada una para verla", option: "Opción", hotel: "Alojamiento", plan: "Día por día", free: "☀️ Día libre para disfrutar", day: "DÍA",
-      total: "Valor total", totalOf: "Valor total · {o}", per: "para {p}", adj: "Ajuste / descuento", pix: "pagando por Pix · cotización R$ {fx} por US$",
+      total: "Valor total", totalOf: "Valor total · {o}", per: "para {p}", adj: "Ajuste / descuento", pix: "pagando por Pix",
       foot: "Valores en dólares estadounidenses (US$), sujetos a disponibilidad.", upd: "Actualizado el {d}",
       none: "Este link no está disponible.", noneSub: "Escríbenos para recibir el link actualizado.", wait: "Tu itinerario se está preparando.", waitSub: "En breve aparece aquí.",
       err: "No se pudo cargar el itinerario.", errSub: "Revisa tu conexión e inténtalo de nuevo.", title: "Tu itinerario · Jeito Miami" },
     en: { hi: "Hi, {n}!", hiAnon: "Hi!", lead: "Here is your Miami itinerary", client: "Client no.", travelers: "Travelers", dates: "Dates", confirmed: "✓ Itinerary confirmed",
       adults: ["adult", "adults"], minors: ["child", "children"], days: ["day", "days"], nights: ["night", "nights"], infants: ["infant", "infants"], infFree: "free",
       choose: "We prepared these options for you · tap each one to see it", option: "Option", hotel: "Accommodation", plan: "Day by day", free: "☀️ Free day to enjoy", day: "DAY",
-      total: "Total price", totalOf: "Total price · {o}", per: "for {p}", adj: "Adjustment / discount", pix: "paying by Pix · rate R$ {fx} per US$",
+      total: "Total price", totalOf: "Total price · {o}", per: "for {p}", adj: "Adjustment / discount", pix: "paying by Pix",
       foot: "Prices in US dollars (US$), subject to availability.", upd: "Updated on {d}",
       none: "This link is not available.", noneSub: "Please contact Jeito Miami for an updated link.", wait: "Your itinerary is being prepared.", waitSub: "It will show up here soon.",
       err: "The itinerary could not be loaded.", errSub: "Check your connection and try again.", title: "Your itinerary · Jeito Miami" }
@@ -243,7 +243,7 @@
     h += '<div class="totalc"><div class="a">';
     if (o.show_prices && o.adjustment) h += '<div class="row"><span>' + esc(t.adj) + "</span><span>" + (o.adjustment < 0 ? "− " : "+ ") + esc(money(Math.abs(o.adjustment))) + "</span></div>";
     h += "<small>" + esc(opts.length > 1 ? fill(t.totalOf, { o: optName(o, sel) }) : t.total) + '</small><div class="usd">' + esc(money(o.total)) + "</div><small>" + esc(fill(t.per, { p: pax.join(" · ") })) + "</small></div>";
-    if (o.fx && o.total_brl != null) h += '<div class="b"><div class="pixi">PIX</div><div><b>R$ ' + esc(Number(o.total_brl).toLocaleString("pt-BR")) + "</b><small>" + esc(fill(t.pix, { fx: Number(o.fx).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }) })) + "</small></div></div>";
+    if (o.total_brl != null) h += '<div class="b"><div class="pixi">PIX</div><div><b>R$ ' + esc(Number(o.total_brl).toLocaleString("pt-BR")) + "</b><small>" + esc(t.pix) + "</small></div></div>";
     h += "</div>";
     if (o.note) h += '<div class="note">' + esc(o.note) + "</div>";
     h += "</div><footer>" + esc(t.foot) + "<br>" + (o.updated ? esc(fill(t.upd, { d: fD(o.updated, { day: "numeric", month: "long", year: "numeric" }) })) + "<br>" : "") + "<b>Jeito Miami</b> · jeitomiami.com</footer>";
